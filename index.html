@@ -52,7 +52,10 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
     </select>
     
     <input type="file" id="newsImageFile" accept="image/*">
+    
+    <!-- CKEditor-тэй текст оролт -->
     <textarea id="editor" placeholder="Мэдээний дэлгэрэнгүй агуулга..."></textarea>
+    
     <select id="newsAuthor"></select>
     <label><input type="checkbox" id="newsFeatured"> Онцлох мэдээ</label>
     <button onclick="saveNews()">Хадгалах</button>
@@ -151,7 +154,7 @@ function displayNews(){
     if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
     container.innerHTML='';
     newsData.forEach((n,i)=>{
-        let authorName = authorsData[n.author_id]?.name || '';
+        let authorName = authorsData.find(a=>a.id===n.author_id)?.name || '';
         container.innerHTML += `<div class="list-item">
             <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
             <div>
@@ -269,7 +272,7 @@ async function removeAuthor(i){
     }
 }
 
-// Initial load
+// Load initial
 fetchAuthors();
 fetchNews();
 </script>

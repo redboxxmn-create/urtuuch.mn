@@ -86,8 +86,8 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'YOUR_SUPABASE_URL'
-const supabaseKey = 'YOUR_PUBLIC_ANON_KEY'
+const supabaseUrl = 'https://wpotnvekaoosdkvmhqgo.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 var quill = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' });

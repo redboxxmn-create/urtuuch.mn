@@ -38,12 +38,10 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
   <!-- Мэдээ нэмэх -->
   <div class="card">
     <h2>Мэдээ нэмэх / засах</h2>
-    <input type="hidden" id="editNewsId">
+    <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
-
-    <!-- Үндсэн цэс dropdown -->
-    <select id="newsMainCategory">
-      <option value="">-- Үндсэн цэс сонгоно уу --</option>
+    <select id="newsCategory">
+      <option value="">Ангилал сонгоно уу</option>
       <option value="Улс төр">Улс төр</option>
       <option value="Эдийн засаг">Эдийн засаг</option>
       <option value="Соёл урлаг">Соёл урлаг</option>
@@ -51,10 +49,6 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
       <option value="Дэлхий дахинд">Дэлхий дахинд</option>
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
-
-    <!-- Дэд цэс -->
-    <input type="text" id="newsSubCategory" placeholder="Дэд цэс">
-
     <input type="text" id="newsImage" placeholder="Зураг URL">
     <div id="editor"></div>
     <select id="newsAuthor"></select>
@@ -66,7 +60,7 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
   <!-- Нийтлэлч нэмэх -->
   <div class="card">
     <h2>Нийтлэлч нэмэх / засах</h2>
-    <input type="hidden" id="editAuthorId">
+    <input type="hidden" id="editAuthorIndex">
     <input type="text" id="authorName" placeholder="Нэр">
     <input type="text" id="authorTitle" placeholder="Албан тушаал">
     <input type="text" id="authorImage" placeholder="Зураг URL">
@@ -92,164 +86,172 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://YOUR_SUPABASE_URL'
+const supabaseUrl = 'YOUR_SUPABASE_URL'
 const supabaseKey = 'YOUR_PUBLIC_ANON_KEY'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-var quill = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' })
+var quill = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' });
 
 // Authors
-let authorsData = []
-async function loadAuthors(){
-  const {data,error} = await supabase.from('authors').select('*').order('id')
-  if(error){ console.error(error); return; }
-  authorsData = data || []
-  const sel = document.getElementById('newsAuthor')
-  sel.innerHTML = authorsData.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')
+async function fetchAuthors(){
+  const { data, error } = await supabase.from('authors').select('*').order('id')
+  if(error) console.error(error)
+  return data || []
 }
-loadAuthors()
+
+async function populateAuthorSelect(){
+  const authors = await fetchAuthors()
+  const sel = document.getElementById('newsAuthor')
+  sel.innerHTML = authors.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')
+}
+populateAuthorSelect()
 
 async function displayAuthors(){
+  const authors = await fetchAuthors()
   const container = document.getElementById('authorList')
-  container.innerHTML = ''
-  authorsData.forEach(a=>{
-    container.innerHTML += `
-      <div class="list-item">
-        <span>${a.name} (${a.title})</span>
-        <div>
-          <button onclick="editAuthor(${a.id})">Засах</button>
-          <button onclick="removeAuthor(${a.id})">Устгах</button>
-        </div>
+  container.innerHTML = authors.map(a=>`
+    <div class="list-item">
+      <span>${a.name} (${a.title})</span>
+      <div>
+        <button onclick="editAuthor(${a.id})">Засах</button>
+        <button onclick="removeAuthor(${a.id})">Устгах</button>
       </div>
-    `
-  })
+    </div>
+  `).join('')
 }
 
 // News
+async function fetchNews(){
+  const { data, error } = await supabase.from('news').select('*').order('created_at', { ascending: false })
+  if(error) console.error(error)
+  return data || []
+}
+
 async function displayNews(){
-  const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false})
-  if(error){ console.error(error); return; }
+  const news = await fetchNews()
+  const authors = await fetchAuthors()
   const container = document.getElementById('newsList')
-  container.innerHTML = ''
-  if(!data || data.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
-  data.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id)?.name || 'Unknown'
-    container.innerHTML += `
+  if(news.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
+
+  const grouped = news.reduce((acc,n)=>{
+    const date = n.created_at.split('T')[0]
+    if(!acc[date]) acc[date]=[]
+    acc[date].push(n)
+    return acc
+  }, {})
+
+  container.innerHTML=''
+  for(const date in grouped){
+    container.innerHTML += `<div class="group-title">${date}</div>`
+    grouped[date].forEach(n=>{
+      let authorName = authors.find(a=>a.id===n.author_id)?.name || ''
+      container.innerHTML += `
       <div class="list-item">
-        <span>${n.title} | ${n.mainCategory} | ${n.subCategory || ''} | ${author} ${n.featured?'| Онцлох':''}</span>
+        <span>${n.title} | ${n.category} | ${authorName} ${n.featured?'| Онцлох':''}</span>
         <div>
           <button onclick="editNews(${n.id})">Засах</button>
           <button onclick="removeNews(${n.id})">Устгах</button>
         </div>
-      </div>
-    `
-  })
+      </div>`
+    })
+  }
 }
 
-// Save News
+// News CRUD
 async function saveNews(){
-  const title = document.getElementById('newsTitle').value.trim()
-  const mainCategory = document.getElementById('newsMainCategory').value
-  const subCategory = document.getElementById('newsSubCategory').value
-  const image = document.getElementById('newsImage').value.trim()
+  const title = document.getElementById('newsTitle').value
+  const category = document.getElementById('newsCategory').value
+  const image = document.getElementById('newsImage').value
   const description = quill.root.innerHTML
-  const authorId = document.getElementById('newsAuthor').value
+  const author_id = parseInt(document.getElementById('newsAuthor').value)
   const featured = document.getElementById('newsFeatured').checked
-  const editId = document.getElementById('editNewsId').value
+  const editId = document.getElementById('editIndex').value
 
-  if(!title || !mainCategory){ alert('Гарчиг болон үндсэн цэс заавал оруулах ёстой!'); return; }
+  if(!title || !category) return alert('Гарчиг болон ангилал заавал оруулах ёстой!')
 
-  if(editId){
-    const {error} = await supabase.from('news').update({
-      title, mainCategory, subCategory, image, description, author_id:authorId, featured
-    }).eq('id',editId)
-    if(error){ console.error(error); alert('Мэдээг засах боломжгүй'); return; }
+  if(editId===''){
+    await supabase.from('news').insert([{ title, category, image, description, author_id, featured }])
   } else {
-    const {error} = await supabase.from('news').insert([{
-      title, mainCategory, subCategory, image, description, author_id:authorId, featured
-    }])
-    if(error){ console.error(error); alert('Мэдээг хадгалах боломжгүй'); return; }
+    await supabase.from('news').update({ title, category, image, description, author_id, featured }).eq('id', editId)
   }
+
+  document.getElementById('editIndex').value=''
   clearNewsForm()
-  loadAuthors()
   displayNews()
 }
 
-function clearNewsForm(){
-  document.getElementById('newsTitle').value=''
-  document.getElementById('newsMainCategory').value=''
-  document.getElementById('newsSubCategory').value=''
-  document.getElementById('newsImage').value=''
-  document.getElementById('newsFeatured').checked=false
-  document.getElementById('editNewsId').value=''
-  quill.setContents([])
-}
-
-// Save Author
-async function saveAuthor(){
-  const name = document.getElementById('authorName').value.trim()
-  const title = document.getElementById('authorTitle').value.trim()
-  const image = document.getElementById('authorImage').value.trim()
-  const editId = document.getElementById('editAuthorId').value
-  if(!name){ alert('Нэр оруулна уу!'); return; }
-  if(editId){
-    const {error} = await supabase.from('authors').update({name,title,image}).eq('id',editId)
-    if(error){ console.error(error); return; }
-  } else {
-    const {error} = await supabase.from('authors').insert([{name,title,image}])
-    if(error){ console.error(error); return; }
-  }
-  document.getElementById('authorName').value=''
-  document.getElementById('authorTitle').value=''
-  document.getElementById('authorImage').value=''
-  document.getElementById('editAuthorId').value=''
-  loadAuthors()
-  displayAuthors()
-}
-
-// Edit & Remove functions
 async function editNews(id){
-  const {data,error} = await supabase.from('news').select('*').eq('id',id).single()
-  if(error){ console.error(error); return; }
-  const n = data
-  document.getElementById('editNewsId').value=n.id
-  document.getElementById('newsTitle').value=n.title
-  document.getElementById('newsMainCategory').value=n.mainCategory
-  document.getElementById('newsSubCategory').value=n.subCategory
-  document.getElementById('newsImage').value=n.image
-  document.getElementById('newsAuthor').value=n.author_id
-  document.getElementById('newsFeatured').checked=n.featured
-  quill.root.innerHTML=n.description
+  const { data } = await supabase.from('news').select('*').eq('id', id).single()
+  document.getElementById('editIndex').value = data.id
+  document.getElementById('newsTitle').value = data.title
+  document.getElementById('newsCategory').value = data.category
+  document.getElementById('newsImage').value = data.image
+  document.getElementById('newsAuthor').value = data.author_id
+  document.getElementById('newsFeatured').checked = data.featured
+  quill.root.innerHTML = data.description
 }
 
 async function removeNews(id){
   if(confirm('Мэдээг устгах уу?')){
-    const {error} = await supabase.from('news').delete().eq('id',id)
-    if(error){ console.error(error); return; }
+    await supabase.from('news').delete().eq('id', id)
     displayNews()
   }
 }
 
+// Author CRUD
+async function saveAuthor(){
+  const name = document.getElementById('authorName').value
+  const title = document.getElementById('authorTitle').value
+  const image = document.getElementById('authorImage').value
+  const editId = document.getElementById('editAuthorIndex').value
+
+  if(!name) return alert('Нэр оруулна уу!')
+
+  if(editId===''){
+    await supabase.from('authors').insert([{ name, title, image }])
+  } else {
+    await supabase.from('authors').update({ name, title, image }).eq('id', editId)
+  }
+
+  document.getElementById('editAuthorIndex').value=''
+  clearAuthorForm()
+  populateAuthorSelect()
+  displayAuthors()
+}
+
 async function editAuthor(id){
-  const {data,error} = await supabase.from('authors').select('*').eq('id',id).single()
-  if(error){ console.error(error); return; }
-  document.getElementById('editAuthorId').value=data.id
-  document.getElementById('authorName').value=data.name
-  document.getElementById('authorTitle').value=data.title
-  document.getElementById('authorImage').value=data.image
+  const { data } = await supabase.from('authors').select('*').eq('id', id).single()
+  document.getElementById('editAuthorIndex').value = data.id
+  document.getElementById('authorName').value = data.name
+  document.getElementById('authorTitle').value = data.title
+  document.getElementById('authorImage').value = data.image
 }
 
 async function removeAuthor(id){
   if(confirm('Нийтлэлчийг устгах уу?')){
-    const {error} = await supabase.from('authors').delete().eq('id',id)
-    if(error){ console.error(error); return; }
-    loadAuthors()
+    await supabase.from('authors').delete().eq('id', id)
+    populateAuthorSelect()
     displayAuthors()
   }
 }
 
-// Initial load
-loadAuthors().then(displayAuthors)
+function clearNewsForm(){
+  document.getElementById('newsTitle').value=''
+  document.getElementById('newsCategory').value=''
+  document.getElementById('newsImage').value=''
+  quill.setContents([])
+  document.getElementById('newsFeatured').checked=false
+}
+
+function clearAuthorForm(){
+  document.getElementById('authorName').value=''
+  document.getElementById('authorTitle').value=''
+  document.getElementById('authorImage').value=''
+}
+
+// Initial render
+populateAuthorSelect()
+displayAuthors()
 displayNews()
 </script>
 </body>

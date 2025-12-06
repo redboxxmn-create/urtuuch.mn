@@ -10,8 +10,6 @@
 body{font-family:'Ubuntu',sans-serif;background:#f4f6f8;margin:0;padding:0;}
 header{background:#3d85c6;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.15);}
 header h1{font-size:22px;margin:0;}
-header button{background:#6fa8dc;padding:6px 12px;border-radius:6px;color:#fff;border:none;cursor:pointer;transition:0.3s;}
-header button:hover{background:#3d85c6;}
 .container{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 .card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);transition:transform 0.2s;}
 .card:hover{transform:translateY(-3px);box-shadow:0 6px 25px rgba(0,0,0,0.15);}
@@ -40,21 +38,12 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
     <h2>Мэдээ нэмэх / засах</h2>
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
-    <!-- Цэс сонгох -->
-    <select id="newsCategory">
-      <option value="">-- Цэс сонго --</option>
-      <option value="Улс төр">Улс төр</option>
-      <option value="Эдийн засаг">Эдийн засаг</option>
-      <option value="Соёл урлаг">Соёл урлаг</option>
-      <option value="Медиа">Медиа</option>
-      <option value="Дэлхий дахинд">Дэлхий дахинд</option>
-      <option value="Ярилцлага">Ярилцлага</option>
+    <select id="newsMainCategory">
+      <option value="">Гол цэс сонго</option>
     </select>
-    <!-- Дэд цэс -->
     <select id="newsSubCategory">
-      <option value="">-- Дэд цэс сонго --</option>
+      <option value="">Дэд цэс сонго</option>
     </select>
-    <input type="text" id="newsImage" placeholder="Зураг URL (компьютер/гар утас) ашиглаж болно)">
     <div id="editor"></div>
     <select id="newsAuthor"></select>
     <label><input type="checkbox" id="newsFeatured"> Онцлох мэдээ</label>
@@ -68,7 +57,7 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
     <input type="hidden" id="editAuthorIndex">
     <input type="text" id="authorName" placeholder="Нэр">
     <input type="text" id="authorTitle" placeholder="Албан тушаал">
-    <input type="text" id="authorImage" placeholder="Зураг URL">
+    <input type="file" id="authorImageFile">
     <button onclick="saveAuthor()">Хадгалах</button>
     <button onclick="clearAuthorForm()">Цэвэрлэх</button>
   </div>
@@ -89,17 +78,8 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script>
-// Data
-let authorsData = JSON.parse(localStorage.getItem('authorsData')) || [];
-let newsData = JSON.parse(localStorage.getItem('newsData')) || [];
-let currentPage = 1;
-const newsPerPage = 25;
-
-// Quill
-var quill = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' });
-
-// Цэс, дэд цэс харилцан холбоотой
-const subCategories = {
+// Цэсний бүтэц
+const menuStructure = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
   "Соёл урлаг":["Ярилцлага","Сурвалжилга","Кино ертөнц","Утга зохиол","Соёл судлал"],
@@ -108,21 +88,36 @@ const subCategories = {
   "Ярилцлага":["Хөрөг ярилцлага","Улс төрийн ярилцлага"]
 };
 
-const newsCategory = document.getElementById('newsCategory');
-const newsSubCategory = document.getElementById('newsSubCategory');
+// Populate main + sub categories
+const mainCatSelect = document.getElementById('newsMainCategory');
+const subCatSelect = document.getElementById('newsSubCategory');
 
-newsCategory.addEventListener('change',()=>{
-  const selected = newsCategory.value;
-  newsSubCategory.innerHTML = '<option value="">-- Дэд цэс сонго --</option>';
-  if(subCategories[selected]){
-    subCategories[selected].forEach(sub=>{
-      const opt=document.createElement('option');
-      opt.value=sub;
-      opt.innerText=sub;
-      newsSubCategory.appendChild(opt);
-    });
-  }
+for(const mainCat in menuStructure){
+  let opt = document.createElement('option');
+  opt.value = mainCat;
+  opt.textContent = mainCat;
+  mainCatSelect.appendChild(opt);
+}
+
+mainCatSelect.addEventListener('change',()=>{
+  const subCats = menuStructure[mainCatSelect.value] || [];
+  subCatSelect.innerHTML='<option value="">Дэд цэс сонго</option>';
+  subCats.forEach(sc=>{
+    let opt = document.createElement('option');
+    opt.value=sc;
+    opt.textContent=sc;
+    subCatSelect.appendChild(opt);
+  });
 });
+
+// Data
+let authorsData = JSON.parse(localStorage.getItem('authorsData')) || [];
+let newsData = JSON.parse(localStorage.getItem('newsData')) || [];
+let currentPage = 1;
+const newsPerPage = 25;
+
+// Quill
+var quill = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' });
 
 // Author select
 function populateAuthorSelect(){
@@ -153,48 +148,33 @@ function displayNews(){
   if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
 
   newsData.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-  const start = (currentPage-1)*newsPerPage;
-  const end = start+newsPerPage;
-  const paginated = newsData.slice(start,end);
-
-  const grouped = paginated.reduce((acc,n)=>{
-    const date = n.timestamp.split('T')[0];
-    if(!acc[date]) acc[date]=[];
-    acc[date].push(n);
-    return acc;
-  }, {});
-
   container.innerHTML='';
-  for(const date in grouped){
-    container.innerHTML += `<div class="group-title">${date}</div>`;
-    grouped[date].forEach(n=>{
-      const idx = newsData.indexOf(n);
-      let authorName = authorsData[n.authorIndex]?.name || '';
-      container.innerHTML += `
+  newsData.forEach((n,i)=>{
+    const authorName = authorsData[n.authorIndex]?.name || '';
+    container.innerHTML += `
       <div class="list-item">
-        <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+        <span>${n.title} | ${n.mainCategory} > ${n.subCategory} | ${authorName} ${n.featured?'| Онцлох':''}</span>
         <div>
-          <button onclick="editNews(${idx})">Засах</button>
-          <button onclick="removeNews(${idx})">Устгах</button>
+          <button onclick="editNews(${i})">Засах</button>
+          <button onclick="removeNews(${i})">Устгах</button>
         </div>
-      </div>`;
-    });
-  }
+      </div>
+    `;
+  });
 }
 
 // News functions
 function saveNews(){
   const title=document.getElementById('newsTitle').value.trim();
-  const category=document.getElementById('newsCategory').value.trim();
-  const subCategory=document.getElementById('newsSubCategory').value.trim();
-  const image=document.getElementById('newsImage').value.trim();
+  const mainCategory=document.getElementById('newsMainCategory').value;
+  const subCategory=document.getElementById('newsSubCategory').value;
   const description=quill.root.innerHTML;
   const authorIndex=parseInt(document.getElementById('newsAuthor').value);
   const featured=document.getElementById('newsFeatured').checked;
   const editIndex=document.getElementById('editIndex').value;
 
-  if(!title||!category) return alert('Гарчиг болон ангилал заавал оруулах ёстой!');
-  const newsObj={title,category,subCategory,image,description,authorIndex,featured,timestamp:new Date().toISOString()};
+  if(!title||!mainCategory||!subCategory) return alert('Гарчиг болон цэс, дэд цэс заавал сонгоно уу!');
+  const newsObj={title,mainCategory,subCategory,description,authorIndex,featured,timestamp:new Date().toISOString()};
 
   if(editIndex===''){ newsData.push(newsObj); } 
   else{ newsData[editIndex]=newsObj; }
@@ -208,10 +188,9 @@ function editNews(i){
   const n=newsData[i];
   document.getElementById('editIndex').value=i;
   document.getElementById('newsTitle').value=n.title;
-  document.getElementById('newsCategory').value=n.category;
-  document.getElementById('newsCategory').dispatchEvent(new Event('change')); // Дэд цэс шинэчлэх
-  document.getElementById('newsSubCategory').value=n.subCategory || '';
-  document.getElementById('newsImage').value=n.image;
+  document.getElementById('newsMainCategory').value=n.mainCategory;
+  mainCatSelect.dispatchEvent(new Event('change'));
+  document.getElementById('newsSubCategory').value=n.subCategory;
   document.getElementById('newsAuthor').value=n.authorIndex;
   document.getElementById('newsFeatured').checked=n.featured;
   quill.root.innerHTML=n.description;
@@ -228,9 +207,8 @@ function removeNews(i){
 function clearNewsForm(){
   document.getElementById('editIndex').value='';
   document.getElementById('newsTitle').value='';
-  document.getElementById('newsCategory').value='';
-  document.getElementById('newsSubCategory').innerHTML='<option value="">-- Дэд цэс сонго --</option>';
-  document.getElementById('newsImage').value='';
+  document.getElementById('newsMainCategory').value='';
+  document.getElementById('newsSubCategory').innerHTML='<option value="">Дэд цэс сонго</option>';
   quill.setContents([]);
   if(authorsData.length>0) document.getElementById('newsAuthor').value=0;
   document.getElementById('newsFeatured').checked=false;
@@ -240,15 +218,28 @@ function clearNewsForm(){
 function saveAuthor(){
   const name=document.getElementById('authorName').value.trim();
   const title=document.getElementById('authorTitle').value.trim();
-  const image=document.getElementById('authorImage').value.trim();
-  const editIndex=document.getElementById('editAuthorIndex').value;
-  if(!name) return alert('Нэр оруулна уу!');
-  const obj={name,title,image};
-  if(editIndex===''){ authorsData.push(obj); } else{ authorsData[editIndex]=obj; }
-  localStorage.setItem('authorsData',JSON.stringify(authorsData));
-  populateAuthorSelect();
-  displayAuthors();
-  clearAuthorForm();
+  const imageFile=document.getElementById('authorImageFile').files[0];
+  let reader=new FileReader();
+  reader.onload=function(e){
+    const imgUrl=e.target.result;
+    const editIndex=document.getElementById('editAuthorIndex').value;
+    const obj={name,title,image:imgUrl};
+    if(editIndex===''){ authorsData.push(obj); } else{ authorsData[editIndex]=obj; }
+    localStorage.setItem('authorsData',JSON.stringify(authorsData));
+    populateAuthorSelect();
+    displayAuthors();
+    clearAuthorForm();
+  }
+  if(imageFile) reader.readAsDataURL(imageFile);
+  else{
+    const editIndex=document.getElementById('editAuthorIndex').value;
+    const obj={name,title,image:''};
+    if(editIndex===''){ authorsData.push(obj); } else{ authorsData[editIndex]=obj; }
+    localStorage.setItem('authorsData',JSON.stringify(authorsData));
+    populateAuthorSelect();
+    displayAuthors();
+    clearAuthorForm();
+  }
 }
 
 function editAuthor(i){
@@ -256,7 +247,6 @@ function editAuthor(i){
   document.getElementById('editAuthorIndex').value=i;
   document.getElementById('authorName').value=a.name;
   document.getElementById('authorTitle').value=a.title;
-  document.getElementById('authorImage').value=a.image;
 }
 
 function removeAuthor(i){
@@ -272,7 +262,7 @@ function clearAuthorForm(){
   document.getElementById('editAuthorIndex').value='';
   document.getElementById('authorName').value='';
   document.getElementById('authorTitle').value='';
-  document.getElementById('authorImage').value='';
+  document.getElementById('authorImageFile').value='';
 }
 
 // Initial render

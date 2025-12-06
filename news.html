@@ -3,120 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>urtuuch.mn</title>
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<title>Мэдээ</title>
 <style>
-body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
-header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100;}
-header h1{margin:0; font-size:24px;}
-.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
-.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s;}
-.card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
-.card img{width:100%; height:150px; object-fit:cover;}
-.card-content{padding:10px; position:relative;}
-.card-title{font-size:16px; margin:0; font-weight:bold;}
-.card-meta{font-size:12px; color:#666; margin-top:5px;}
-.card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-.card:hover .card-desc-preview{display:block;}
-.pagination{display:flex; justify-content:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
-.pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
-.pagination button:hover{background:#3d85c6;}
-@media(max-width:480px){.grid{grid-template-columns:1fr;}}
+img{width:100%;max-height:400px;object-fit:cover}
 </style>
 </head>
 <body>
-<header>
-<h1>urtuuch.mn</h1>
-</header>
 
-<div class="grid" id="newsContainer"></div>
-<div class="pagination" id="pagination"></div>
+<div id="box">Ачаалж байна...</div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 🔹 Supabase тохиргоо
-const supabaseUrl = 'https://wpotnvekaoosdkvmhqgo.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0'; // Өөрийн Public Key
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const NEWS_PER_PAGE = 12;
-let currentPage = 1;
+const supabase = createClient(
+ "https://wpotnvekaoosdkvmhqgo.supabase.co",
+ "PUBLIC_ANON_KEY"   <!-- ← Энд өөрийн key оруул -->
+);
 
-function el(id){ return document.getElementById(id); }
+const params = new URLSearchParams(location.search);
+const slug = params.get("slug");
 
-// 🔹 Мэдээ авах
-async function getNews(){
-  const { data, error } = await supabase.from('news').select('*').order('created_at', { ascending:false });
-  if(error) console.error(error);
-  return data || [];
+async function load(){
+   if(!slug){ 
+       document.getElementById("box").innerHTML="Мэдээ олдсонгүй"; 
+       return;
+   }
+
+   let {data,error} = await supabase
+      .from("news")
+      .select("*")
+      .eq("slug",slug)
+      .single();
+
+   if(error){ 
+       document.getElementById("box").innerHTML="Алдаа гарлаа"; 
+       return;
+   }
+
+   document.getElementById("box").innerHTML = `
+      <h2>${data.title}</h2>
+      <div>${data.category}</div>
+      ${data.image? `<img src="${data.image}">`:''}
+      <div>${data.description}</div>
+   `;
 }
 
-// 🔹 Мэдээ харуулах
-async function displayNews(filteredNews=null){
-  const container = el('newsContainer');
-  const allNews = filteredNews || await getNews();
+load();
 
-  const totalPages = Math.ceil(allNews.length / NEWS_PER_PAGE);
-  if(currentPage>totalPages) currentPage = totalPages || 1;
-  const start = (currentPage-1)*NEWS_PER_PAGE;
-  const pageNews = allNews.slice(start, start+NEWS_PER_PAGE);
-
-  container.innerHTML = '';
-  pageNews.forEach(n=>{
-    const div = document.createElement('div');
-    div.className = "card";
-    div.innerHTML = `
-      ${n.image? `<img src="${n.image}">` : ''}
-      <div class="card-content">
-        <h3 class="card-title">${n.title}</h3>
-        <div class="card-meta">${n.category}${n.subcategory? ' | ' + n.subcategory : ''}${n.featured?' | Онцлох':''}</div>
-        <div class="card-desc-preview">${n.description || ''}</div>
-      </div>
-    `;
-    // 🔹 Click хийхэд slug-тай news.html руу
-    div.addEventListener('click', ()=> {
-      if(n.slug){
-        window.location.href = `news.html?slug=${encodeURIComponent(n.slug)}`;
-      }
-    });
-    container.appendChild(div);
-  });
-
-  renderPagination(allNews.length);
-}
-
-// 🔹 Pagination
-function renderPagination(totalItems){
-  const container = el('pagination');
-  const totalPages = Math.ceil(totalItems / NEWS_PER_PAGE);
-  container.innerHTML = '';
-  if(totalPages<=1) return;
-
-  if(currentPage>1){
-    const prev = document.createElement('button');
-    prev.innerText='Өмнөх';
-    prev.onclick=()=>{currentPage--; displayNews();};
-    container.appendChild(prev);
-  }
-  for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement('button');
-    btn.innerText=i;
-    if(i===currentPage) btn.style.background="#3d85c6";
-    btn.onclick=()=>{currentPage=i; displayNews();};
-    container.appendChild(btn);
-  }
-  if(currentPage<totalPages){
-    const next = document.createElement('button');
-    next.innerText='Дараах';
-    next.onclick=()=>{currentPage++; displayNews();};
-    container.appendChild(next);
-  }
-}
-
-// 🔹 Эхлэн ачааллах
-displayNews();
 </script>
-
 </body>
 </html>

@@ -10,10 +10,10 @@ body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5;
 header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
 .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
-nav {background:#3d85c6; display:flex; padding:10px;}
+nav {background:#3d85c6; display:flex; padding:10px; flex-wrap:wrap;}
 nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
 nav ul li {position:relative; margin-right:20px;}
-nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px;}
+nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px; cursor:pointer;}
 nav ul li:hover > a {background:#6fa8dc;}
 nav ul li ul {display:none; position:absolute; top:100%; left:0; background:#6fa8dc; list-style:none; padding:0; margin:0; border-radius:6px; min-width:180px; z-index:100;}
 nav ul li:hover ul {display:block;}
@@ -51,59 +51,58 @@ nav ul li ul li a:hover {background:#3d85c6;}
 </style>
 </head>
 <body>
-
 <header>
 <h1>urtuuch.mn</h1>
 <div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
 <nav>
   <ul>
-    <li><a href="#">Улс төр</a>
+    <li><a data-category="Улс төр">Улс төр</a>
       <ul>
-        <li><a href="#">Тойм</a></li>
-        <li><a href="#">Нийтлэл</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">Өртөөчийн үг</a></li>
-        <li><a href="#">Хов болох вий</a></li>
+        <li><a data-category="Тойм">Тойм</a></li>
+        <li><a data-category="Нийтлэл">Нийтлэл</a></li>
+        <li><a data-category="Сурвалжилга">Сурвалжилга</a></li>
+        <li><a data-category="Өртөөчийн үг">Өртөөчийн үг</a></li>
+        <li><a data-category="Хов болох вий">Хов болох вий</a></li>
       </ul>
     </li>
-    <li><a href="#">Эдийн засаг</a>
+    <li><a data-category="Эдийн засаг">Эдийн засаг</a>
       <ul>
-        <li><a href="#">Уул уурхай</a></li>
-        <li><a href="#">Дэд бүтэц</a></li>
-        <li><a href="#">Монголд үйлдвэрлэв</a></li>
-        <li><a href="#">Зар сурталчилгаа</a></li>
+        <li><a data-category="Уул уурхай">Уул уурхай</a></li>
+        <li><a data-category="Дэд бүтэц">Дэд бүтэц</a></li>
+        <li><a data-category="Монголд үйлдвэрлэв">Монголд үйлдвэрлэв</a></li>
+        <li><a data-category="Зар сурталчилгаа">Зар сурталчилгаа</a></li>
       </ul>
     </li>
-    <li><a href="#">Соёл урлаг</a>
+    <li><a data-category="Соёл урлаг">Соёл урлаг</a>
       <ul>
-        <li><a href="#">Ярилцлага</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">Кино ертөнц</a></li>
-        <li><a href="#">Утга зохиол</a></li>
-        <li><a href="#">Соёл судлал</a></li>
+        <li><a data-category="Ярилцлага">Ярилцлага</a></li>
+        <li><a data-category="Сурвалжилга">Сурвалжилга</a></li>
+        <li><a data-category="Кино ертөнц">Кино ертөнц</a></li>
+        <li><a data-category="Утга зохиол">Утга зохиол</a></li>
+        <li><a data-category="Соёл судлал">Соёл судлал</a></li>
       </ul>
     </li>
-    <li><a href="#">Медиа</a>
+    <li><a data-category="Медиа">Медиа</a>
       <ul>
-        <li><a href="#">Нэвтрүүлэг</a></li>
-        <li><a href="#">Мэдээ</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">MIC UP</a></li>
-        <li><a href="#">Зураглал</a></li>
-        <li><a href="#">Өртөөчөөс</a></li>
+        <li><a data-category="Нэвтрүүлэг">Нэвтрүүлэг</a></li>
+        <li><a data-category="Мэдээ">Мэдээ</a></li>
+        <li><a data-category="Сурвалжилга">Сурвалжилга</a></li>
+        <li><a data-category="MIC UP">MIC UP</a></li>
+        <li><a data-category="Зураглал">Зураглал</a></li>
+        <li><a data-category="Өртөөчөөс">Өртөөчөөс</a></li>
       </ul>
     </li>
-    <li><a href="#">Дэлхий дахинд</a>
+    <li><a data-category="Дэлхий дахинд">Дэлхий дахинд</a>
       <ul>
-        <li><a href="#">Улс төр</a></li>
-        <li><a href="#">Танин мэдэхүй</a></li>
-        <li><a href="#">Шинжлэх ухаан</a></li>
+        <li><a data-category="Улс төр">Улс төр</a></li>
+        <li><a data-category="Танин мэдэхүй">Танин мэдэхүй</a></li>
+        <li><a data-category="Шинжлэх ухаан">Шинжлэх ухаан</a></li>
       </ul>
     </li>
-    <li><a href="#">Ярилцлага</a>
+    <li><a data-category="Ярилцлага">Ярилцлага</a>
       <ul>
-        <li><a href="#">Хөрөг ярилцлага</a></li>
-        <li><a href="#">Улс төрийн ярилцлага</a></li>
+        <li><a data-category="Хөрөг ярилцлага">Хөрөг ярилцлага</a></li>
+        <li><a data-category="Улс төрийн ярилцлага">Улс төрийн ярилцлага</a></li>
       </ul>
     </li>
   </ul>
@@ -145,21 +144,18 @@ let currentPage = 1;
 
 function el(id){ return document.getElementById(id); }
 
-// Load authors
 async function getAuthors(){
   const {data,error} = await supabase.from('authors').select('*').order('id');
   if(error) console.error(error);
   return data || [];
 }
 
-// Load news
 async function getNews(){
   const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
   if(error) console.error(error);
   return data || [];
 }
 
-// Display authors
 async function displayAuthors(){
   const authors = await getAuthors();
   const container = el('authorsContainer');
@@ -172,7 +168,6 @@ async function displayAuthors(){
   `).join('');
 }
 
-// Display news
 async function displayNews(filteredNews=null){
   const container = el('newsContainer');
   const allNews = filteredNews || await getNews();
@@ -209,7 +204,6 @@ async function displayNews(filteredNews=null){
   displayAuthors();
 }
 
-// Pagination
 function renderPagination(totalItems){
   const container = el('pagination');
   const totalPages = Math.ceil(totalItems/NEWS_PER_PAGE);
@@ -243,6 +237,18 @@ el('searchInput').addEventListener('input', async()=>{
   const filtered = allNews.filter(n=>n.title.toLowerCase().includes(keyword));
   currentPage = 1;
   displayNews(filtered);
+});
+
+// Category click
+document.querySelectorAll('nav a[data-category]').forEach(a=>{
+  a.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const category = a.dataset.category.toLowerCase();
+    const allNews = await getNews();
+    const filtered = allNews.filter(n=>n.category.toLowerCase()===category);
+    currentPage = 1;
+    displayNews(filtered);
+  });
 });
 
 // Modal close

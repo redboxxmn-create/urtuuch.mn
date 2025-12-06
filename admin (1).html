@@ -37,7 +37,6 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
     
-    <!-- Цэс сонгох -->
     <select id="newsCategory">
       <option value="">-- Цэс сонго --</option>
       <option value="Улс төр">Улс төр</option>
@@ -48,7 +47,6 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
     
-    <!-- Дэд цэс -->
     <select id="newsSubCategory">
       <option value="">-- Дэд цэс сонго --</option>
     </select>
@@ -86,20 +84,18 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 
 </div>
 
-<!-- CKEditor 5 Classic -->
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = 'https://YOUR_PROJECT_REF.supabase.co';
+const supabaseKey = 'YOUR_PUBLIC_ANON_KEY';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 let editor;
-ClassicEditor.create(document.querySelector('#editor'), {
-    toolbar: ['heading','bold','italic','underline','link','bulletedList','numberedList','blockQuote','insertTable','undo','redo','alignment','imageUpload'],
-    alignment: { options: ['left','center','right','justify'] }
-}).then(ed=>editor=ed).catch(err=>console.error(err));
+
+// CKEditor
+ClassicEditor.create(document.querySelector('#editor')).then(ed=>editor=ed).catch(err=>console.error(err));
 
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
@@ -124,11 +120,11 @@ async function loadAuthors(){
 }
 
 async function displayAuthors(){
-    const {data: authors, error} = await supabase.from('authors').select('*').order('id');
+    const authors = await supabase.from('authors').select('*').order('id');
     const container = document.getElementById('authorList');
     container.innerHTML = '';
-    if(authors.length===0){ container.innerHTML='<p>Одоогоор нийтлэлч байхгүй.</p>'; return; }
-    authors.forEach(a=>{
+    if(authors.data.length===0){ container.innerHTML='<p>Одоогоор нийтлэлч байхгүй.</p>'; return; }
+    authors.data.forEach(a=>{
         container.innerHTML += `<div class="list-item">
             <span>${a.name} (${a.title})</span>
             <div>
@@ -141,12 +137,12 @@ async function displayAuthors(){
 
 async function displayNews(){
     const { data: news, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
-    const { data: authors } = await supabase.from('authors').select('*').order('id');
     const container = document.getElementById('newsList');
     container.innerHTML = '';
     if(news.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
+    const authors = await supabase.from('authors').select('*').order('id');
     news.forEach(n=>{
-        const authorName = authors.find(a=>a.id===n.author_id)?.name || '';
+        const authorName = authors.data.find(a=>a.id===n.author_id)?.name || '';
         container.innerHTML += `<div class="list-item">
             <span>${n.title} | ${n.category} | ${n.subcategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
             <div>
@@ -157,6 +153,7 @@ async function displayNews(){
     });
 }
 
+// Save & Clear functions
 async function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -164,17 +161,17 @@ async function saveNews(){
     const author_id=parseInt(document.getElementById('newsAuthor').value);
     const featured=document.getElementById('newsFeatured').checked;
     const editIndex=document.getElementById('editIndex').value;
-
     const fileInput=document.getElementById('newsImageFile');
     let image_url=null;
+
     if(fileInput.files[0]){
         const file=fileInput.files[0];
         const { data, error } = await supabase.storage.from('news-images').upload(`news/${Date.now()}_${file.name}`, file);
         if(error) console.error(error);
-        else image_url=`${supabaseUrl}/storage/v1/object/public/news-images/${data.path}`;
+        else image_url=`https://YOUR_PROJECT_REF.supabase.co/storage/v1/object/public/news-images/${data.path}`;
     }
 
-    const payload={ title, category, subcategory, author_id, featured, image:image_url, description: editor.getData() };
+    const payload={ title, category, subcategory, author_id, featured, image:image_url };
     if(editIndex===''){ await supabase.from('news').insert([payload]); }
     else{ await supabase.from('news').update(payload).eq('id',parseInt(editIndex)); }
 
@@ -201,7 +198,7 @@ async function saveAuthor(){
         const file=fileInput.files[0];
         const { data, error } = await supabase.storage.from('author-images').upload(`authors/${Date.now()}_${file.name}`, file);
         if(error) console.error(error);
-        else image_url=`${supabaseUrl}/storage/v1/object/public/author-images/${data.path}`;
+        else image_url=`https://YOUR_PROJECT_REF.supabase.co/storage/v1/object/public/author-images/${data.path}`;
     }
     const editIndex=document.getElementById('editAuthorIndex').value;
     const payload={ name, title, image:image_url };

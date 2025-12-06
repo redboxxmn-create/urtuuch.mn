@@ -18,26 +18,63 @@ body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f8f8f8;
 .back-btn { display:inline-block; margin-top:20px; padding:10px 15px; background:#3d85c6; color:#fff; border-radius:6px; text-decoration:none; font-size:14px; }
 </style>
 </head>
-
 <body>
 
 <div class="container" id="newsBox">
   Уншиж байна...
 </div>
 
-<script>
-// 🔵 URL-аас id авах
-const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get("id");
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 🔵 LocalStorage унших
-let newsData = JSON.parse(localStorage.getItem("newsData")) || [];
-let authorsData = JSON.parse(localStorage.getItem("authorsData")) || [];
+// 🔹 Supabase тохиргоо
+const supabaseUrl = 'https://wpotnvekaoosdkvmhqgo.supabase.co';
+const supabaseKey = 'PUBLIC_ANON_KEY_HERE'; // Өөрийн Public Key-ээ оруул
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// 🔹 URL-аас slug авах
+const urlParams = new URLSearchParams(window.location.search);
+const slug = urlParams.get("slug");
 
 const box = document.getElementById("newsBox");
 
-// 🔵 ID шалгах
-if(!id || !newsData[id]){
-    box.innerHTML = "<h2>Мэдээ олдсонгүй...</h2>";
+if(!slug){
+    box.innerHTML = "<h2>Мэдээний URL зөв биш байна.</h2>";
 } else {
-    const n = newsDa
+    async function loadNews(){
+        // 🔹 Мэдээг slug-аар авах
+        const { data: news, error } = await supabase.from('news').select('*').eq('slug', slug).single();
+        if(error || !news){
+            box.innerHTML = "<h2>Мэдээ олдсонгүй...</h2>";
+            return;
+        }
+
+        // 🔹 Author мэдээллийг авах
+        const { data: authors } = await supabase.from('authors').select('*');
+        const author = authors.find(a=>a.id === news.author_id);
+
+        // 🔹 Мэдээг харуулах
+        box.innerHTML = `
+            <h1 class="news-title">${news.title}</h1>
+            <div class="news-meta">
+                ${news.category} ${news.subcategory? '| ' + news.subcategory : ''} ${news.featured?'| Онцлох':''}
+            </div>
+            ${news.image? `<img class="news-img" src="${news.image}">` : ''}
+            <div class="news-content">${news.description}</div>
+            ${author ? `<div class="author-box">
+                <img src="${author.image}">
+                <div>
+                    <div class="author-name">${author.name}</div>
+                    <div class="author-title">${author.title}</div>
+                </div>
+            </div>` : ''}
+            <a class="back-btn" href="index.html">Буцах</a>
+        `;
+    }
+
+    loadNews();
+}
+</script>
+
+</body>
+</html>

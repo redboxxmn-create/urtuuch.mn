@@ -9,6 +9,8 @@
 body{font-family:'Ubuntu',sans-serif;background:#f4f6f8;margin:0;padding:0;}
 header{background:#3d85c6;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.15);}
 header h1{font-size:22px;margin:0;}
+header button{background:#6fa8dc;padding:6px 12px;border-radius:6px;color:#fff;border:none;cursor:pointer;transition:0.3s;}
+header button:hover{background:#3d85c6;}
 .container{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 .card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);transition:transform 0.2s;}
 .card:hover{transform:translateY(-3px);box-shadow:0 6px 25px rgba(0,0,0,0.15);}
@@ -36,6 +38,7 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
     <h2>Мэдээ нэмэх / засах</h2>
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
+    <!-- Цэс сонгох -->
     <select id="newsCategory">
       <option value="">-- Цэс сонго --</option>
       <option value="Улс төр">Улс төр</option>
@@ -45,6 +48,7 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
       <option value="Дэлхий дахинд">Дэлхий дахинд</option>
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
+    <!-- Дэд цэс -->
     <select id="newsSubCategory">
       <option value="">-- Дэд цэс сонго --</option>
     </select>
@@ -81,11 +85,14 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 
 </div>
 
+<!-- CKEditor 5 Classic -->
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
 // Data
 let authorsData = JSON.parse(localStorage.getItem('authorsData')) || [];
 let newsData = JSON.parse(localStorage.getItem('newsData')) || [];
+let currentPage = 1;
+const newsPerPage = 25;
 
 // CKEditor
 let editor;
@@ -93,7 +100,7 @@ ClassicEditor.create(document.querySelector('#editor'), {
     toolbar: ['heading','bold','italic','underline','link','bulletedList','numberedList','blockQuote','insertTable','undo','redo','imageUpload']
 }).then(ed=>editor=ed).catch(error=>console.error(error));
 
-// Цэс, дэд цэс
+// Цэс, дэд цэс харилцан холбоотой
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
@@ -150,7 +157,7 @@ function displayNews(){
   });
 }
 
-// Save news
+// News functions
 function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -159,18 +166,23 @@ function saveNews(){
     const featured=document.getElementById('newsFeatured').checked;
     const editIndex=document.getElementById('editIndex').value;
 
+    // Зураг файлыг base64 болгох
     const fileInput = document.getElementById('newsImageFile');
     const reader = new FileReader();
     reader.onload = function(e){
         const imageData = e.target.result;
-        const newsObj = {title, category, subCategory, image:imageData, description: editor.getData(), authorIndex, featured, timestamp:new Date().toISOString()};
+        const newsObj = {
+            title, category, subCategory, image:imageData,
+            description: editor.getData(),
+            authorIndex, featured, timestamp:new Date().toISOString()
+        };
         if(editIndex===''){ newsData.push(newsObj); } else{ newsData[editIndex]=newsObj; }
         localStorage.setItem('newsData',JSON.stringify(newsData));
         displayNews();
         clearNewsForm();
     };
     if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-    else reader.onload({target:{result:null}});
+    else reader.onload({target:{result:null}}); // зураггүй хадгалах
 }
 
 function editNews(i){
@@ -234,6 +246,7 @@ function clearAuthorForm(){
     document.getElementById('authorImageFile').value='';
 }
 
+// Initial render
 displayNews();
 displayAuthors();
 </script>

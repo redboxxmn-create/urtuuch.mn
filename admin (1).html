@@ -21,11 +21,7 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 .list-item{padding:8px;margin:5px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
 .list-item button{padding:4px 8px;font-size:12px;margin-left:5px;}
 .group-title{margin-top:20px;font-weight:bold;font-size:16px;color:#3d85c6;}
-#editor-container{height:150px; background:#fff; border:1px solid #ccc; border-radius:8px;}
-#editor-container .ql-editor{color:red; min-height:120px;}
-.ql-align-center { text-align: center; }
-.ql-align-right { text-align: right; }
-.ql-align-justify { text-align: justify; }
+#editor-container{height:200px;background:#fff;}
 @media(max-width:768px){.container{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -106,20 +102,20 @@ let authorsData = [];
 let newsData = [];
 let quill;
 
-// Quill editor setup
 quill = new Quill('#editor-container', {
-    theme: 'snow',
-    modules: {
-        toolbar: [
-            [{ 'header': [1, 2, false] }],
-            ['bold','italic','underline'],
-            [{ 'align': [] }],
-            ['link','image'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-        ]
-    }
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline'],
+      [{ 'align': [] }],
+      ['link', 'image'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+    ]
+  }
 });
 
+// Дэд цэс
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
@@ -134,12 +130,12 @@ document.getElementById('newsCategory').addEventListener('change', function(){
     document.getElementById('newsSubCategory').innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
 });
 
-// Slug
+// Slug үүсгэх
 function generateSlug(title){
     return title.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'').replace(/--+/g,'-').replace(/^-+|-+$/g,'');
 }
 
-// Authors
+// Author functions
 async function fetchAuthors(){
   const {data,error} = await supabase.from('authors').select('*').order('id');
   if(error) console.error(error);
@@ -166,7 +162,7 @@ function displayAuthors(){
     `).join('');
 }
 
-// News
+// News functions
 async function fetchNews(){
   const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
   if(error) console.error(error);
@@ -182,7 +178,6 @@ function displayNews(){
         let authorName = authorsData.find(a=>a.id===n.author_id)?.name || '';
         container.innerHTML += `<div class="list-item">
             <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
-            <div>${n.description}</div>
             <div>
                 <button onclick="editNews(${i})">Засах</button>
                 <button onclick="removeNews(${i})">Устгах</button>
@@ -191,7 +186,6 @@ function displayNews(){
     });
 }
 
-// Forms
 function clearNewsForm(){
     document.getElementById('editIndex').value='';
     document.getElementById('newsTitle').value='';
@@ -210,7 +204,7 @@ function clearAuthorForm(){
     document.getElementById('authorImageFile').value='';
 }
 
-// Save News
+// Save news
 async function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -220,6 +214,7 @@ async function saveNews(){
     const editIndex=document.getElementById('editIndex').value;
 
     const slug = generateSlug(title);
+
     const fileInput = document.getElementById('newsImageFile');
     const reader = new FileReader();
     reader.onload = async function(e){
@@ -264,7 +259,7 @@ async function removeNews(i){
     }
 }
 
-// Authors
+// Author functions
 async function saveAuthor(){
     const name=document.getElementById('authorName').value.trim();
     const title=document.getElementById('authorTitle').value.trim();

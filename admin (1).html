@@ -21,12 +21,8 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 .list-item{padding:8px;margin:5px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
 .list-item button{padding:4px 8px;font-size:12px;margin-left:5px;}
 .group-title{margin-top:20px;font-weight:bold;font-size:16px;color:#3d85c6;}
-#editor-container{height:150px;}
-/* Quill text default color red */
-.ql-editor {
-    color: red;
-    text-align: left; /* left, center, right тохируулах */
-}
+#editor-container{height:150px;background:#fff;border:1px solid #ccc;border-radius:8px;}
+#editor-container .ql-editor{color:red;} /* Улаан текст */
 @media(max-width:768px){.container{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -98,22 +94,22 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 🔹 Supabase холболт
+// 🔹 Supabase тохиргоо
 const supabase = createClient(
-  'https://YOUR_SUPABASE_URL',
-  'YOUR_PUBLIC_ANON_KEY'
+  'https://YOUR_SUPABASE_URL', // Өөрийн Supabase URL
+  'YOUR_PUBLIC_ANON_KEY'      // Өөрийн Public Key
 );
 
 let authorsData = [];
 let newsData = [];
 let quill;
 
-// Quill editor setup with toolbar
+// Quill editor тохиргоо
 quill = new Quill('#editor-container', {
   theme: 'snow',
   modules: {
     toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
+      [{ 'header': [1, 2, false] }],
       ['bold', 'italic', 'underline'],
       [{ 'align': [] }],
       ['link', 'image'],
@@ -122,7 +118,6 @@ quill = new Quill('#editor-container', {
   }
 });
 
-// 🔹 Subcategories
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
@@ -139,10 +134,14 @@ document.getElementById('newsCategory').addEventListener('change', function(){
 
 // 🔹 Slug үүсгэх
 function generateSlug(title){
-    return title.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'').replace(/--+/g,'-').replace(/^-+|-+$/g,'');
+    return title.toLowerCase()
+                .replace(/ /g,'-')
+                .replace(/[^\w-]+/g,'')
+                .replace(/--+/g,'-')
+                .replace(/^-+|-+$/g,'');
 }
 
-// 🔹 Author
+// 🔹 Authors
 async function fetchAuthors(){
   const {data,error} = await supabase.from('authors').select('*').order('id');
   if(error) console.error(error);
@@ -150,10 +149,12 @@ async function fetchAuthors(){
   populateAuthorSelect();
   displayAuthors();
 }
+
 function populateAuthorSelect(){
     const sel = document.getElementById('newsAuthor');
     sel.innerHTML = authorsData.map((a,i)=>`<option value="${i}">${a.name}</option>`).join('');
 }
+
 function displayAuthors(){
     const container = document.getElementById('authorList');
     container.innerHTML = authorsData.map((a,i)=>`
@@ -174,6 +175,7 @@ async function fetchNews(){
   newsData = data || [];
   displayNews();
 }
+
 function displayNews(){
     const container = document.getElementById('newsList');
     if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
@@ -190,7 +192,7 @@ function displayNews(){
     });
 }
 
-// 🔹 Form functions
+// 🔹 Form цэвэрлэх
 function clearNewsForm(){
     document.getElementById('editIndex').value='';
     document.getElementById('newsTitle').value='';
@@ -201,6 +203,7 @@ function clearNewsForm(){
     if(authorsData.length>0) document.getElementById('newsAuthor').value=0;
     document.getElementById('newsFeatured').checked=false;
 }
+
 function clearAuthorForm(){
     document.getElementById('editAuthorIndex').value='';
     document.getElementById('authorName').value='';
@@ -208,7 +211,7 @@ function clearAuthorForm(){
     document.getElementById('authorImageFile').value='';
 }
 
-// 🔹 Save News
+// 🔹 Save news
 async function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -216,7 +219,6 @@ async function saveNews(){
     const authorIndex=parseInt(document.getElementById('newsAuthor').value);
     const featured=document.getElementById('newsFeatured').checked;
     const editIndex=document.getElementById('editIndex').value;
-
     const slug = generateSlug(title);
 
     const fileInput = document.getElementById('newsImageFile');
@@ -242,6 +244,7 @@ async function saveNews(){
     if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
     else reader.onload({target:{result:null}});
 }
+
 function editNews(i){
     const n=newsData[i];
     document.getElementById('editIndex').value=i;
@@ -254,6 +257,7 @@ function editNews(i){
     if(authorIndex>=0) document.getElementById('newsAuthor').value=authorIndex;
     quill.root.innerHTML = n.description || '';
 }
+
 async function removeNews(i){
     if(confirm('Мэдээг устгах уу?')){
         await supabase.from('news').delete().eq('id',newsData[i].id);
@@ -261,7 +265,7 @@ async function removeNews(i){
     }
 }
 
-// 🔹 Author
+// 🔹 Author functions
 async function saveAuthor(){
     const name=document.getElementById('authorName').value.trim();
     const title=document.getElementById('authorTitle').value.trim();
@@ -283,12 +287,14 @@ async function saveAuthor(){
     if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
     else reader.onload({target:{result:null}});
 }
+
 function editAuthor(i){
     const a=authorsData[i];
     document.getElementById('editAuthorIndex').value=i;
     document.getElementById('authorName').value=a.name;
     document.getElementById('authorTitle').value=a.title;
 }
+
 async function removeAuthor(i){
     if(confirm('Нийтлэлчийг устгах уу?')){
         await supabase.from('authors').delete().eq('id',authorsData[i].id);
@@ -299,7 +305,6 @@ async function removeAuthor(i){
 // 🔹 Initial load
 fetchAuthors();
 fetchNews();
-
 </script>
 </body>
 </html>

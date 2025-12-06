@@ -89,7 +89,9 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 
 </div>
 
+<!-- Quill JS -->
 <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
@@ -101,19 +103,6 @@ const supabase = createClient(
 let authorsData = [];
 let newsData = [];
 let quill;
-
-quill = new Quill('#editor-container', {
-  theme: 'snow',
-  modules: {
-    toolbar: [
-      [{ 'header': [1, 2, false] }],
-      ['bold', 'italic', 'underline'],
-      [{ 'align': [] }],
-      ['link', 'image'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-    ]
-  }
-});
 
 // Дэд цэс
 const subCategories = {
@@ -135,7 +124,26 @@ function generateSlug(title){
     return title.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'').replace(/--+/g,'-').replace(/^-+|-+$/g,'');
 }
 
-// Author functions
+// Quill initialize DOM бэлэн болсны дараа
+document.addEventListener('DOMContentLoaded', function() {
+  quill = new Quill('#editor-container', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'underline'],
+        [{ 'align': [] }],
+        ['link', 'image'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+      ]
+    }
+  });
+
+  fetchAuthors();
+  fetchNews();
+});
+
+// --- Author functions ---
 async function fetchAuthors(){
   const {data,error} = await supabase.from('authors').select('*').order('id');
   if(error) console.error(error);
@@ -162,7 +170,43 @@ function displayAuthors(){
     `).join('');
 }
 
-// News functions
+async function saveAuthor(){
+    const name=document.getElementById('authorName').value.trim();
+    const title=document.getElementById('authorTitle').value.trim();
+    const fileInput=document.getElementById('authorImageFile');
+    const editIndex=document.getElementById('editAuthorIndex').value;
+    const reader = new FileReader();
+    reader.onload = async function(e){
+        const imageData = e.target.result;
+        const obj={name,title,image:imageData};
+        if(editIndex===''){
+            await supabase.from('authors').insert([obj]);
+        } else {
+            const aId = authorsData[editIndex].id;
+            await supabase.from('authors').update(obj).eq('id',aId);
+        }
+        fetchAuthors();
+        clearAuthorForm();
+    };
+    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
+    else reader.onload({target:{result:null}});
+}
+
+function editAuthor(i){
+    const a=authorsData[i];
+    document.getElementById('editAuthorIndex').value=i;
+    document.getElementById('authorName').value=a.name;
+    document.getElementById('authorTitle').value=a.title;
+}
+
+async function removeAuthor(i){
+    if(confirm('Нийтлэлчийг устгах уу?')){
+        await supabase.from('authors').delete().eq('id',authorsData[i].id);
+        fetchAuthors();
+    }
+}
+
+// --- News functions ---
 async function fetchNews(){
   const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
   if(error) console.error(error);
@@ -197,14 +241,6 @@ function clearNewsForm(){
     document.getElementById('newsFeatured').checked=false;
 }
 
-function clearAuthorForm(){
-    document.getElementById('editAuthorIndex').value='';
-    document.getElementById('authorName').value='';
-    document.getElementById('authorTitle').value='';
-    document.getElementById('authorImageFile').value='';
-}
-
-// Save news
 async function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -258,47 +294,7 @@ async function removeNews(i){
         fetchNews();
     }
 }
-
-// Author functions
-async function saveAuthor(){
-    const name=document.getElementById('authorName').value.trim();
-    const title=document.getElementById('authorTitle').value.trim();
-    const fileInput=document.getElementById('authorImageFile');
-    const editIndex=document.getElementById('editAuthorIndex').value;
-    const reader = new FileReader();
-    reader.onload = async function(e){
-        const imageData = e.target.result;
-        const obj={name,title,image:imageData};
-        if(editIndex===''){
-            await supabase.from('authors').insert([obj]);
-        } else {
-            const aId = authorsData[editIndex].id;
-            await supabase.from('authors').update(obj).eq('id',aId);
-        }
-        fetchAuthors();
-        clearAuthorForm();
-    };
-    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-    else reader.onload({target:{result:null}});
-}
-
-function editAuthor(i){
-    const a=authorsData[i];
-    document.getElementById('editAuthorIndex').value=i;
-    document.getElementById('authorName').value=a.name;
-    document.getElementById('authorTitle').value=a.title;
-}
-
-async function removeAuthor(i){
-    if(confirm('Нийтлэлчийг устгах уу?')){
-        await supabase.from('authors').delete().eq('id',authorsData[i].id);
-        fetchAuthors();
-    }
-}
-
-// Initial load
-fetchAuthors();
-fetchNews();
 </script>
+
 </body>
 </html>

@@ -20,6 +20,7 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 .list-item{padding:8px;margin:5px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
 .list-item button{padding:4px 8px;font-size:12px;margin-left:5px;}
 .group-title{margin-top:20px;font-weight:bold;font-size:16px;color:#3d85c6;}
+#newsImagePreview{max-width:100%;margin:5px 0;border-radius:8px;filter:brightness(1) contrast(1) saturate(1);}
 @media(max-width:768px){.container{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -31,12 +32,13 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 
 <div class="container">
 
-  <!-- Мэдээ нэмэх / засах -->
+  <!-- Мэдээ нэмэх -->
   <div class="card">
     <h2>Мэдээ нэмэх / засах</h2>
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
     
+    <!-- Цэс сонгох -->
     <select id="newsCategory">
       <option value="">-- Цэс сонго --</option>
       <option value="Улс төр">Улс төр</option>
@@ -47,11 +49,20 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
     
+    <!-- Дэд цэс -->
     <select id="newsSubCategory">
       <option value="">-- Дэд цэс сонго --</option>
     </select>
     
     <input type="file" id="newsImageFile" accept="image/*">
+    <img id="newsImagePreview" src="">
+    
+    <!-- Image style controls -->
+    <label>Өнгө (brightness): <input type="range" id="imgBrightness" min="0" max="2" step="0.05" value="1"></label>
+    <label>Контраст: <input type="range" id="imgContrast" min="0" max="2" step="0.05" value="1"></label>
+    <label>Saturate: <input type="range" id="imgSaturate" min="0" max="2" step="0.05" value="1"></label>
+    <label>Border-radius (px): <input type="number" id="imgRadius" min="0" max="100" value="8"></label>
+    
     <textarea id="editor" placeholder="Мэдээний дэлгэрэнгүй агуулга..."></textarea>
     
     <select id="newsAuthor"></select>
@@ -85,86 +96,119 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 
 </div>
 
-<!-- CKEditor 5 Classic -->
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// Supabase тохиргоо
-const supabaseUrl = 'https://YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl='https://wpotnvekaoosdkvmhqgo.supabase.co';
+const supabaseKey='PUBLIC_ANON_KEY_HERE';
+const supabase=createClient(supabaseUrl,supabaseKey);
 
 let editor;
+ClassicEditor.create(document.querySelector('#editor')).then(ed=>editor=ed).catch(err=>console.error(err));
 
-// CKEditor
-ClassicEditor.create(document.querySelector('#editor'), {
-    toolbar: ['heading','bold','italic','underline','link','bulletedList','numberedList','blockQuote','undo','redo','alignment'],
-    alignment: { options: ['left','center','right','justify'] }
-}).then(ed=>editor=ed).catch(err=>console.error(err));
-
-// Дэд цэс
-const subCategories = {
-  "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
-  "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
-  "Соёл урлаг":["Ярилцлага","Сурвалжилга","Кино ертөнц","Утга зохиол","Соёл судлал"],
-  "Медиа":["Нэвтрүүлэг","Мэдээ","Сурвалжилга","MIC UP","Зураглал","Өртөөчөөс"],
-  "Дэлхий дахинд":["Улс төр","Танин мэдэхүй","Шинжлэх ухаан"],
-  "Ярилцлага":["Хөрөг ярилцлага","Улс төрийн ярилцлага"]
+const subCategories={
+"Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
+"Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
+"Соёл урлаг":["Ярилцлага","Сурвалжилга","Кино ертөнц","Утга зохиол","Соёл судлал"],
+"Медиа":["Нэвтрүүлэг","Мэдээ","Сурвалжилга","MIC UP","Зураглал","Өртөөчөөс"],
+"Дэлхий дахинд":["Улс төр","Танин мэдэхүй","Шинжлэх ухаан"],
+"Ярилцлага":["Хөрөг ярилцлага","Улс төрийн ярилцлага"]
 };
-document.getElementById('newsCategory').addEventListener('change', function(){
-    const subs = subCategories[this.value] || [];
-    const subSel = document.getElementById('newsSubCategory');
-    subSel.innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+document.getElementById('newsCategory').addEventListener('change',function(){
+const subs=subCategories[this.value]||[];
+document.getElementById('newsSubCategory').innerHTML=`<option value="">-- Дэд цэс сонго --</option>`+subs.map(s=>`<option value="${s}">${s}</option>`).join('');
 });
 
-// Author select
+// Image preview + live style
+const preview=document.getElementById('newsImagePreview');
+document.getElementById('newsImageFile').addEventListener('change',e=>{
+    const file=e.target.files[0];
+    if(file){
+        const reader=new FileReader();
+        reader.onload=()=>{preview.src=reader.result;}
+        reader.readAsDataURL(file);
+    } else preview.src='';
+});
+['imgBrightness','imgContrast','imgSaturate','imgRadius'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',updateImageStyle);
+});
+function updateImageStyle(){
+    const b=document.getElementById('imgBrightness').value;
+    const c=document.getElementById('imgContrast').value;
+    const s=document.getElementById('imgSaturate').value;
+    const r=document.getElementById('imgRadius').value;
+    preview.style.filter=`brightness(${b}) contrast(${c}) saturate(${s})`;
+    preview.style.borderRadius=r+'px';
+}
+
+// Load authors
 async function loadAuthors(){
-    let { data: authors, error } = await supabase.from('authors').select('*').order('id');
+    let { data:authors,error }=await supabase.from('authors').select('*').order('id');
     if(error){ console.error(error); authors=[]; }
-    const sel = document.getElementById('newsAuthor');
-    sel.innerHTML = authors.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
-    return authors;
+    document.getElementById('newsAuthor').innerHTML=authors.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
 }
 
-// Display authors list
+// Display authors
 async function displayAuthors(){
-    const { data: authors, error } = await supabase.from('authors').select('*').order('id');
-    const container = document.getElementById('authorList');
-    container.innerHTML = '';
-    if(authors.length===0){ container.innerHTML='<p>Одоогоор нийтлэлч байхгүй.</p>'; return; }
-    authors.forEach(a=>{
-        container.innerHTML += `<div class="list-item">
-            <span>${a.name} (${a.title})</span>
-            <div>
-                <button onclick="editAuthor(${a.id})">Засах</button>
-                <button onclick="removeAuthor(${a.id})">Устгах</button>
-            </div>
-        </div>`;
+    const authors=await supabase.from('authors').select('*').order('id');
+    const container=document.getElementById('authorList');
+    container.innerHTML='';
+    if(authors.data.length===0){ container.innerHTML='<p>Одоогоор нийтлэлч байхгүй.</p>'; return; }
+    authors.data.forEach(a=>{
+        container.innerHTML+=`<div class="list-item">
+        <span>${a.name} (${a.title})</span>
+        <div><button onclick="editAuthor(${a.id})">Засах</button><button onclick="removeAuthor(${a.id})">Устгах</button></div></div>`;
     });
 }
 
-// Display news list
+// Display news
 async function displayNews(){
-    const { data: news, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
-    const container = document.getElementById('newsList');
-    container.innerHTML = '';
+    const { data:news,error }=await supabase.from('news').select('*').order('created_at',{ascending:false});
+    const container=document.getElementById('newsList');
+    container.innerHTML='';
     if(news.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
-    const authorsData = await supabase.from('authors').select('*').order('id');
+    const authors=await supabase.from('authors').select('*').order('id');
     news.forEach(n=>{
-        const authorName = authorsData.data.find(a=>a.id===n.author_id)?.name || '';
-        container.innerHTML += `<div class="list-item">
-            <span>${n.title} | ${n.category} | ${n.subcategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
-            <div>
-                <button onclick="editNews(${n.id})">Засах</button>
-                <button onclick="removeNews(${n.id})">Устгах</button>
-            </div>
-        </div>`;
+        const authorName=authors.data.find(a=>a.id===n.author_id)?.name||'';
+        container.innerHTML+=`<div class="list-item"><span>${n.title} | ${n.category} | ${n.subcategory||''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+        <div><button onclick="editNews(${n.id})">Засах</button><button onclick="removeNews(${n.id})">Устгах</button></div></div>`;
     });
 }
 
-// Save news
+// Save news with logo + style
+async function resizeImage(file,maxW=800,maxH=600){
+    return new Promise(resolve=>{
+        const img=new Image();
+        img.onload=()=>{
+            let w=img.width,h=img.height;
+            if(w>maxW){h*=maxW/w; w=maxW;}
+            if(h>maxH){w*=maxH/h; h=maxH;}
+            const canvas=document.createElement('canvas');
+            canvas.width=w; canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            canvas.toBlob(blob=>resolve(new File([blob], file.name, {type:file.type})), file.type,0.9);
+        };
+        img.src=URL.createObjectURL(file);
+    });
+}
+async function addLogo(file,logoUrl){
+    return new Promise(resolve=>{
+        const baseImg=new Image();
+        const logoImg=new Image();
+        baseImg.onload=()=>{logoImg.onload=()=>{
+            const canvas=document.createElement('canvas');
+            canvas.width=baseImg.width; canvas.height=baseImg.height;
+            const ctx=canvas.getContext('2d');
+            ctx.drawImage(baseImg,0,0);
+            const logoW=baseImg.width*0.15;
+            const logoH=logoImg.height*(logoW/logoImg.width);
+            ctx.drawImage(logoImg, baseImg.width-logoW-10, baseImg.height-logoH-10, logoW, logoH);
+            canvas.toBlob(blob=>resolve(new File([blob], file.name,{type:file.type})),file.type,0.9);
+        };logoImg.src=logoUrl;};
+        baseImg.src=URL.createObjectURL(file);
+    });
+}
 async function saveNews(){
     const title=document.getElementById('newsTitle').value.trim();
     const category=document.getElementById('newsCategory').value.trim();
@@ -176,27 +220,28 @@ async function saveNews(){
     const fileInput=document.getElementById('newsImageFile');
     let image_url=null;
     if(fileInput.files[0]){
-        const file=fileInput.files[0];
-        const { data, error } = await supabase.storage.from('news-images').upload(`news/${Date.now()}_${file.name}`, file);
+        let file=await resizeImage(fileInput.files[0]);
+        file=await addLogo(file,'/logo.png'); // өөрийн logo зам
+        const { data,error }=await supabase.storage.from('news-images').upload(`news/${Date.now()}_${file.name}`,file);
         if(error) console.error(error);
         else image_url=`${supabaseUrl}/storage/v1/object/public/news-images/${data.path}`;
     }
 
-    const payload={ title, category, subcategory, author_id, featured, image:image_url, content:editor.getData() };
-    if(editIndex===''){ await supabase.from('news').insert([payload]); }
-    else{ await supabase.from('news').update(payload).eq('id',parseInt(editIndex)); }
+    const payload={title,category,subcategory,author_id,featured,image:image_url};
+    if(editIndex===''){await supabase.from('news').insert([payload]);}
+    else{await supabase.from('news').update(payload).eq('id',parseInt(editIndex));}
 
-    clearNewsForm();
-    displayNews();
+    clearNewsForm(); displayNews();
 }
 
-// Clear news form
+// Clear news
 function clearNewsForm(){
     document.getElementById('editIndex').value='';
     document.getElementById('newsTitle').value='';
     document.getElementById('newsCategory').value='';
     document.getElementById('newsSubCategory').innerHTML=`<option value="">-- Дэд цэс сонго --</option>`;
     document.getElementById('newsImageFile').value='';
+    preview.src=''; preview.style.filter='brightness(1) contrast(1) saturate(1)'; preview.style.borderRadius='8px';
     editor.setData('');
     document.getElementById('newsFeatured').checked=false;
 }
@@ -209,32 +254,20 @@ async function saveAuthor(){
     let image_url=null;
     if(fileInput.files[0]){
         const file=fileInput.files[0];
-        const { data, error } = await supabase.storage.from('author-images').upload(`authors/${Date.now()}_${file.name}`, file);
+        const { data,error }=await supabase.storage.from('author-images').upload(`authors/${Date.now()}_${file.name}`,file);
         if(error) console.error(error);
         else image_url=`${supabaseUrl}/storage/v1/object/public/author-images/${data.path}`;
     }
     const editIndex=document.getElementById('editAuthorIndex').value;
-    const payload={ name, title, image:image_url };
-    if(editIndex===''){ await supabase.from('authors').insert([payload]); }
-    else{ await supabase.from('authors').update(payload).eq('id',parseInt(editIndex)); }
-    clearAuthorForm();
-    displayAuthors();
-    loadAuthors();
+    const payload={name,title,image:image_url};
+    if(editIndex===''){await supabase.from('authors').insert([payload]);}
+    else{await supabase.from('authors').update(payload).eq('id',parseInt(editIndex));}
+    clearAuthorForm(); displayAuthors(); loadAuthors();
 }
-
-// Clear author form
-function clearAuthorForm(){
-    document.getElementById('editAuthorIndex').value='';
-    document.getElementById('authorName').value='';
-    document.getElementById('authorTitle').value='';
-    document.getElementById('authorImageFile').value='';
-}
+function clearAuthorForm(){document.getElementById('editAuthorIndex').value='';document.getElementById('authorName').value='';document.getElementById('authorTitle').value='';document.getElementById('authorImageFile').value='';}
 
 // Initial load
-loadAuthors();
-displayAuthors();
-displayNews();
+loadAuthors(); displayAuthors(); displayNews();
 </script>
-
 </body>
 </html>

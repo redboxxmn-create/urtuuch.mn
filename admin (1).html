@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Админ Панел</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <style>
 body{font-family:'Ubuntu',sans-serif;background:#f4f6f8;margin:0;padding:0;}
 header{background:#3d85c6;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.15);}
-header h1{margin:0;}
+header h1{font-size:22px;margin:0;}
 .container{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 .card{background:#fff;padding:15px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);transition:transform 0.2s;}
 .card:hover{transform:translateY(-3px);box-shadow:0 6px 25px rgba(0,0,0,0.15);}
@@ -21,7 +21,10 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 .list-item{padding:8px;margin:5px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
 .list-item button{padding:4px 8px;font-size:12px;margin-left:5px;}
 .group-title{margin-top:20px;font-weight:bold;font-size:16px;color:#3d85c6;}
-#editor{height:150px;}
+#editor-container{height:200px;background:#fff;}
+#modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;}
+#modalContent{background:#fff;padding:20px;border-radius:12px;max-width:800px;width:90%;max-height:90%;overflow:auto;position:relative;}
+#modalClose{position:absolute;top:10px;right:10px;cursor:pointer;background:#3d85c6;color:#fff;border:none;padding:5px 10px;border-radius:6px;}
 @media(max-width:768px){.container{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -52,14 +55,14 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
     <select id="newsSubCategory">
       <option value="">-- Дэд цэс сонго --</option>
     </select>
-    
-    <input type="file" id="newsImageFile" accept="image/*">
-    <div id="editor"></div>
 
+    <input type="file" id="newsImageFile" accept="image/*">
+    <div id="editor-container"></div>
     <select id="newsAuthor"></select>
     <label><input type="checkbox" id="newsFeatured"> Онцлох мэдээ</label>
     <button onclick="saveNews()">Хадгалах</button>
     <button onclick="clearNewsForm()">Цэвэрлэх</button>
+    <input type="text" id="searchInput" placeholder="Хайх...">
   </div>
 
   <!-- Нийтлэлч нэмэх -->
@@ -77,6 +80,7 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
   <div class="card" style="grid-column: span 2;">
     <h2>Мэдээ жагсаалт</h2>
     <div id="newsList"></div>
+    <div id="pagination"></div>
   </div>
 
   <!-- Нийтлэлчид жагсаалт -->
@@ -87,24 +91,30 @@ input:focus, select:focus{border-color:#3d85c6;outline:none;box-shadow:0 0 5px r
 
 </div>
 
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<!-- Modal -->
+<div id="modal">
+  <div id="modalContent">
+    <button id="modalClose">X</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 🔹 Supabase холболт
 const supabase = createClient(
-  'https://YOUR_SUPABASE_URL',
+  'YOUR_SUPABASE_URL',
   'YOUR_PUBLIC_ANON_KEY'
 );
 
 let authorsData = [];
 let newsData = [];
-let editor;
+let quill;
+let currentPage = 1;
+const newsPerPage = 10;
 
-// 🔹 Quill редактор
-editor = new Quill('#editor', { theme: 'snow', placeholder: 'Мэдээний дэлгэрэнгүй агуулга...' });
-
-// 🔹 Дэд цэс
+// Дэд цэс
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
@@ -113,163 +123,231 @@ const subCategories = {
   "Дэлхий дахинд":["Улс төр","Танин мэдэхүй","Шинжлэх ухаан"],
   "Ярилцлага":["Хөрөг ярилцлага","Улс төрийн ярилцлага"]
 };
-document.getElementById('newsCategory').addEventListener('change', function(){
-    const subs = subCategories[this.value] || [];
-    document.getElementById('newsSubCategory').innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+
+// Quill initialize
+document.addEventListener('DOMContentLoaded', async()=>{
+  quill = new Quill('#editor-container',{
+    theme:'snow',
+    placeholder:'Мэдээний дэлгэрэнгүй агуулга...',
+    modules:{toolbar:[[{ 'header':[1,2,false] }], ['bold','italic','underline'], [{ 'align':[] }], ['link','image'], [{ 'list':'ordered'}, { 'list':'bullet'}]]}
+  });
+  await fetchAuthors();
+  await fetchNews();
 });
 
-// 🔹 Slug үүсгэх
-function generateSlug(title){
-    return title.toLowerCase().replace(/ /g,'-').replace(/[^\w-]+/g,'').replace(/--+/g,'-').replace(/^-+|-+$/g,'');
-}
+// Category change -> subCategory update
+document.getElementById('newsCategory').addEventListener('change', function(){
+  const subs = subCategories[this.value] || [];
+  document.getElementById('newsSubCategory').innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+});
 
-// 🔹 Author functions
+// --- Author functions ---
 async function fetchAuthors(){
   const {data,error} = await supabase.from('authors').select('*').order('id');
-  if(error) console.error(error);
+  if(error){console.error(error); return;}
   authorsData = data || [];
   populateAuthorSelect();
   displayAuthors();
 }
 
 function populateAuthorSelect(){
-    const sel = document.getElementById('newsAuthor');
-    sel.innerHTML = authorsData.map((a,i)=>`<option value="${i}">${a.name}</option>`).join('');
+  const sel=document.getElementById('newsAuthor');
+  sel.innerHTML = authorsData.map((a,i)=>`<option value="${i}">${a.name}</option>`).join('');
 }
 
 function displayAuthors(){
-    const container = document.getElementById('authorList');
-    container.innerHTML = authorsData.map((a,i)=>`
-        <div class="list-item">
-            <span>${a.name} (${a.title})</span>
-            <div>
-                <button onclick="editAuthor(${i})">Засах</button>
-                <button onclick="removeAuthor(${i})">Устгах</button>
-            </div>
-        </div>
-    `).join('');
+  const container = document.getElementById('authorList');
+  container.innerHTML = authorsData.map((a,i)=>`
+    <div class="list-item">
+      <span>${a.name} (${a.title})</span>
+      <div>
+        <button onclick="editAuthor(${i})">Засах</button>
+        <button onclick="removeAuthor(${i})">Устгах</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-// 🔹 News functions
+async function saveAuthor(){
+  const name=document.getElementById('authorName').value.trim();
+  const title=document.getElementById('authorTitle').value.trim();
+  const file=document.getElementById('authorImageFile').files[0];
+  const editIndex=document.getElementById('editAuthorIndex').value;
+
+  let image=null;
+  if(file){
+    const reader=new FileReader();
+    reader.onload=async(e)=>{
+      image=e.target.result;
+      await upsertAuthor(name,title,image,editIndex);
+    }
+    reader.readAsDataURL(file);
+  }else{
+    await upsertAuthor(name,title,null,editIndex);
+  }
+}
+
+async function upsertAuthor(name,title,image,editIndex){
+  const obj={name,title,image};
+  if(editIndex===''){
+    await supabase.from('authors').insert([obj]);
+  }else{
+    const id=authorsData[editIndex].id;
+    await supabase.from('authors').update(obj).eq('id',id);
+  }
+  await fetchAuthors();
+  clearAuthorForm();
+}
+
+function editAuthor(i){
+  const a=authorsData[i];
+  document.getElementById('editAuthorIndex').value=i;
+  document.getElementById('authorName').value=a.name;
+  document.getElementById('authorTitle').value=a.title;
+}
+
+async function removeAuthor(i){
+  if(confirm('Нийтлэлчийг устгах уу?')){
+    await supabase.from('authors').delete().eq('id',authorsData[i].id);
+    await fetchAuthors();
+  }
+}
+
+function clearAuthorForm(){
+  document.getElementById('editAuthorIndex').value='';
+  document.getElementById('authorName').value='';
+  document.getElementById('authorTitle').value='';
+  document.getElementById('authorImageFile').value='';
+}
+
+// --- News functions ---
 async function fetchNews(){
   const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
-  if(error) console.error(error);
+  if(error){console.error(error); return;}
   newsData = data || [];
   displayNews();
 }
 
 function displayNews(){
-    const container = document.getElementById('newsList');
-    if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
-    container.innerHTML='';
-    newsData.forEach((n,i)=>{
-        let authorName = authorsData.find(a=>a.id===n.author_id)?.name || '';
-        container.innerHTML += `<div class="list-item">
-            <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
-            <div>
-                <button onclick="editNews(${i})">Засах</button>
-                <button onclick="removeNews(${i})">Устгах</button>
-            </div>
-        </div>`;
-    });
+  const searchTerm=document.getElementById('searchInput').value.toLowerCase();
+  let filtered = newsData;
+  if(searchTerm) filtered = newsData.filter(n=>n.title.toLowerCase().includes(searchTerm)|| n.category.toLowerCase().includes(searchTerm));
+
+  const totalPages = Math.ceil(filtered.length/newsPerPage);
+  if(currentPage>totalPages) currentPage=totalPages||1;
+
+  const start=(currentPage-1)*newsPerPage;
+  const end=start+newsPerPage;
+  const paginated = filtered.slice(start,end);
+
+  const container=document.getElementById('newsList');
+  container.innerHTML='';
+
+  paginated.forEach((n,i)=>{
+    const authorName=authorsData[n.authorIndex]?.name || '';
+    container.innerHTML+=`<div class="list-item">
+      <span>${n.title} | ${n.category} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+      <div>
+        <button onclick="editNews(${n.id})">Засах</button>
+        <button onclick="removeNews(${n.id})">Устгах</button>
+        <button onclick="viewNewsModal(${n.id})">Дэлгэрэнгүй</button>
+      </div>
+    </div>`;
+  });
+
+  const paginationContainer=document.getElementById('pagination');
+  paginationContainer.innerHTML='';
+  for(let i=1;i<=totalPages;i++){
+    const btn=document.createElement('button');
+    btn.innerText=i;
+    btn.onclick=()=>{currentPage=i;displayNews();}
+    if(i===currentPage) btn.style.background='#6fa8dc';
+    paginationContainer.appendChild(btn);
+  }
+}
+
+// Search
+document.getElementById('searchInput').addEventListener('input',()=>{currentPage=1;displayNews();});
+
+async function saveNews(){
+  const title=document.getElementById('newsTitle').value.trim();
+  const category=document.getElementById('newsCategory').value.trim();
+  const subCategory=document.getElementById('newsSubCategory').value.trim();
+  const authorIndex=parseInt(document.getElementById('newsAuthor').value);
+  const featured=document.getElementById('newsFeatured').checked;
+  const editIndex=document.getElementById('editIndex').value;
+  const file=document.getElementById('newsImageFile').files[0];
+  const description=quill.root.innerHTML;
+
+  if(!title || !category) return alert('Гарчиг болон ангилал шаардлагатай!');
+
+  let image=null;
+  if(file){
+    const reader=new FileReader();
+    reader.onload=async(e)=>{
+      image=e.target.result;
+      await upsertNews(title,category,subCategory,authorIndex,featured,description,image,editIndex);
+    }
+    reader.readAsDataURL(file);
+  }else{
+    await upsertNews(title,category,subCategory,authorIndex,featured,description,null,editIndex);
+  }
+}
+
+async function upsertNews(title,category,subCategory,authorIndex,featured,description,image,editIndex){
+  const obj={title,category,subCategory,authorIndex,featured,description,image,created_at:new Date().toISOString()};
+  if(editIndex===''){
+    await supabase.from('news').insert([obj]);
+  }else{
+    const id=editIndex;
+    await supabase.from('news').update(obj).eq('id',id);
+  }
+  await fetchNews();
+  clearNewsForm();
+}
+
+function editNews(id){
+  const n=newsData.find(x=>x.id===id);
+  if(!n) return;
+  document.getElementById('editIndex').value=id;
+  document.getElementById('newsTitle').value=n.title;
+  document.getElementById('newsCategory').value=n.category;
+  document.getElementById('newsSubCategory').value=n.subCategory;
+  document.getElementById('newsAuthor').value=n.authorIndex;
+  document.getElementById('newsFeatured').checked=n.featured;
+  quill.root.innerHTML=n.description;
+}
+
+async function removeNews(id){
+  if(confirm('Мэдээг устгах уу?')){
+    await supabase.from('news').delete().eq('id',id);
+    await fetchNews();
+  }
 }
 
 function clearNewsForm(){
-    document.getElementById('editIndex').value='';
-    document.getElementById('newsTitle').value='';
-    document.getElementById('newsCategory').value='';
-    document.getElementById('newsSubCategory').innerHTML=`<option value="">-- Дэд цэс сонго --</option>`;
-    document.getElementById('newsImageFile').value='';
-    editor.setContents([]);
-    if(authorsData.length>0) document.getElementById('newsAuthor').value=0;
-    document.getElementById('newsFeatured').checked=false;
+  document.getElementById('editIndex').value='';
+  document.getElementById('newsTitle').value='';
+  document.getElementById('newsCategory').value='';
+  document.getElementById('newsSubCategory').innerHTML=`<option value="">-- Дэд цэс сонго --</option>`;
+  document.getElementById('newsImageFile').value='';
+  quill.setContents([]);
+  if(authorsData.length>0) document.getElementById('newsAuthor').value=0;
+  document.getElementById('newsFeatured').checked=false;
 }
 
-async function saveNews(){
-    const title=document.getElementById('newsTitle').value.trim();
-    const category=document.getElementById('newsCategory').value.trim();
-    const subCategory=document.getElementById('newsSubCategory').value.trim();
-    const authorIndex=parseInt(document.getElementById('newsAuthor').value);
-    const featured=document.getElementById('newsFeatured').checked;
-    const editIndex=document.getElementById('editIndex').value;
+// --- Modal ---
+const modal=document.getElementById('modal');
+const modalBody=document.getElementById('modalBody');
+document.getElementById('modalClose').addEventListener('click',()=>{modal.style.display='none';});
 
-    const slug = generateSlug(title);
-    const fileInput = document.getElementById('newsImageFile');
-    const reader = new FileReader();
-    reader.onload = async function(e){
-        const imageData = e.target.result;
-        const newsObj = {
-            title, slug, category, subCategory, image:imageData,
-            description: editor.root.innerHTML,
-            author_id: authorsData[authorIndex]?.id || null,
-            featured,
-            created_at:new Date().toISOString()
-        };
-        if(editIndex===''){ await supabase.from('news').insert([newsObj]); }
-        else{ const nId = newsData[editIndex].id; await supabase.from('news').update(newsObj).eq('id',nId); }
-        fetchNews();
-        clearNewsForm();
-    };
-    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-    else reader.onload({target:{result:null}});
+function viewNewsModal(id){
+  const n=newsData.find(x=>x.id===id);
+  if(!n) return;
+  const authorName=authorsData[n.authorIndex]?.name || '';
+  modalBody.innerHTML=`<h2>${n.title}</h2><p>${n.category} | ${authorName} ${n.featured?'| Онцлох':''}</p><div>${n.description}</div>${n.image?`<img src="${n.image}" style="max-width:100%;">`:''}`;
+  modal.style.display='flex';
 }
-
-function editNews(i){
-    const n=newsData[i];
-    document.getElementById('editIndex').value=i;
-    document.getElementById('newsTitle').value=n.title;
-    document.getElementById('newsCategory').value=n.category;
-    document.getElementById('newsSubCategory').value=n.subCategory;
-    document.getElementById('newsFeatured').checked=n.featured;
-    populateAuthorSelect();
-    const authorIndex = authorsData.findIndex(a=>a.id===n.author_id);
-    if(authorIndex>=0) document.getElementById('newsAuthor').value=authorIndex;
-    editor.root.innerHTML=n.description || '';
-}
-
-async function removeNews(i){
-    if(confirm('Мэдээг устгах уу?')){
-        await supabase.from('news').delete().eq('id',newsData[i].id);
-        fetchNews();
-    }
-}
-
-// Author functions
-async function saveAuthor(){
-    const name=document.getElementById('authorName').value.trim();
-    const title=document.getElementById('authorTitle').value.trim();
-    const fileInput=document.getElementById('authorImageFile');
-    const editIndex=document.getElementById('editAuthorIndex').value;
-    const reader = new FileReader();
-    reader.onload = async function(e){
-        const imageData = e.target.result;
-        const obj={name,title,image:imageData};
-        if(editIndex===''){ await supabase.from('authors').insert([obj]); }
-        else{ const aId = authorsData[editIndex].id; await supabase.from('authors').update(obj).eq('id',aId); }
-        fetchAuthors();
-        clearAuthorForm();
-    };
-    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-    else reader.onload({target:{result:null}});
-}
-
-function editAuthor(i){
-    const a=authorsData[i];
-    document.getElementById('editAuthorIndex').value=i;
-    document.getElementById('authorName').value=a.name;
-    document.getElementById('authorTitle').value=a.title;
-}
-
-async function removeAuthor(i){
-    if(confirm('Нийтлэлчийг устгах уу?')){
-        await supabase.from('authors').delete().eq('id',authorsData[i].id);
-        fetchAuthors();
-    }
-}
-
-// Initial load
-fetchAuthors();
-fetchNews();
 </script>
 </body>
 </html>

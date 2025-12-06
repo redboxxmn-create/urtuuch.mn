@@ -11,7 +11,7 @@ header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 
 header h1{margin:0; font-size:24px;}
 .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
 nav {background:#3d85c6; display:flex; padding:10px;}
-nav ul {list-style:none; margin:0; padding:0; display:flex;}
+nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
 nav ul li {position:relative; margin-right:20px;}
 nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px;}
 nav ul li:hover > a {background:#6fa8dc;}
@@ -32,6 +32,8 @@ nav ul li ul li a:hover {background:#3d85c6;}
 .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
 .card:hover .card-desc-preview{display:block;}
 .featured-card{grid-column: span 2; font-size:18px; box-shadow:0 6px 20px rgba(0,0,0,0.2); border:2px solid #6fa8dc;}
+.video-card{grid-column: span 2; padding:0; margin:20px;}
+.video-card iframe{width:100%; height:400px; border:none; border-radius:12px;}
 .authors-container {display:flex; gap:15px; padding:10px; justify-content:center; flex-wrap:wrap;}
 .author-card {width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
 .author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
@@ -40,7 +42,7 @@ nav ul li ul li a:hover {background:#3d85c6;}
 .pagination{display:flex; justify-content:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
 .pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
 .pagination button:hover{background:#3d85c6;}
-@media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
+@media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;} nav ul li ul{position:static;}}
 .contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
 #newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
 #newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
@@ -49,12 +51,67 @@ nav ul li ul li a:hover {background:#3d85c6;}
 </style>
 </head>
 <body>
+
 <header>
 <h1>urtuuch.mn</h1>
 <div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
+<nav>
+  <ul>
+    <li><a href="#">Улс төр</a>
+      <ul>
+        <li><a href="#">Тойм</a></li>
+        <li><a href="#">Нийтлэл</a></li>
+        <li><a href="#">Сурвалжилга</a></li>
+        <li><a href="#">Өртөөчийн үг</a></li>
+        <li><a href="#">Хов болох вий</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Эдийн засаг</a>
+      <ul>
+        <li><a href="#">Уул уурхай</a></li>
+        <li><a href="#">Дэд бүтэц</a></li>
+        <li><a href="#">Монголд үйлдвэрлэв</a></li>
+        <li><a href="#">Зар сурталчилгаа</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Соёл урлаг</a>
+      <ul>
+        <li><a href="#">Ярилцлага</a></li>
+        <li><a href="#">Сурвалжилга</a></li>
+        <li><a href="#">Кино ертөнц</a></li>
+        <li><a href="#">Утга зохиол</a></li>
+        <li><a href="#">Соёл судлал</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Медиа</a>
+      <ul>
+        <li><a href="#">Нэвтрүүлэг</a></li>
+        <li><a href="#">Мэдээ</a></li>
+        <li><a href="#">Сурвалжилга</a></li>
+        <li><a href="#">MIC UP</a></li>
+        <li><a href="#">Зураглал</a></li>
+        <li><a href="#">Өртөөчөөс</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Дэлхий дахинд</a>
+      <ul>
+        <li><a href="#">Улс төр</a></li>
+        <li><a href="#">Танин мэдэхүй</a></li>
+        <li><a href="#">Шинжлэх ухаан</a></li>
+      </ul>
+    </li>
+    <li><a href="#">Ярилцлага</a>
+      <ul>
+        <li><a href="#">Хөрөг ярилцлага</a></li>
+        <li><a href="#">Улс төрийн ярилцлага</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 </header>
 
 <div class="grid" id="newsContainer"></div>
+<div class="video-card" id="videoContainer"></div>
 <div class="authors-container" id="authorsContainer"></div>
 <div class="pagination" id="pagination"></div>
 
@@ -78,58 +135,57 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// ✅ Supabase client
 const supabase = createClient(
-  'https://gltuxtagujshtipylagd.supabase.co', // өөрийн Supabase URL
-  'PUBLIC_ANON_KEY_HERE' // өөрийн Supabase public anon key
+  'https://gltuxtagujshtipylagd.supabase.co',
+  'PUBLIC_ANON_KEY_HERE'
 )
 
-const NEWS_PER_PAGE = 10
-let currentPage = 1
+const NEWS_PER_PAGE = 18;
+let currentPage = 1;
 
 function el(id){ return document.getElementById(id); }
 
 // Load authors
 async function getAuthors(){
-  const {data,error} = await supabase.from('authors').select('*').order('id')
-  if(error) console.error(error)
-  return data || []
+  const {data,error} = await supabase.from('authors').select('*').order('id');
+  if(error) console.error(error);
+  return data || [];
 }
 
 // Load news
 async function getNews(){
-  const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false})
-  if(error) console.error(error)
-  return data || []
+  const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
+  if(error) console.error(error);
+  return data || [];
 }
 
 // Display authors
 async function displayAuthors(){
-  const authors = await getAuthors()
-  const container = el('authorsContainer')
+  const authors = await getAuthors();
+  const container = el('authorsContainer');
   container.innerHTML = authors.map(a=>`
     <div class="author-card">
       <img src="${a.image}">
       <div class="author-name">${a.name}</div>
       <div class="author-title">${a.title}</div>
     </div>
-  `).join('')
+  `).join('');
 }
 
 // Display news
 async function displayNews(filteredNews=null){
-  const container = el('newsContainer')
-  const allNews = filteredNews || await getNews()
+  const container = el('newsContainer');
+  const allNews = filteredNews || await getNews();
   
-  const totalPages = Math.ceil(allNews.length / NEWS_PER_PAGE)
-  if(currentPage>totalPages) currentPage = totalPages || 1
-  const start = (currentPage-1)*NEWS_PER_PAGE
-  const pageNews = allNews.slice(start,start+NEWS_PER_PAGE)
+  const totalPages = Math.ceil(allNews.length / NEWS_PER_PAGE);
+  if(currentPage>totalPages) currentPage = totalPages || 1;
+  const start = (currentPage-1)*NEWS_PER_PAGE;
+  const pageNews = allNews.slice(start,start+NEWS_PER_PAGE);
 
-  container.innerHTML=""
+  container.innerHTML="";
   pageNews.forEach(n=>{
-    const div = document.createElement('div')
-    div.className = n.featured?"card featured-card":"card"
+    const div = document.createElement('div');
+    div.className = n.featured?"card featured-card":"card";
     div.innerHTML = `
       ${n.image?`<img src="${n.image}">`:''}
       <div class="card-content">
@@ -138,63 +194,63 @@ async function displayNews(filteredNews=null){
         <div class="card-author">${n.author_id?`ID: ${n.author_id}`:''}</div>
         <div class="card-desc-preview">${n.description || ''}</div>
       </div>
-    `
+    `;
     div.addEventListener('click', ()=>{
-      el('modalTitle').innerText=n.title
-      el('modalMeta').innerText=`${n.category} ${n.featured?'| Онцлох':''}`
-      el('modalImage').src=n.image||''
-      el('modalContent').innerHTML=n.description||''
-      el('newsModal').style.display='flex'
-    })
-    container.appendChild(div)
-  })
+      el('modalTitle').innerText=n.title;
+      el('modalMeta').innerText=`${n.category} ${n.featured?'| Онцлох':''}`;
+      el('modalImage').src=n.image||'';
+      el('modalContent').innerHTML=n.description||'';
+      el('newsModal').style.display='flex';
+    });
+    container.appendChild(div);
+  });
 
-  renderPagination(allNews.length)
-  displayAuthors()
+  renderPagination(allNews.length);
+  displayAuthors();
 }
 
 // Pagination
 function renderPagination(totalItems){
-  const container = el('pagination')
-  const totalPages = Math.ceil(totalItems/NEWS_PER_PAGE)
-  container.innerHTML=''
-  if(totalPages<=1) return
+  const container = el('pagination');
+  const totalPages = Math.ceil(totalItems/NEWS_PER_PAGE);
+  container.innerHTML='';
+  if(totalPages<=1) return;
   if(currentPage>1){
-    const prev=document.createElement('button')
-    prev.innerText='Өмнөх'
-    prev.onclick=()=>{currentPage--; displayNews();}
-    container.appendChild(prev)
+    const prev=document.createElement('button');
+    prev.innerText='Өмнөх';
+    prev.onclick=()=>{currentPage--; displayNews();};
+    container.appendChild(prev);
   }
   for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement('button')
-    btn.innerText=i
-    if(i===currentPage) btn.style.background="#3d85c6"
-    btn.onclick=()=>{currentPage=i; displayNews();}
-    container.appendChild(btn)
+    const btn=document.createElement('button');
+    btn.innerText=i;
+    if(i===currentPage) btn.style.background="#3d85c6";
+    btn.onclick=()=>{currentPage=i; displayNews();};
+    container.appendChild(btn);
   }
   if(currentPage<totalPages){
-    const next=document.createElement('button')
-    next.innerText='Дараах'
-    next.onclick=()=>{currentPage++; displayNews();}
-    container.appendChild(next)
+    const next=document.createElement('button');
+    next.innerText='Дараах';
+    next.onclick=()=>{currentPage++; displayNews();};
+    container.appendChild(next);
   }
 }
 
 // Search
 el('searchInput').addEventListener('input', async()=>{
-  const keyword = el('searchInput').value.toLowerCase()
-  const allNews = await getNews()
-  const filtered = allNews.filter(n=>n.title.toLowerCase().includes(keyword))
-  currentPage = 1
-  displayNews(filtered)
-})
+  const keyword = el('searchInput').value.toLowerCase();
+  const allNews = await getNews();
+  const filtered = allNews.filter(n=>n.title.toLowerCase().includes(keyword));
+  currentPage = 1;
+  displayNews(filtered);
+});
 
 // Modal close
-el('newsModalClose').onclick=()=>{el('newsModal').style.display='none'}
-el('newsModal').onclick=(e)=>{if(e.target.id==='newsModal') el('newsModal').style.display='none'}
+el('newsModalClose').onclick=()=>{el('newsModal').style.display='none';}
+el('newsModal').onclick=(e)=>{if(e.target.id==='newsModal') el('newsModal').style.display='none';}
 
 // Initial load
-displayNews()
+displayNews();
 </script>
 </body>
 </html>

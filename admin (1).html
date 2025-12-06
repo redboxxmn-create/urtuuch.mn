@@ -31,11 +31,12 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 
 <div class="container">
 
-  <!-- Мэдээ нэмэх / засах -->
+  <!-- Мэдээ нэмэх -->
   <div class="card">
     <h2>Мэдээ нэмэх / засах</h2>
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
+    
     <select id="newsCategory">
       <option value="">-- Цэс сонго --</option>
       <option value="Улс төр">Улс төр</option>
@@ -45,16 +46,23 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
       <option value="Дэлхий дахинд">Дэлхий дахинд</option>
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
-    <select id="newsSubCategory"><option value="">-- Дэд цэс сонго --</option></select>
+    
+    <select id="newsSubCategory">
+      <option value="">-- Дэд цэс сонго --</option>
+    </select>
+    
     <input type="file" id="newsImageFile" accept="image/*">
+    
+    <!-- CKEditor-тэй текст оролт -->
     <textarea id="editor" placeholder="Мэдээний дэлгэрэнгүй агуулга..."></textarea>
+    
     <select id="newsAuthor"></select>
     <label><input type="checkbox" id="newsFeatured"> Онцлох мэдээ</label>
     <button onclick="saveNews()">Хадгалах</button>
     <button onclick="clearNewsForm()">Цэвэрлэх</button>
   </div>
 
-  <!-- Нийтлэлч нэмэх / засах -->
+  <!-- Нийтлэлч нэмэх -->
   <div class="card">
     <h2>Нийтлэлч нэмэх / засах</h2>
     <input type="hidden" id="editAuthorIndex">
@@ -83,17 +91,17 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://YOUR_SUPABASE_URL';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  'https://YOUR_SUPABASE_URL',
+  'YOUR_PUBLIC_ANON_KEY'
+);
 
+let authorsData = [];
+let newsData = [];
 let editor;
-ClassicEditor.create(document.querySelector('#editor'), {
-    toolbar: ['heading','bold','italic','underline','link','bulletedList','numberedList','blockQuote','insertTable','undo','redo','alignment','imageUpload'],
-    alignment: { options: ['left','center','right','justify'] }
-}).then(ed=>editor=ed).catch(err=>console.error(err));
 
-// Дэд цэс
+ClassicEditor.create(document.querySelector('#editor')).then(ed=>editor=ed).catch(err=>console.error(err));
+
 const subCategories = {
   "Улс төр":["Тойм","Нийтлэл","Сурвалжилга","Өртөөчийн үг","Хов болох вий"],
   "Эдийн засаг":["Уул уурхай","Дэд бүтэц","Монголд үйлдвэрлэв","Зар сурталчилгаа"],
@@ -102,66 +110,70 @@ const subCategories = {
   "Дэлхий дахинд":["Улс төр","Танин мэдэхүй","Шинжлэх ухаан"],
   "Ярилцлага":["Хөрөг ярилцлага","Улс төрийн ярилцлага"]
 };
+
 document.getElementById('newsCategory').addEventListener('change', function(){
     const subs = subCategories[this.value] || [];
-    const subSel = document.getElementById('newsSubCategory');
-    subSel.innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    document.getElementById('newsSubCategory').innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
 });
 
-// Author select
-async function loadAuthors(){
-    let { data: authors, error } = await supabase.from('authors').select('*').order('id');
-    if(error){ console.error(error); authors=[]; }
-    const sel = document.getElementById('newsAuthor');
-    sel.innerHTML = authors.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
-    return authors;
+// 🔹 Slug үүсгэх
+function generateSlug(title){
+    return title.toLowerCase()
+                .replace(/ /g,'-')
+                .replace(/[^\w-]+/g,'')
+                .replace(/--+/g,'-')
+                .replace(/^-+|-+$/g,'');
 }
 
-// News list
-async function displayNews(){
-    const { data: news, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
-    const container = document.getElementById('newsList');
-    container.innerHTML = '';
-    if(news.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
-    const authors = await supabase.from('authors').select('*').order('id');
-    news.forEach(n=>{
-        const authorName = authors.data.find(a=>a.id===n.author_id)?.name || '';
-        container.innerHTML += `<div class="list-item">
-            <span>${n.title} | ${n.category} | ${n.subcategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+// 🔹 Author functions
+async function fetchAuthors(){
+  const {data,error} = await supabase.from('authors').select('*').order('id');
+  if(error) console.error(error);
+  authorsData = data || [];
+  populateAuthorSelect();
+  displayAuthors();
+}
+
+function populateAuthorSelect(){
+    const sel = document.getElementById('newsAuthor');
+    sel.innerHTML = authorsData.map((a,i)=>`<option value="${i}">${a.name}</option>`).join('');
+}
+
+function displayAuthors(){
+    const container = document.getElementById('authorList');
+    container.innerHTML = authorsData.map((a,i)=>`
+        <div class="list-item">
+            <span>${a.name} (${a.title})</span>
             <div>
-                <button onclick="editNews(${n.id})">Засах</button>
-                <button onclick="removeNews(${n.id})">Устгах</button>
+                <button onclick="editAuthor(${i})">Засах</button>
+                <button onclick="removeAuthor(${i})">Устгах</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 🔹 News functions
+async function fetchNews(){
+  const {data,error} = await supabase.from('news').select('*').order('created_at',{ascending:false});
+  if(error) console.error(error);
+  newsData = data || [];
+  displayNews();
+}
+
+function displayNews(){
+    const container = document.getElementById('newsList');
+    if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
+    container.innerHTML='';
+    newsData.forEach((n,i)=>{
+        let authorName = authorsData.find(a=>a.id===n.author_id)?.name || '';
+        container.innerHTML += `<div class="list-item">
+            <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+            <div>
+                <button onclick="editNews(${i})">Засах</button>
+                <button onclick="removeNews(${i})">Устгах</button>
             </div>
         </div>`;
     });
-}
-
-// Save news with auto slug
-async function saveNews(){
-    const title=document.getElementById('newsTitle').value.trim();
-    const category=document.getElementById('newsCategory').value.trim();
-    const subcategory=document.getElementById('newsSubCategory').value.trim();
-    const author_id=parseInt(document.getElementById('newsAuthor').value);
-    const featured=document.getElementById('newsFeatured').checked;
-    const editIndex=document.getElementById('editIndex').value;
-
-    const fileInput=document.getElementById('newsImageFile');
-    let image_url=null;
-    if(fileInput.files[0]){
-        const file=fileInput.files[0];
-        const { data, error } = await supabase.storage.from('news-images').upload(`news/${Date.now()}_${file.name}`, file);
-        if(error) console.error(error);
-        else image_url=`https://YOUR_SUPABASE_URL/storage/v1/object/public/news-images/${data.path}`;
-    }
-
-    // Auto slug
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-    const payload={ title, category, subcategory, author_id, featured, image:image_url, slug };
-    if(editIndex===''){ await supabase.from('news').insert([payload]); }
-    else{ await supabase.from('news').update(payload).eq('id',parseInt(editIndex)); }
-
-    clearNewsForm();
-    displayNews();
 }
 
 function clearNewsForm(){
@@ -171,28 +183,8 @@ function clearNewsForm(){
     document.getElementById('newsSubCategory').innerHTML=`<option value="">-- Дэд цэс сонго --</option>`;
     document.getElementById('newsImageFile').value='';
     editor.setData('');
+    if(authorsData.length>0) document.getElementById('newsAuthor').value=0;
     document.getElementById('newsFeatured').checked=false;
-}
-
-// Save author
-async function saveAuthor(){
-    const name=document.getElementById('authorName').value.trim();
-    const title=document.getElementById('authorTitle').value.trim();
-    const fileInput=document.getElementById('authorImageFile');
-    let image_url=null;
-    if(fileInput.files[0]){
-        const file=fileInput.files[0];
-        const { data, error } = await supabase.storage.from('author-images').upload(`authors/${Date.now()}_${file.name}`, file);
-        if(error) console.error(error);
-        else image_url=`https://YOUR_SUPABASE_URL/storage/v1/object/public/author-images/${data.path}`;
-    }
-    const editIndex=document.getElementById('editAuthorIndex').value;
-    const payload={ name, title, image:image_url };
-    if(editIndex===''){ await supabase.from('authors').insert([payload]); }
-    else{ await supabase.from('authors').update(payload).eq('id',parseInt(editIndex)); }
-    clearAuthorForm();
-    displayAuthors();
-    loadAuthors();
 }
 
 function clearAuthorForm(){
@@ -202,26 +194,101 @@ function clearAuthorForm(){
     document.getElementById('authorImageFile').value='';
 }
 
-async function displayAuthors(){
-    const authors = await supabase.from('authors').select('*').order('id');
-    const container = document.getElementById('authorList');
-    container.innerHTML = '';
-    if(authors.data.length===0){ container.innerHTML='<p>Одоогоор нийтлэлч байхгүй.</p>'; return; }
-    authors.data.forEach(a=>{
-        container.innerHTML += `<div class="list-item">
-            <span>${a.name} (${a.title})</span>
-            <div>
-                <button onclick="editAuthor(${a.id})">Засах</button>
-                <button onclick="removeAuthor(${a.id})">Устгах</button>
-            </div>
-        </div>`;
-    });
+// 🔹 Save news with slug
+async function saveNews(){
+    const title=document.getElementById('newsTitle').value.trim();
+    const category=document.getElementById('newsCategory').value.trim();
+    const subCategory=document.getElementById('newsSubCategory').value.trim();
+    const authorIndex=parseInt(document.getElementById('newsAuthor').value);
+    const featured=document.getElementById('newsFeatured').checked;
+    const editIndex=document.getElementById('editIndex').value;
+
+    const slug = generateSlug(title);
+
+    const fileInput = document.getElementById('newsImageFile');
+    const reader = new FileReader();
+    reader.onload = async function(e){
+        const imageData = e.target.result;
+        const newsObj = {
+            title, slug, category, subCategory, image:imageData,
+            description: editor.getData(),
+            author_id: authorsData[authorIndex]?.id || null,
+            featured,
+            created_at:new Date().toISOString()
+        };
+        if(editIndex===''){
+            await supabase.from('news').insert([newsObj]);
+        } else {
+            const nId = newsData[editIndex].id;
+            await supabase.from('news').update(newsObj).eq('id',nId);
+        }
+        fetchNews();
+        clearNewsForm();
+    };
+    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
+    else reader.onload({target:{result:null}});
+}
+
+function editNews(i){
+    const n=newsData[i];
+    document.getElementById('editIndex').value=i;
+    document.getElementById('newsTitle').value=n.title;
+    document.getElementById('newsCategory').value=n.category;
+    document.getElementById('newsSubCategory').value=n.subCategory;
+    document.getElementById('newsFeatured').checked=n.featured;
+    populateAuthorSelect();
+    const authorIndex = authorsData.findIndex(a=>a.id===n.author_id);
+    if(authorIndex>=0) document.getElementById('newsAuthor').value=authorIndex;
+    editor.setData(n.description || '');
+}
+
+async function removeNews(i){
+    if(confirm('Мэдээг устгах уу?')){
+        await supabase.from('news').delete().eq('id',newsData[i].id);
+        fetchNews();
+    }
+}
+
+// Author functions
+async function saveAuthor(){
+    const name=document.getElementById('authorName').value.trim();
+    const title=document.getElementById('authorTitle').value.trim();
+    const fileInput=document.getElementById('authorImageFile');
+    const editIndex=document.getElementById('editAuthorIndex').value;
+    const reader = new FileReader();
+    reader.onload = async function(e){
+        const imageData = e.target.result;
+        const obj={name,title,image:imageData};
+        if(editIndex===''){
+            await supabase.from('authors').insert([obj]);
+        } else {
+            const aId = authorsData[editIndex].id;
+            await supabase.from('authors').update(obj).eq('id',aId);
+        }
+        fetchAuthors();
+        clearAuthorForm();
+    };
+    if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
+    else reader.onload({target:{result:null}});
+}
+
+function editAuthor(i){
+    const a=authorsData[i];
+    document.getElementById('editAuthorIndex').value=i;
+    document.getElementById('authorName').value=a.name;
+    document.getElementById('authorTitle').value=a.title;
+}
+
+async function removeAuthor(i){
+    if(confirm('Нийтлэлчийг устгах уу?')){
+        await supabase.from('authors').delete().eq('id',authorsData[i].id);
+        fetchAuthors();
+    }
 }
 
 // Initial load
-loadAuthors();
-displayAuthors();
-displayNews();
+fetchAuthors();
+fetchNews();
 </script>
 </body>
 </html>

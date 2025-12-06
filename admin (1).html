@@ -38,6 +38,7 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
     <h2>Мэдээ нэмэх / засах</h2>
     <input type="hidden" id="editIndex">
     <input type="text" id="newsTitle" placeholder="Мэдээний гарчиг">
+    
     <!-- Цэс сонгох -->
     <select id="newsCategory">
       <option value="">-- Цэс сонго --</option>
@@ -48,12 +49,15 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
       <option value="Дэлхий дахинд">Дэлхий дахинд</option>
       <option value="Ярилцлага">Ярилцлага</option>
     </select>
+
     <!-- Дэд цэс -->
     <select id="newsSubCategory">
       <option value="">-- Дэд цэс сонго --</option>
     </select>
+
     <input type="file" id="newsImageFile" accept="image/*">
     <textarea id="editor" placeholder="Мэдээний дэлгэрэнгүй агуулга..."></textarea>
+    
     <select id="newsAuthor"></select>
     <label><input type="checkbox" id="newsFeatured"> Онцлох мэдээ</label>
     <button onclick="saveNews()">Хадгалах</button>
@@ -91,14 +95,16 @@ input:focus, select:focus, textarea:focus{border-color:#3d85c6;outline:none;box-
 // Data
 let authorsData = JSON.parse(localStorage.getItem('authorsData')) || [];
 let newsData = JSON.parse(localStorage.getItem('newsData')) || [];
-let currentPage = 1;
-const newsPerPage = 25;
 
 // CKEditor
 let editor;
 ClassicEditor.create(document.querySelector('#editor'), {
-    toolbar: ['heading','bold','italic','underline','link','bulletedList','numberedList','blockQuote','insertTable','undo','redo','imageUpload']
-}).then(ed=>editor=ed).catch(error=>console.error(error));
+    toolbar: [
+        'heading','bold','italic','underline','link','bulletedList','numberedList',
+        'blockQuote','insertTable','undo','redo','alignment','indent','outdent','codeBlock','imageUpload'
+    ],
+    alignment: { options:['left','center','right','justify'] }
+}).then(ed=>editor=ed).catch(err=>console.error(err));
 
 // Цэс, дэд цэс харилцан холбоотой
 const subCategories = {
@@ -112,8 +118,7 @@ const subCategories = {
 
 document.getElementById('newsCategory').addEventListener('change', function(){
     const subs = subCategories[this.value] || [];
-    const subSel = document.getElementById('newsSubCategory');
-    subSel.innerHTML = `<option value="">-- Дэд цэс сонго --</option>` + subs.map(s=>`<option value="${s}">${s}</option>`).join('');
+    document.getElementById('newsSubCategory').innerHTML = `<option value="">-- Дэд цэс сонго --</option>`+subs.map(s=>`<option value="${s}">${s}</option>`).join('');
 });
 
 // Author select
@@ -124,7 +129,7 @@ function populateAuthorSelect(){
 }
 populateAuthorSelect();
 
-// Display authors
+// Display functions
 function displayAuthors(){
   const container = document.getElementById('authorList');
   container.innerHTML = authorsData.map((a,i)=>`
@@ -134,21 +139,19 @@ function displayAuthors(){
         <button onclick="editAuthor(${i})">Засах</button>
         <button onclick="removeAuthor(${i})">Устгах</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 displayAuthors();
 
-// Display news
 function displayNews(){
   const container = document.getElementById('newsList');
   if(newsData.length===0){ container.innerHTML='<p>Одоогоор мэдээ байхгүй.</p>'; return; }
   newsData.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
   container.innerHTML='';
   newsData.forEach((n,i)=>{
-    let authorName = authorsData[n.authorIndex]?.name || '';
+    const authorName = authorsData[n.authorIndex]?.name || '';
     container.innerHTML += `<div class="list-item">
-      <span>${n.title} | ${n.category} | ${n.subCategory || ''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
+      <span>${n.title} | ${n.category} | ${n.subCategory||''} | ${authorName} ${n.featured?'| Онцлох':''}</span>
       <div>
         <button onclick="editNews(${i})">Засах</button>
         <button onclick="removeNews(${i})">Устгах</button>
@@ -166,23 +169,17 @@ function saveNews(){
     const featured=document.getElementById('newsFeatured').checked;
     const editIndex=document.getElementById('editIndex').value;
 
-    // Зураг файлыг base64 болгох
-    const fileInput = document.getElementById('newsImageFile');
-    const reader = new FileReader();
-    reader.onload = function(e){
-        const imageData = e.target.result;
-        const newsObj = {
-            title, category, subCategory, image:imageData,
-            description: editor.getData(),
-            authorIndex, featured, timestamp:new Date().toISOString()
-        };
+    const fileInput=document.getElementById('newsImageFile');
+    const reader=new FileReader();
+    reader.onload=function(e){
+        const imageData=e.target.result;
+        const newsObj={title,category,subCategory,image:imageData,description:editor.getData(),authorIndex,featured,timestamp:new Date().toISOString()};
         if(editIndex===''){ newsData.push(newsObj); } else{ newsData[editIndex]=newsObj; }
         localStorage.setItem('newsData',JSON.stringify(newsData));
-        displayNews();
-        clearNewsForm();
+        displayNews(); clearNewsForm();
     };
     if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-    else reader.onload({target:{result:null}}); // зураггүй хадгалах
+    else reader.onload({target:{result:null}});
 }
 
 function editNews(i){
@@ -194,7 +191,7 @@ function editNews(i){
     document.getElementById('newsFeatured').checked=n.featured;
     populateAuthorSelect();
     document.getElementById('newsAuthor').value=n.authorIndex;
-    editor.setData(n.description || '');
+    editor.setData(n.description||'');
 }
 
 function removeNews(i){ if(confirm('Мэдээг устгах уу?')){ newsData.splice(i,1); localStorage.setItem('newsData',JSON.stringify(newsData)); displayNews(); }}
@@ -214,17 +211,15 @@ function clearNewsForm(){
 function saveAuthor(){
     const name=document.getElementById('authorName').value.trim();
     const title=document.getElementById('authorTitle').value.trim();
-    const fileInput = document.getElementById('authorImageFile');
+    const fileInput=document.getElementById('authorImageFile');
     const editIndex=document.getElementById('editAuthorIndex').value;
-    const reader = new FileReader();
-    reader.onload = function(e){
+    const reader=new FileReader();
+    reader.onload=function(e){
         const imageData=e.target.result;
         const obj={name,title,image:imageData};
         if(editIndex===''){ authorsData.push(obj); } else{ authorsData[editIndex]=obj; }
         localStorage.setItem('authorsData',JSON.stringify(authorsData));
-        populateAuthorSelect();
-        displayAuthors();
-        clearAuthorForm();
+        populateAuthorSelect(); displayAuthors(); clearAuthorForm();
     };
     if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
     else reader.onload({target:{result:null}});
@@ -247,8 +242,7 @@ function clearAuthorForm(){
 }
 
 // Initial render
-displayNews();
-displayAuthors();
+displayNews(); displayAuthors();
 </script>
 </body>
 </html>

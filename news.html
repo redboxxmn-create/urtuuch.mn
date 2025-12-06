@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мэдээ - urtuuch.mn</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f8f8f8; color:#333; }
+.container { max-width:900px; margin:20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 3px 12px rgba(0,0,0,0.15); }
+.news-title { font-size:24px; font-weight:bold; margin-bottom:10px; }
+.news-meta { color:#666; font-size:14px; margin-bottom:15px; }
+.news-img { width:100%; border-radius:10px; margin-bottom:15px; }
+.news-content { font-size:16px; line-height:1.6; white-space:pre-line; }
+.author-box { display:flex; align-items:center; margin-top:20px; gap:10px; }
+.author-box img { width:45px; height:45px; border-radius:50%; object-fit:cover; }
+.author-name { font-weight:bold; }
+.back-btn { display:inline-block; margin-top:20px; padding:10px 15px; background:#3d85c6; color:#fff; border-radius:6px; text-decoration:none; font-size:14px; }
+</style>
+</head>
+
+<body>
+
+<div class="container" id="newsBox">
+  Уншиж байна...
+</div>
+
+<script>
+// 🔵 URL-аас id авах
+const urlParams = new URLSearchParams(window.location.search);
+const id = urlParams.get("id");
+
+// 🔵 LocalStorage унших
+let newsData = JSON.parse(localStorage.getItem("newsData")) || [];
+let authorsData = JSON.parse(localStorage.getItem("authorsData")) || [];
+
+const box = document.getElementById("newsBox");
+
+// 🔵 ID шалгах
+if(!id || !newsData[id]){
+    box.innerHTML = "<h2>Мэдээ олдсонгүй...</h2>";
+} else {
+    const n = newsDa

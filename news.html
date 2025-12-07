@@ -13,12 +13,11 @@ img{width:100%;max-height:400px;object-fit:cover}
 <div id="box">Ачаалж байна...</div>
 
 <script type="module">
-
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(
- "https://wpotnvekaoosdkvmhqgo.supabase.co",
- "PUBLIC_ANON_KEY"   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
+    "https://wpotnvekaoosdkvmhqgo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
 const params = new URLSearchParams(location.search);
@@ -30,10 +29,10 @@ async function load(){
        return;
    }
 
-   let {data,error} = await supabase
+   let {data, error} = await supabase
       .from("news")
       .select("*")
-      .eq("slug",slug)
+      .eq("slug", slug)
       .single();
 
    if(error){ 
@@ -44,13 +43,13 @@ async function load(){
    document.getElementById("box").innerHTML = `
       <h2>${data.title}</h2>
       <div>${data.category}</div>
-      ${data.image? `<img src="${data.image}">`:''}
+      ${data.image ? `<img src="${data.image}">` : ''}
       <div>${data.description}</div>
    `;
 }
 
 load();
-
 </script>
+
 </body>
 </html>

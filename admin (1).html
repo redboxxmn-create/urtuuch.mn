@@ -293,7 +293,7 @@ async function saveNews() {
     
     const data = {
         title: titleValue,
-        // ✅ ШИНЭЧИЛСЭН SLUG-г ҮҮСГЭЖ БАЙНА
+        // ✅ SLUG ҮҮСГЭЖ, DATA-д ОРУУЛЖ БАЙНА
         slug: generateSlug(titleValue), 
         category: newsCategory.value || null,
         image: newsImage.value.trim() || null,

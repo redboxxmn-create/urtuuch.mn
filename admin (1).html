@@ -9,16 +9,16 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
     <style>
-        /* CSS хэсэг (Өөрчлөгдөөгүй) */
         body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
         header { background: #3d85c6; color: #fff; padding: 15px 20px; }
         .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
+        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; box-sizing: border-box; }
         .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
         #editor { height: 150px; }
         .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; }
-        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;}
+        .checkbox-group { display: flex; gap: 20px; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -43,8 +43,12 @@
         <input id="newsImage" placeholder="Зураг URL">
         <div id="editor"></div>
         <select id="newsAuthor"></select>
-        <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
-        <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
+        
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
+            <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
+        </div>
+        
         <button onclick="saveNews()">Хадгалах</button>
         <button onclick="clearNewsForm()">Цэвэрлэх</button>
     </div>
@@ -76,10 +80,10 @@
 </div>
 
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
 
 <script>
-// DOM элементүүд (newsActive нэмэгдсэн)
+// DOM элементүүд
 const newsTitle = document.getElementById("newsTitle");
 const newsCategory = document.getElementById("newsCategory");
 const newsImage = document.getElementById("newsImage");
@@ -97,17 +101,18 @@ const authorList = document.getElementById("authorList");
 
 const searchInput = document.getElementById("searchInput");
 
-// Supabase client (Өөрчлөгдөөгүй)
-const supabaseClient = supabase.createClient(
-    "https://wpotnvekaoosdkvmhqgo.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
-);
+// Supabase client (window.supabase-ийг ашиглаж байна)
+const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
-// Quill editor (Өөрчлөгдөөгүй)
+// ✅ ЗАСВАР: window.supabase-аас createClient-г авч ашиглаж байна.
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
+
+// Quill editor
 const quill = new Quill("#editor", { theme: "snow" });
 
 // ---------------------------------------------------
-// AUTHORS (Өөрчлөгдөөгүй)
+// AUTHORS
 // ---------------------------------------------------
 async function fetchAuthors() {
     const { data } = await supabaseClient.from("authors").select("*").order("id");
@@ -124,14 +129,14 @@ async function populateAuthorSelect() {
 async function displayAuthors() {
     const list = await fetchAuthors();
     authorList.innerHTML = list.length
-        ? list.map(a => `
-            <div class="list-item">
-                <span>${a.name} (${a.title})</span>
-                <span>
-                    <button onclick="editAuthor(${a.id})">Засах</button>
-                    <button onclick="removeAuthor(${a.id})">Устгах</button>
-                </span>
-            </div>
+        ? list.map(a => `<br>
+            <div class="list-item"><br>
+                <span>${a.name} (${a.title})</span><br>
+                <span><br>
+                    <button onclick="editAuthor(${a.id})">Засах</button><br>
+                    <button onclick="removeAuthor(${a.id})">Устгах</button><br>
+                </span><br>
+            </div><br>
         `).join("")
         : "Нийтлэлч байхгүй";
 }
@@ -178,7 +183,7 @@ function clearAuthorForm() {
 }
 
 // ---------------------------------------------------
-// NEWS (Засварласан хэсэг)
+// NEWS
 // ---------------------------------------------------
 async function fetchNews() {
     const { data } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
@@ -186,6 +191,7 @@ async function fetchNews() {
 }
 
 function generateSlug(title) {
+    // Монгол үсгээр dash-аар тусгаарласан slug үүсгэнэ
     return title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 }
 
@@ -212,15 +218,18 @@ async function displayNews(filter = "") {
         newsList.innerHTML += `<div class="group-title">${d}</div>`;
         grouped[d].forEach(n => {
             const aut = authors.find(a => a.id == n.author_id)?.name || "Тодорхойгүй";
-            // active төлөвийг жагсаалтад харуулж байна
             const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
-            newsList.innerHTML += `
-            <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""} ${activeStatus}</span>
-                <span>
-                    <button onclick="editNews(${n.id})">Засах</button>
-                    <button onclick="removeNews(${n.id})">Устгах</button>
-                </span>
+            
+            // Slug байхгүй бол анхааруулга өгнө
+            const slugStatus = !n.slug ? " ⚠️ SLUG АЛГА" : "";
+
+            newsList.innerHTML += `<br>
+            <div class="list-item"><br>
+                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""} ${activeStatus}${slugStatus}</span><br>
+                <span><br>
+                    <button onclick="editNews(${n.id})">Засах</button><br>
+                    <button onclick="removeNews(${n.id})">Устгах</button><br>
+                </span><br>
             </div>`;
         });
     }
@@ -228,31 +237,41 @@ async function displayNews(filter = "") {
 
 async function saveNews() {
     const html = quill.root.innerHTML.trim();
+    const titleValue = newsTitle.value.trim();
+    
     const data = {
-        title: newsTitle.value.trim(),
-        slug: generateSlug(newsTitle.value.trim()),
-        category: newsCategory.value,
-        image: newsImage.value.trim(),
-        description: html,
-        author_id: Number(newsAuthor.value),
+        title: titleValue,
+        // ✅ SLUG-ИЙГ ҮҮСГЭЖ БАЙНА
+        slug: generateSlug(titleValue), 
+        category: newsCategory.value || null,
+        image: newsImage.value.trim() || null,
+        description: html || null,
+        author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
         featured: newsFeatured.checked,
-        // ✅ ЭНЭ БОЛ ТАНЫ АСУУДЛЫГ ШИЙДЭЖ БУЙ ХЭСЭГ: `active` утгыг check box-оос авч байна.
+        // ✅ ACTIVE УТГЫГ ИЛГЭЭЖ БАЙНА
         active: newsActive.checked 
     };
     if (!data.title) return alert("Гарчиг заавал бөглөнө");
     if (!data.author_id) return alert("Нийтлэлч сонгоно уу");
 
+    let result;
     if (editIndex.value === "") {
         // Шинэ мэдээ нэмэх
-        await supabaseClient.from("news").insert(data);
+        result = await supabaseClient.from("news").insert(data);
     } else {
         // Мэдээ засах
-        await supabaseClient.from("news").update(data).eq("id", editIndex.value);
+        result = await supabaseClient.from("news").update(data).eq("id", editIndex.value);
+    }
+    
+    if (result.error) {
+        console.error("News save error:", result.error);
+        alert(`Мэдээ хадгалахад алдаа гарлаа: ${result.error.message}. Slug давхардсан эсэхийг шалгана уу.`);
+    } else {
+        alert("Мэдээ амжилттай хадгалагдлаа.");
     }
 
     clearNewsForm();
     displayNews(searchInput.value);
-    alert("Амжилттай хадгалагдлаа. Үндсэн вэбсайтыг (urtuuch.mn) Hard Refresh хийж шалгана уу.");
 }
 
 async function editNews(id) {
@@ -263,7 +282,7 @@ async function editNews(id) {
     newsImage.value = data.image;
     newsAuthor.value = data.author_id;
     newsFeatured.checked = data.featured;
-    newsActive.checked = data.active; // ✅ `active` утгыг check box-д оруулж байна.
+    newsActive.checked = data.active; 
     quill.root.innerHTML = data.description;
 }
 
@@ -280,20 +299,29 @@ function clearNewsForm() {
     newsCategory.value = "";
     newsImage.value = "";
     newsFeatured.checked = false;
-    newsActive.checked = false; // ✅ Цэвэрлэхэд `active` утгыг false болгох
+    newsActive.checked = false; 
     quill.setText("");
 }
 
-// Search listener (Өөрчлөгдөөгүй)
+// Search listener
 searchInput.addEventListener("input", () => {
     displayNews(searchInput.value);
 });
 
-// INIT (Өөрчлөгдөөгүй)
+// Global scope-д функцуудыг гаргах (onclick үйлдэл ажиллахын тулд)
+window.saveNews = saveNews;
+window.clearNewsForm = clearNewsForm;
+window.editNews = editNews;
+window.removeNews = removeNews;
+window.saveAuthor = saveAuthor;
+window.clearAuthorForm = clearAuthorForm;
+window.editAuthor = editAuthor;
+window.removeAuthor = removeAuthor;
+
+// INIT
 populateAuthorSelect();
 displayAuthors();
 displayNews();
-
 </script>
 </body>
 </html>

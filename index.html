@@ -132,7 +132,6 @@
 </div>
 
 <script type="module">
-// ✅ ЗАСВАР: Cannot read properties of null алдааг засварлахын тулд импортын URL-д @2 хувилбарыг тодорхой зааж өгөв.
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
@@ -147,24 +146,22 @@ const NEWS_PER_PAGE = 12;
 
 async function fetchAuthors() {
   const { data, error } = await supabase.from('authors').select('*').order('id');
-  if(error) console.error("Authors fetch error:", error); // Алдааг тодорхой харуулах
+  if(error) console.error("Authors fetch error:", error); 
   else authorsData = data;
 }
 
-// ✅ Зөвхөн active=true мэдээг татаж авна.
 async function fetchNews() {
   const { data, error } = await supabase.from('news')
     .select('*')
     .eq('active', true) 
     .order('created_at',{ascending:false});
   
-  if(error) console.error("News fetch error:", error); // Алдааг тодорхой харуулах
+  if(error) console.error("News fetch error:", error); 
   else newsData = data;
 }
 
 function displayAuthors() {
   const container = document.getElementById('authorsContainer');
-  // Хэрэв authorsData хоосон бол юу ч харуулахгүй
   if (!authorsData || authorsData.length === 0) return; 
 
   container.innerHTML = authorsData.map(a=>`
@@ -179,7 +176,6 @@ function displayAuthors() {
 function displayNews() {
   const container = document.getElementById('newsContainer');
   container.innerHTML = '';
-  // Хэрэв newsData хоосон бол мэдээлэл байхгүй гэж харуулна
   if (!newsData || newsData.length === 0) {
       container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
       renderPagination(0);
@@ -191,7 +187,6 @@ function displayNews() {
   const pageNews = newsData.slice(start,end);
 
   pageNews.forEach(n=>{
-    // Зохиогчийг олохдоо authorsData-г шалгана
     const author = authorsData ? authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"} : {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
     
     const div = document.createElement('div');
@@ -206,7 +201,6 @@ function displayNews() {
       </div>
     `;
     div.addEventListener('click', ()=> {
-      // slug-тэй URL рүү redirect
       window.location.href = `news.html?slug=${n.slug}`;
     });
     container.appendChild(div);
@@ -245,15 +239,10 @@ function renderPagination() {
   }
 }
 
-// ----------------------------------------------------------------------
-// ✅ ШИНЭ ХАЙЛТЫН ЛОГИК (Хуудаслалтыг түр устгаж зөвхөн хайлтын үр дүнг харуулна)
-// ----------------------------------------------------------------------
-
 function displayFilteredNews(filteredData) {
     const container = document.getElementById('newsContainer');
     container.innerHTML = '';
     
-    // Хуудаслалтыг түр устгана.
     document.getElementById('pagination').innerHTML = ''; 
 
     if (!filteredData || filteredData.length === 0) {
@@ -261,7 +250,6 @@ function displayFilteredNews(filteredData) {
         return;
     }
 
-    // Зөвхөн хайлтын үр дүнг харуулах
     filteredData.forEach(n => {
         const author = authorsData.find(a => a.id === n.author_id) || { name: "Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png" };
         const div = document.createElement('div');
@@ -281,19 +269,13 @@ function displayFilteredNews(filteredData) {
     });
 }
 
-// ----------------------------------------------------------------------
-// 🔄 ОДОО АЖИЛЛАЖ БАЙГАА ХАЙЛТЫН КОДЫГ СОЛИХ
-// ----------------------------------------------------------------------
 document.getElementById('searchInput').addEventListener('input', ()=>{
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     
-    // 1. Хайлт хийх
     const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
     
-    // 2. Хуудаслалтгүйгээр зөвхөн хайлтын үр дүнг харуулах
     displayFilteredNews(filtered);
 
-    // Хэрэв хайлт хийж дуусаад input хоосон болбол үндсэн displayNews-г дуудах логик нэмж болно:
     if (keyword === '') {
         currentPage = 1;
         displayNews();

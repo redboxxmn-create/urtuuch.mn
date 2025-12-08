@@ -1,55 +1,55 @@
 <!DOCTYPE html>
 <html lang="mn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>urtuuch.mn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* CSS хэсэг (Өөрчлөгдөөгүй) */
-        body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
-        header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
-        header h1{margin:0; font-size:24px;}
-        .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
-        nav {background:#3d85c6; display:flex; padding:10px;}
-        nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
-        nav ul li {position:relative; margin-right:20px;}
-        nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px;}
-        nav ul li:hover > a {background:#6fa8dc;}
-        nav ul li ul {display:none; position:absolute; top:100%; left:0; background:#6fa8dc; list-style:none; padding:0; margin:0; border-radius:6px; min-width:180px; z-index:100;}
-        nav ul li:hover ul {display:block;}
-        nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
-        nav ul li ul li a:hover {background:#3d85c6;}
-        .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
-        .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s;}
-        .card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
-        .card img{width:100%; height:150px; object-fit:cover;}
-        .card-content{padding:10px; position:relative;}
-        .card-title{font-size:16px; margin:0; font-weight:bold;}
-        .card-meta{font-size:12px; color:#666; margin-top:5px; display:flex; justify-content:space-between; flex-wrap:wrap;}
-        .card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;}
-        .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
-        .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
-        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-        .card:hover .card-desc-preview{display:block;}
-        .featured-card{grid-column: span 2; font-size:18px; box-shadow:0 6px 20px rgba(0,0,0,0.2); border:2px solid #6fa8dc;}
-        .video-card{grid-column: span 2; padding:0; margin:20px;}
-        .video-card iframe{width:100%; height:400px; border:none; border-radius:12px;}
-        .authors-container {display:flex; gap:15px; padding:10px; justify-content:center; flex-wrap:wrap;}
-        .author-card {width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
-        .author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
-        .author-name{font-weight:bold; font-size:14px;}
-        .author-title{font-size:12px; color:#555;}
-        .pagination{display:flex; justify-content:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
-        .pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
-        .pagination button:hover{background:#3d85c6;}
-        @media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
-        .contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-        #newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
-        #newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
-        #newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
-        #newsModalContent img{width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>urtuuch.mn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS хэсэг (Өөрчлөгдөөгүй) */
+        body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
+        header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
+        header h1{margin:0; font-size:24px;}
+        .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
+        nav {background:#3d85c6; display:flex; padding:10px;}
+        nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
+        nav ul li {position:relative; margin-right:20px;}
+        nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px;}
+        nav ul li:hover > a {background:#6fa8dc;}
+        nav ul li ul {display:none; position:absolute; top:100%; left:0; background:#6fa8dc; list-style:none; padding:0; margin:0; border-radius:6px; min-width:180px; z-index:100;}
+        nav ul li:hover ul {display:block;}
+        nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
+        nav ul li ul li a:hover {background:#3d85c6;}
+        .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
+        .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s;}
+        .card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
+        .card img{width:100%; height:150px; object-fit:cover;}
+        .card-content{padding:10px; position:relative;}
+        .card-title{font-size:16px; margin:0; font-weight:bold;}
+        .card-meta{font-size:12px; color:#666; margin-top:5px; display:flex; justify-content:space-between; flex-wrap:wrap;}
+        .card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;}
+        .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
+        .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
+        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
+        .card:hover .card-desc-preview{display:block;}
+        .featured-card{grid-column: span 2; font-size:18px; box-shadow:0 6px 20px rgba(0,0,0,0.2); border:2px solid #6fa8dc;}
+        .video-card{grid-column: span 2; padding:0; margin:20px;}
+        .video-card iframe{width:100%; height:400px; border:none; border-radius:12px;}
+        .authors-container {display:flex; gap:15px; padding:10px; justify-content:center; flex-wrap:wrap;}
+        .author-card {width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
+        .author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
+        .author-name{font-weight:bold; font-size:14px;}
+        .author-title{font-size:12px; color:#555;}
+        .pagination{display:flex; justify-content:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
+        .pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
+        .pagination button:hover{background:#3d85c6;}
+        @media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
+        .contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+        #newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
+        #newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
+        #newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
+        #newsModalContent img{width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
+    </style>
 </head>
 <body>
 <header>
@@ -146,140 +146,170 @@ let currentPage = 1;
 const NEWS_PER_PAGE = 12;
 
 async function fetchAuthors() {
-  const { data, error } = await supabase.from('authors').select('*').order('id');
-  if(error) console.error("Authors fetch error:", error); // Алдааг тодорхой харуулах
-  else authorsData = data;
+  const { data, error } = await supabase.from('authors').select('*').order('id');
+  if(error) console.error("Authors fetch error:", error); // Алдааг тодорхой харуулах
+  else authorsData = data;
 }
 
 // ✅ Зөвхөн active=true мэдээг татаж авна.
 async function fetchNews() {
-  const { data, error } = await supabase.from('news')
-    .select('*')
-    .eq('active', true) 
-    .order('created_at',{ascending:false});
-  
-  if(error) console.error("News fetch error:", error); // Алдааг тодорхой харуулах
-  else newsData = data;
+  const { data, error } = await supabase.from('news')
+    .select('*')
+    .eq('active', true) 
+    .order('created_at',{ascending:false});
+  
+  if(error) console.error("News fetch error:", error); // Алдааг тодорхой харуулах
+  else newsData = data;
 }
 
 function displayAuthors() {
-  const container = document.getElementById('authorsContainer');
-  // Хэрэв authorsData хоосон бол юу ч харуулахгүй
-  if (!authorsData || authorsData.length === 0) return; 
+  const container = document.getElementById('authorsContainer');
+  // Хэрэв authorsData хоосон бол юу ч харуулахгүй
+  if (!authorsData || authorsData.length === 0) return; 
 
-  container.innerHTML = authorsData.map(a=>`
-    <div class="author-card">
-      <img src="${a.image}" alt="${a.name}">
-      <div class="author-name">${a.name}</div>
-      <div class="author-title">${a.title}</div>
-    </div>
-  `).join('');
+  container.innerHTML = authorsData.map(a=>`
+    <div class="author-card">
+      <img src="${a.image}" alt="${a.name}">
+      <div class="author-name">${a.name}</div>
+      <div class="author-title">${a.title}</div>
+    </div>
+  `).join('');
 }
 
 function displayNews() {
-  const container = document.getElementById('newsContainer');
-  container.innerHTML = '';
-  // Хэрэв newsData хоосон бол мэдээлэл байхгүй гэж харуулна
-  if (!newsData || newsData.length === 0) {
-      container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
-      renderPagination(0);
-      return;
-  }
+  const container = document.getElementById('newsContainer');
+  container.innerHTML = '';
+  // Хэрэв newsData хоосон бол мэдээлэл байхгүй гэж харуулна
+  if (!newsData || newsData.length === 0) {
+      container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
+      renderPagination(0);
+      return;
+  }
 
-  const start = (currentPage-1)*NEWS_PER_PAGE;
-  const end = start + NEWS_PER_PAGE;
-  const pageNews = newsData.slice(start,end);
+  const start = (currentPage-1)*NEWS_PER_PAGE;
+  const end = start + NEWS_PER_PAGE;
+  const pageNews = newsData.slice(start,end);
 
-  pageNews.forEach(n=>{
-    // Зохиогчийг олохдоо authorsData-г шалгана
-    const author = authorsData ? authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"} : {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
-    
-    const div = document.createElement('div');
-    div.className = n.featured?"card featured-card":"card";
-    div.innerHTML = `
-      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
+  pageNews.forEach(n=>{
+    // Зохиогчийг олохдоо authorsData-г шалгана
+    const author = authorsData ? authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"} : {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
+    
+    const div = document.createElement('div');
+    div.className = n.featured?"card featured-card":"card";
+    div.innerHTML = `
+      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
 
-      <div class="card-content">
-        <h3 class="card-title">${n.title}</h3>
-        <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
-      </div>
-    `;
-    div.addEventListener('click', ()=> {
-      // slug-тэй URL рүү redirect
-      window.location.href = `news.html?slug=${n.slug}`;
-    });
-    container.appendChild(div);
-  });
+      <div class="card-content">
+        <h3 class="card-title">${n.title}</h3>
+        <div class="card-meta"><span class="category">${n.category}</span></div>
+        <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
+      </div>
+    `;
+    div.addEventListener('click', ()=> {
+      // slug-тэй URL рүү redirect
+      window.location.href = `news.html?slug=${n.slug}`;
+    });
+    container.appendChild(div);
+  });
 
-  renderPagination();
-  displayAuthors();
+  renderPagination();
+  displayAuthors();
 }
 
 function renderPagination() {
-  const container = document.getElementById('pagination');
-  const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
-  container.innerHTML='';
-  if(totalPages<=1) return;
+  const container = document.getElementById('pagination');
+  const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
+  container.innerHTML='';
+  if(totalPages<=1) return;
 
-  if(currentPage>1){
-    const prev=document.createElement('button');
-    prev.innerText="Өмнөх";
-    prev.onclick=()=>{currentPage--; displayNews();};
-    container.appendChild(prev);
-  }
+  if(currentPage>1){
+    const prev=document.createElement('button');
+    prev.innerText="Өмнөх";
+    prev.onclick=()=>{currentPage--; displayNews();};
+    container.appendChild(prev);
+  }
 
-  for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement('button');
-    btn.innerText=i;
-    if(i===currentPage) btn.style.background="#3d85c6";
-    btn.onclick=()=>{currentPage=i; displayNews();};
-    container.appendChild(btn);
-  }
+  for(let i=1;i<=totalPages;i++){
+    const btn=document.createElement('button');
+    btn.innerText=i;
+    if(i===currentPage) btn.style.background="#3d85c6";
+    btn.onclick=()=>{currentPage=i; displayNews();};
+    container.appendChild(btn);
+  }
 
-  if(currentPage<totalPages){
-    const next=document.createElement('button');
-    next.innerText="Дараах";
-    next.onclick=()=>{currentPage++; displayNews();};
-    container.appendChild(next);
-  }
+  if(currentPage<totalPages){
+    const next=document.createElement('button');
+    next.innerText="Дараах";
+    next.onclick=()=>{currentPage++; displayNews();};
+    container.appendChild(next);
+  }
 }
 
-// Search
-document.getElementById('searchInput').addEventListener('input', ()=>{
-  const keyword = document.getElementById('searchInput').value.toLowerCase();
-  // Хайлт хийхдээ newsData-г ашиглаж байгаа тул зөвхөн active мэдээг хайна
-  const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword)); 
-  currentPage = 1;
-  const container = document.getElementById('newsContainer');
-  container.innerHTML = '';
-  // displayNews доторх логикийг давтаж байна, энэ нь зөвхөн хайлтад зориулагдсан
-  filtered.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
-    const div=document.createElement('div');
-    div.className = n.featured?"card featured-card":"card";
-    div.innerHTML= `
-      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
+// ----------------------------------------------------------------------
+// ✅ ШИНЭ ХАЙЛТЫН ЛОГИК (Хуудаслалтыг түр устгаж зөвхөн хайлтын үр дүнг харуулна)
+// ----------------------------------------------------------------------
 
-      <div class="card-content">
-        <h3 class="card-title">${n.title}</h3>
-        <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
-      </div>
-    `;
-    div.addEventListener('click',()=>{ window.location.href = `news.html?slug=${n.slug}`; });
-    container.appendChild(div);
-  });
+function displayFilteredNews(filteredData) {
+    const container = document.getElementById('newsContainer');
+    container.innerHTML = '';
+    
+    // Хуудаслалтыг түр устгана.
+    document.getElementById('pagination').innerHTML = ''; 
+
+    if (!filteredData || filteredData.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
+        return;
+    }
+
+    // Зөвхөн хайлтын үр дүнг харуулах
+    filteredData.forEach(n => {
+        const author = authorsData.find(a => a.id === n.author_id) || { name: "Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png" };
+        const div = document.createElement('div');
+        div.className = n.featured ? "card featured-card" : "card";
+        div.innerHTML = `
+            ${n.image ? `<img src="${n.image}" alt="${n.title}">` : ''}
+            <div class="card-content">
+                <h3 class="card-title">${n.title}</h3>
+                <div class="card-meta"><span class="category">${n.category}</span></div>
+                <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
+            </div>
+        `;
+        div.addEventListener('click', () => {
+            window.location.href = `news.html?slug=${n.slug}`;
+        });
+        container.appendChild(div);
+    });
+}
+
+// ----------------------------------------------------------------------
+// 🔄 ОДОО АЖИЛЛАЖ БАЙГАА ХАЙЛТЫН КОДЫГ СОЛИХ
+// ----------------------------------------------------------------------
+document.getElementById('searchInput').addEventListener('input', ()=>{
+    const keyword = document.getElementById('searchInput').value.toLowerCase();
+    
+    // 1. Хайлт хийх
+    const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
+    
+    // 2. Хуудаслалтгүйгээр зөвхөн хайлтын үр дүнг харуулах
+    displayFilteredNews(filtered);
+
+    // Хайлт хийж дуусмагц pagination-г устгана (displayFilteredNews дотор хийгдсэн)
+    // Хэрэв хайлт хийж дуусаад input хоосон болбол үндсэн displayNews-г дуудах логик нэмж болно:
+    if (keyword === '') {
+        currentPage = 1;
+        displayNews();
+    }
 });
+
 
 // Modal close
 document.getElementById('newsModalClose').onclick = ()=>{ document.getElementById('newsModal').style.display='none'; };
 document.getElementById('newsModal').onclick = e=>{ if(e.target.id==='newsModal') document.getElementById('newsModal').style.display='none'; };
 
 async function init(){
-  await fetchAuthors();
-  await fetchNews();
-  displayNews();
+  await fetchAuthors();
+  await fetchNews();
+  displayNews();
 }
 
 init();

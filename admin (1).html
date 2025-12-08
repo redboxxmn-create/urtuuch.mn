@@ -4,375 +4,392 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ Панел</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
-        body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-        header { background: #3d85c6; color: #fff; padding: 15px 20px; }
-        .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 8px; cursor: pointer; background: #6fa8dc; color: #fff; transition: background 0.3s; }
-        button:hover { background: #3d85c6; }
-        .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        #editor { height: 150px; }
-        .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; border-bottom: 2px solid #3d85c6; padding-bottom: 5px; }
-        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;}
-        .checkbox-group { display: flex; gap: 20px; margin: 10px 0; }
-        @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .card { grid-column: span 1 !important; }
-        }
+        body { font-family: 'Ubuntu', sans-serif; margin: 0; padding: 0; background: #f0f5f5; color: #333; }
+        header { background: #3d85c6; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        header h1 { margin: 0; font-size: 24px; }
+        .logout-btn { background: #d9534f; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+        .logout-btn:hover { background: #c9302c; }
+
+        .container { display: flex; padding: 20px; }
+        .sidebar { width: 250px; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-right: 20px; }
+        .sidebar button { width: 100%; padding: 10px; margin-bottom: 10px; background: #6fa8dc; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
+        .sidebar button.active, .sidebar button:hover { background: #3d85c6; }
+
+        .content { flex-grow: 1; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Мэдээний картны жагсаалт */
+        .news-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .news-list-item:hover { background: #f9f9f9; }
+        .news-title { flex-grow: 1; font-weight: 500; }
+        .news-actions button { margin-left: 10px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+        .edit-btn { background: #5cb85c; color: white; }
+        .delete-btn { background: #f0ad4e; color: white; }
+        .edit-btn:hover { background: #4cae4c; }
+        .delete-btn:hover { background: #eea236; }
+
+        /* Мэдээ нэмэх/засах талбар */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        .form-group textarea { resize: vertical; }
+
+        .form-actions button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        #saveNewsBtn { background: #3d85c6; color: white; }
+        #saveNewsBtn:hover { background: #337ab7; }
+        #cancelEditBtn { background: #ccc; color: #333; margin-left: 10px; }
+        #cancelEditBtn:hover { background: #bbb; }
+        
+        /* Featured & Active Checkboxes */
+        .checkbox-group { display: flex; gap: 20px; margin-top: 10px; }
+        .checkbox-group label { font-weight: normal; }
+
+        /* Response message */
+        #responseMessage { margin-top: 20px; padding: 10px; border-radius: 6px; font-weight: bold; display: none; }
+        .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
     </style>
 </head>
 <body>
-
-<header><h1>Админ Панел</h1></header>
+<header>
+    <h1>Админ Панел</h1>
+    <button class="logout-btn" onclick="logout()">Гарах</button>
+</header>
 
 <div class="container">
-
-    <div class="card">
-        <h2>Мэдээ нэмэх / засах</h2>
-        <input type="hidden" id="editIndex">
-        <input id="newsTitle" placeholder="Гарчиг">
-        <select id="newsCategory">
-            <option value="">Ангилал</option>
-            <option>Улс төр</option>
-            <option>Эдийн засаг</option>
-            <option>Соёл урлаг</option>
-            <option>Медиа</option>
-            <option>Дэлхий дахинд</option>
-            <option>Ярилцлага</option>
-        </select>
-        <input id="newsImage" placeholder="Зураг URL">
-        <div id="editor"></div>
-        <select id="newsAuthor"></select>
-        
-        <div class="checkbox-group">
-            <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
-            <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
+    <div class="sidebar">
+        <button id="tabListNews" onclick="openTab('listNews', this)" class="active">Мэдээний жагсаалт</button>
+        <button id="tabCreateNews" onclick="openTab('createNews', this)">Мэдээ нэмэх</button>
         </div>
-        
-        <button onclick="saveNews()">Хадгалах</button>
-        <button onclick="clearNewsForm()">Цэвэрлэх</button>
-    </div>
 
-    <div class="card">
-        <h2>Нийтлэлч</h2>
-        <input type="hidden" id="editAuthorIndex">
-        <input id="authorName" placeholder="Нэр">
-        <input id="authorTitle" placeholder="Албан тушаал">
-        <input id="authorImage" placeholder="Зураг">
-        <button onclick="saveAuthor()">Хадгалах</button>
-        <button onclick="clearAuthorForm()">Цэвэрлэх</button>
-    </div>
+    <div class="content">
+        <div id="listNews" class="tab-content active">
+            <h2>Нийтлэгдсэн мэдээ (29 мэдээ)</h2>
+            <div id="newsListContainer">
+                <p>Мэдээ татаж байна...</p>
+            </div>
+        </div>
 
-    <div class="card" style="grid-column: span 2;">
-        <input type="text" id="searchInput" class="search-input" placeholder="Мэдээ хайх...">
-    </div>
+        <div id="createNews" class="tab-content">
+            <h2 id="newsFormTitle">Мэдээ нэмэх</h2>
+            <div class="form-group">
+                <label for="newsTitle">Гарчиг:</label>
+                <input type="text" id="newsTitle" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="newsSlug">Slug (URL-ийн нэр):</label>
+                <input type="text" id="newsSlug" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="newsCategory">Ангилал:</label>
+                <select id="newsCategory">
+                    <option value="Улс төр">Улс төр</option>
+                    <option value="Эдийн засаг">Эдийн засаг</option>
+                    <option value="Соёл урлаг">Соёл урлаг</option>
+                    <option value="Спорт">Спорт</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="newsImage">Зургийн URL:</label>
+                <input type="url" id="newsImage" placeholder="https://image-url.com/example.jpg">
+            </div>
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Мэдээ</h2>
-        <div id="newsList"></div>
-    </div>
+            <div class="form-group">
+                <label for="newsContent">Агуулга:</label>
+                <textarea id="newsContent" rows="15"></textarea>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <div>
+                    <input type="checkbox" id="newsFeatured">
+                    <label for="newsFeatured">Онцлох мэдээ (Featured)</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="newsActive" checked>
+                    <label for="newsActive">Нийтлэх (Active)</label>
+                </div>
+            </div>
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Нийтлэлчид</h2>
-        <div id="authorList"></div>
+            <div class="form-actions">
+                <button id="saveNewsBtn" onclick="saveNews(true)">Хадгалах</button>
+                <button id="cancelEditBtn" onclick="openTab('listNews')">Буцах</button>
+            </div>
+            <input type="hidden" id="newsId"> <div id="responseMessage"></div>
+        </div>
     </div>
-
 </div>
 
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
+<script type="module">
+// Supabase-ийн JS импорт
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0/+esm';
 
-<script>
-// DOM элементүүд
-const newsTitle = document.getElementById("newsTitle");
-const newsCategory = document.getElementById("newsCategory");
-const newsImage = document.getElementById("newsImage");
-const newsAuthor = document.getElementById("newsAuthor");
-const newsFeatured = document.getElementById("newsFeatured");
-const newsActive = document.getElementById("newsActive"); 
-const newsList = document.getElementById("newsList");
-const editIndex = document.getElementById("editIndex");
+// ************************************************************
+// ТАНЫ SUPABASE ТҮЛХҮҮРҮҮД
+// ************************************************************
+const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
-const authorName = document.getElementById("authorName");
-const authorTitle = document.getElementById("authorTitle");
-const authorImage = document.getElementById("authorImage");
-const editAuthorIndex = document.getElementById("editAuthorIndex");
-const authorList = document.getElementById("authorList");
-
-const searchInput = document.getElementById("searchInput");
-
-// Supabase client 
-const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
-
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
-
-// Quill editor
-const quill = new Quill("#editor", { theme: "snow" });
-
-// ---------------------------------------------------
-// SLUG GENERATION FUNCTION (ШИНЭЧИЛСЭН)
-// ---------------------------------------------------
-
-// Кирилл үсгийг Латин руу хөрвүүлэх (Transliteration) функц
-function cyrillicToLatin(text) {
-    const cyrToLat = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'ye', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'i',
-        'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'ө': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-        'ү': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '',
-        'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'Ye', 'Ё': 'Yo',
-        'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'Ө': 'O',
-        'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ү': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch',
-        'Ш': 'Sh', 'Щ': 'Sh', 'Ъ': '', 'Ы': 'I', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
-    };
-
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        result += cyrToLat[char] || char;
-    }
-    return result;
-}
-
-function generateSlug(title) {
-    // 1. Кирилл үсгийг Латин руу хөрвүүлэх
-    let slug = cyrillicToLatin(title);
-
-    // 2. Жижиг үсэгт хөрвүүлэх
-    slug = slug.toLowerCase();
-
-    // 3. Хоосон зайг зураасаар солих
-    slug = slug.replace(/\s+/g, '-');
-
-    // 4. Үсэг, тоо, зурааснаас бусад тэмдэгтийг арилгах
-    slug = slug.replace(/[^\w-]+/g, '');
-
-    // 5. Давхардсан зураасыг нэгээр солих
-    slug = slug.replace(/--+/g, '-');
-
-    // 6. Эхлэл төгсгөлийн зураасыг арилгах
-    slug = slug.replace(/^-+|-+$/g, '');
-    
-    return slug;
-}
-// ---------------------------------------------------
-// END SLUG GENERATION
-// ---------------------------------------------------
-
-
-// ---------------------------------------------------
-// AUTHORS
-// ---------------------------------------------------
-async function fetchAuthors() {
-    const { data } = await supabaseClient.from("authors").select("*").order("id");
-    return data || [];
-}
-
-async function populateAuthorSelect() {
-    const list = await fetchAuthors();
-    newsAuthor.innerHTML = list.length
-        ? list.map(a => `<option value="${a.id}">${a.name}</option>`).join("")
-        : `<option disabled>Нийтлэлч байхгүй</option>`;
-}
-
-async function displayAuthors() {
-    const list = await fetchAuthors();
-    authorList.innerHTML = list.length
-        ? list.map(a => `
-            <div class="list-item">
-                <span>${a.name} (${a.title})</span>
-                <span>
-                    <button onclick="editAuthor(${a.id})">Засах</button>
-                    <button onclick="removeAuthor(${a.id})">Устгах</button>
-                </span>
-            </div>
-        `).join("")
-        : "Нийтлэлч байхгүй";
-}
-
-async function saveAuthor() {
-    const data = {
-        name: authorName.value.trim(),
-        title: authorTitle.value.trim(),
-        image: authorImage.value.trim()
-    };
-    if (!data.name) return alert("Нэр заавал бөглөнө");
-
-    if (editAuthorIndex.value === "")
-        await supabaseClient.from("authors").insert(data);
-    else
-        await supabaseClient.from("authors").update(data).eq("id", editAuthorIndex.value);
-
-    clearAuthorForm();
-    populateAuthorSelect();
-    displayAuthors();
-}
-
-async function editAuthor(id) {
-    const { data } = await supabaseClient.from("authors").select("*").eq("id", id).single();
-    editAuthorIndex.value = data.id;
-    authorName.value = data.name;
-    authorTitle.value = data.title;
-    authorImage.value = data.image;
-}
-
-async function removeAuthor(id) {
-    if (confirm("Устгах уу?")) {
-        await supabaseClient.from("authors").delete().eq("id", id);
-        populateAuthorSelect();
-        displayAuthors();
-    }
-}
-
-function clearAuthorForm() {
-    editAuthorIndex.value = "";
-    authorName.value = "";
-    authorTitle.value = "";
-    authorImage.value = "";
-}
-
-// ---------------------------------------------------
-// NEWS
-// ---------------------------------------------------
-async function fetchNews() {
-    const { data } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
-    return data || [];
-}
-
-async function displayNews(filter = "") {
-    const news = await fetchNews();
-    const authors = await fetchAuthors();
-    newsList.innerHTML = "";
-
-    let filteredNews = news;
-    if (filter) {
-        filteredNews = news.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
-    }
-
-    if (!filteredNews.length) { newsList.innerHTML = "Мэдээ байхгүй"; return; }
-
-    const grouped = {};
-    filteredNews.forEach(n => {
-        const day = n.created_at ? n.created_at.split("T")[0] : "Огноо байхгүй";
-        if (!grouped[day]) grouped[day] = [];
-        grouped[day].push(n);
-    });
-
-    for (const d in grouped) {
-        newsList.innerHTML += `<div class="group-title">${d}</div>`;
-        grouped[d].forEach(n => {
-            const aut = authors.find(a => a.id == n.author_id)?.name || "Тодорхойгүй";
-            const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
-            
-            // Slug байхгүй бол анхааруулга өгнө
-            const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
-
-            newsList.innerHTML += `
-            <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""} ${activeStatus}${slugStatus}</span>
-                <span>
-                    <button onclick="editNews(${n.id})">Засах</button>
-                    <button onclick="removeNews(${n.id})">Устгах</button>
-                </span>
-            </div>`;
-        });
-    }
-}
-
-async function saveNews() {
-    const html = quill.root.innerHTML.trim();
-    const titleValue = newsTitle.value.trim();
-    
-    if (!titleValue) return alert("Гарчиг заавал бөглөнө");
-    
-    const data = {
-        title: titleValue,
-        // ✅ SLUG ҮҮСГЭЖ, DATA-д ОРУУЛЖ БАЙНА
-        slug: generateSlug(titleValue), 
-        category: newsCategory.value || null,
-        image: newsImage.value.trim() || null,
-        description: html || null,
-        author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
-        featured: newsFeatured.checked,
-        active: newsActive.checked 
-    };
-    
-    if (!data.author_id) return alert("Нийтлэлч сонгоно уу");
-
-    let result;
-    if (editIndex.value === "") {
-        // Шинэ мэдээ нэмэх
-        result = await supabaseClient.from("news").insert(data);
-    } else {
-        // Мэдээ засах
-        result = await supabaseClient.from("news").update(data).eq("id", editIndex.value);
-    }
-    
-    if (result.error) {
-        console.error("News save error:", result.error);
-        alert(`Мэдээ хадгалахад алдаа гарлаа: ${result.error.message}. Slug давхардсан эсэхийг шалгана уу.`);
-    } else {
-        alert("Мэдээ амжилттай хадгалагдлаа.");
-    }
-
-    clearNewsForm();
-    displayNews(searchInput.value);
-}
-
-async function editNews(id) {
-    const { data } = await supabaseClient.from("news").select("*").eq("id", id).single();
-    editIndex.value = data.id;
-    newsTitle.value = data.title;
-    newsCategory.value = data.category;
-    newsImage.value = data.image;
-    newsAuthor.value = data.author_id;
-    newsFeatured.checked = data.featured;
-    newsActive.checked = data.active; 
-    quill.root.innerHTML = data.description;
-}
-
-async function removeNews(id) {
-    if (confirm("Устгах уу?")) {
-        await supabaseClient.from("news").delete().eq("id", id);
-        displayNews(searchInput.value);
-    }
-}
-
-function clearNewsForm() {
-    editIndex.value = "";
-    newsTitle.value = "";
-    newsCategory.value = "";
-    newsImage.value = "";
-    newsFeatured.checked = false;
-    newsActive.checked = false; 
-    quill.setText("");
-}
-
-// Search listener
-searchInput.addEventListener("input", () => {
-    displayNews(searchInput.value);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true }, // СЕССИЙГ ХАДГАЛАХ
 });
 
-// Global scope-д функцуудыг гаргах (onclick үйлдэл ажиллахын тулд)
-window.saveNews = saveNews;
-window.clearNewsForm = clearNewsForm;
-window.editNews = editNews;
-window.removeNews = removeNews;
-window.saveAuthor = saveAuthor;
-window.clearAuthorForm = clearAuthorForm;
-window.editAuthor = editAuthor;
-window.removeAuthor = removeAuthor;
+let currentNewsId = null; // Засах үед ашиглана
 
-// INIT
-populateAuthorSelect();
-displayAuthors();
-displayNews();
+// ************************************************************
+// ✅ TINYMCE-ИЙГ ИДЭВХЖҮҮЛЭХ
+// ************************************************************
+tinymce.init({
+    selector: '#newsContent', 
+    plugins: 'advlist autolink lists link image charmap print preview anchor code', 
+    toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image | code', 
+    menubar: 'file edit view insert format tools table help',
+    height: 500,
+    // setup функц нь мэдээг засах үед TinyMCE-ийн утгыг зөв ачаална
+    setup: function(editor) {
+        editor.on('init', function() {
+            // Мэдээг засах үед утгыг автоматаар ачаална
+            const contentElement = document.getElementById('newsContent');
+            if(contentElement.value) {
+                editor.setContent(contentElement.value);
+            }
+        });
+    }
+});
+
+// ************************************************************
+// 1. МЭДЭЭНИЙ ЖАГСААЛТ ТАТАХ
+// ************************************************************
+async function fetchNewsList() {
+    const { data, error } = await supabase
+        .from('news')
+        .select('id, title, created_at, active, slug')
+        .order('created_at', { ascending: false })
+        .limit(29); // Зөвхөн 29 мэдээг татаж харуулна
+
+    const container = document.getElementById('newsListContainer');
+    container.innerHTML = '';
+
+    if (error) {
+        container.innerHTML = `<p class="error">Мэдээ татахад алдаа гарлаа: ${error.message}</p>`;
+        return;
+    }
+
+    if (data.length === 0) {
+        container.innerHTML = '<p>Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
+        return;
+    }
+
+    data.forEach(news => {
+        const item = document.createElement('div');
+        item.className = 'news-list-item';
+        item.innerHTML = `
+            <span class="news-title" style="color: ${news.active ? '#333' : '#999'}">${news.title}</span>
+            <span style="font-size: 12px; color: #666;">${new Date(news.created_at).toLocaleDateString()}</span>
+            <div class="news-actions">
+                <button class="edit-btn" onclick="editNews('${news.slug}')">Засах</button>
+                <button class="delete-btn" onclick="deleteNews(${news.id})">Устгах</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+// ************************************************************
+// 2. МЭДЭЭГ ЗАСАХ ТАЛБАРТ УТГА ОРУУЛАХ
+// ************************************************************
+window.editNews = async function(slug) {
+    const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+    if (error) {
+        showMessage(`Мэдээ татахад алдаа гарлаа: ${error.message}`, 'error');
+        return;
+    }
+
+    // Талбаруудад утгыг оруулах
+    document.getElementById('newsId').value = data.id;
+    document.getElementById('newsFormTitle').innerText = 'Мэдээ засах';
+    document.getElementById('newsTitle').value = data.title;
+    document.getElementById('newsSlug').value = data.slug;
+    document.getElementById('newsCategory').value = data.category || 'Улс төр'; 
+    document.getElementById('newsImage').value = data.image || '';
+    document.getElementById('newsFeatured').checked = data.featured || false;
+    document.getElementById('newsActive').checked = data.active;
+    
+    // TinyMCE-ийн textarea-д HTML утгыг оруулах
+    const contentElement = document.getElementById('newsContent');
+    contentElement.value = data.content; 
+    
+    // TinyMCE Editor-т утгыг ачаалах
+    // Энэ нь TinyMCE-ийг "reset" хийж, шинэ утгыг зөв ачаална.
+    if (tinymce.get('newsContent')) {
+        tinymce.get('newsContent').setContent(data.content || '');
+    }
+
+    // Хадгалах товчийг 'Засах' горимд шилжүүлэх
+    document.getElementById('saveNewsBtn').onclick = () => saveNews(false);
+    document.getElementById('saveNewsBtn').innerText = 'Өөрчлөлт хадгалах';
+    
+    // "Мэдээ нэмэх" таб руу шилжих
+    openTab('createNews');
+};
+
+// ************************************************************
+// 3. МЭДЭЭГ ХАДГАЛАХ (Шинэчлэх/Нэмэх)
+// ************************************************************
+window.saveNews = async function(isNew) {
+    
+    // ✅ 1. TINYMCE-ээс Утгыг Авах
+    const content = tinymce.get('newsContent').getContent();
+    
+    // 2. Бусад талбаруудаас утгыг авах
+    const newsId = document.getElementById('newsId').value;
+    const title = document.getElementById('newsTitle').value;
+    const slug = document.getElementById('newsSlug').value;
+    const category = document.getElementById('newsCategory').value;
+    const image = document.getElementById('newsImage').value;
+    const featured = document.getElementById('newsFeatured').checked;
+    const active = document.getElementById('newsActive').checked;
+    
+    if (!title || !slug || !content) {
+        showMessage('Гарчиг, Slug, Агуулгын талбарыг бөглөнө үү.', 'error');
+        return;
+    }
+
+    const newsData = {
+        title: title,
+        slug: slug,
+        category: category,
+        image: image || null,
+        content: content, // ✅ TINYMCE-ЭЭС АВСАН HTML КОНТЕНТ
+        featured: featured,
+        active: active,
+        // created_at, author_id-г Supabase-д defaults-аар оруулах боломжтой
+    };
+
+    let response;
+    
+    if (isNew) {
+        // Шинэ мэдээ оруулах
+        response = await supabase.from('news').insert([newsData]);
+    } else {
+        // Одоо байгаа мэдээг шинэчлэх
+        response = await supabase.from('news').update(newsData).eq('id', newsId);
+    }
+    
+    if (response.error) {
+        showMessage(`Хадгалахад алдаа гарлаа: ${response.error.message}`, 'error');
+    } else {
+        showMessage(isNew ? 'Мэдээ амжилттай нэмэгдлээ!' : 'Мэдээ амжилттай шинэчлэгдлээ!', 'success');
+        resetForm();
+        fetchNewsList();
+        openTab('listNews');
+    }
+};
+
+// ************************************************************
+// 4. МЭДЭЭГ УСТГАХ
+// ************************************************************
+window.deleteNews = async function(id) {
+    if (!confirm('Та энэ мэдээг устгахдаа итгэлтэй байна уу?')) return;
+
+    const { error } = await supabase
+        .from('news')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        showMessage(`Устгахад алдаа гарлаа: ${error.message}`, 'error');
+    } else {
+        showMessage('Мэдээ амжилттай устгагдлаа.', 'success');
+        fetchNewsList();
+    }
+};
+
+// ************************************************************
+// 5. ТУСЛАХ ФУНКЦҮҮД
+// ************************************************************
+window.openTab = function(tabName, elm) {
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => content.classList.remove('active'));
+    
+    const sidebarButtons = document.querySelectorAll('.sidebar button');
+    sidebarButtons.forEach(button => button.classList.remove('active'));
+
+    document.getElementById(tabName).classList.add('active');
+    
+    if (elm) {
+        elm.classList.add('active');
+    } else {
+        // Хэрэв товчлуургүйгээр буцвал жагсаалтын тавцангийн товчийг идэвхжүүлнэ
+        document.getElementById('tabListNews').classList.add('active');
+    }
+    
+    if (tabName === 'createNews') {
+        // 'Нэмэх' таб руу шилжихэд, хэрэв засах горим биш бол формыг цэвэрлэнэ
+        if (document.getElementById('newsFormTitle').innerText !== 'Мэдээ засах') {
+            resetForm();
+        }
+    } else if (tabName === 'listNews') {
+        // Жагсаалтын таб руу шилжихэд формыг цэвэрлэж, үндсэн товчийг сэргээнэ
+        resetForm();
+    }
+    
+    // Мессежийг нуух
+    document.getElementById('responseMessage').style.display = 'none';
+};
+
+function resetForm() {
+    document.getElementById('newsId').value = '';
+    document.getElementById('newsFormTitle').innerText = 'Мэдээ нэмэх';
+    document.getElementById('newsTitle').value = '';
+    document.getElementById('newsSlug').value = '';
+    document.getElementById('newsImage').value = '';
+    document.getElementById('newsCategory').value = 'Улс төр'; 
+    document.getElementById('newsFeatured').checked = false;
+    document.getElementById('newsActive').checked = true;
+    
+    // TinyMCE-ийн агуулгыг цэвэрлэх
+    if (tinymce.get('newsContent')) {
+        tinymce.get('newsContent').setContent('');
+    }
+    // saveNews товчийг анхны байдалд оруулах
+    document.getElementById('saveNewsBtn').onclick = () => saveNews(true);
+    document.getElementById('saveNewsBtn').innerText = 'Хадгалах';
+}
+
+function showMessage(message, type) {
+    const msgEl = document.getElementById('responseMessage');
+    msgEl.innerText = message;
+    msgEl.className = type === 'success' ? 'success' : 'error';
+    msgEl.style.display = 'block';
+    // 5 секундын дараа нуух
+    setTimeout(() => {
+        msgEl.style.display = 'none';
+    }, 5000);
+}
+
+window.logout = function() {
+    // Хэрэглэгч гарах үед хийх үйлдлүүд (жишээ нь, LocalStorage цэвэрлэх)
+    alert('Системээс гарах үйлдлийг хийх JS логик оруулаарай.');
+};
+
+// Хуудас ачаалагдахад жагсаалтыг татах
+window.onload = function() {
+    fetchNewsList();
+    // TinyMCE-ийн init нь өөрөө ачаалагдана
+};
+
 </script>
 </body>
 </html>

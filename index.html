@@ -6,7 +6,7 @@
 <title>urtuuch.mn</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* --- Таны өмнөх style --- */
+/* Таны бүх өмнөх CSS энд оруулсан */
 body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
 header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
@@ -45,6 +45,10 @@ nav ul li ul li a:hover {background:#3d85c6;}
 .pagination button:hover{background:#3d85c6;}
 @media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
 .contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+#newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
+#newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
+#newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
+#newsModalContent img{width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -106,15 +110,10 @@ nav ul li ul li a:hover {background:#3d85c6;}
 </nav>
 </header>
 
-<!-- Grid мэдээ -->
 <div class="grid" id="newsContainer"></div>
-
-<!-- Нийтлэлчид -->
+<div class="video-card" id="videoContainer"></div>
 <div class="authors-container" id="authorsContainer"></div>
-
-<!-- Pagination -->
 <div class="pagination" id="pagination"></div>
-
 <div class="contact">
 <h3>Холбоо барих</h3>
 <p>Утас: 94344777</p>
@@ -122,11 +121,23 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
+<div id="newsModal">
+<div id="newsModalContent">
+<span id="newsModalClose">&times;</span>
+<h2 id="modalTitle"></h2>
+<div id="modalMeta" style="color:#666; font-size:12px; margin-bottom:10px;"></div>
+<img id="modalImage" src="">
+<div id="modalContent"></div>
+</div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"; // өөрийн key
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let authorsData = [];
 let newsData = [];
@@ -149,7 +160,7 @@ function displayAuthors() {
   const container = document.getElementById('authorsContainer');
   container.innerHTML = authorsData.map(a=>`
     <div class="author-card">
-      <img src="${a.image}">
+      <img src="${a.image}" alt="${a.name}">
       <div class="author-name">${a.name}</div>
       <div class="author-title">${a.title}</div>
     </div>
@@ -168,14 +179,15 @@ function displayNews() {
     const div = document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
     div.innerHTML = `
-      ${n.image?`<img src="${n.image}">`:``}
+      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
+        <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
       </div>
     `;
     div.addEventListener('click', ()=> {
+      // slug-тэй URL рүү redirect
       window.location.href = `news.html?slug=${n.slug}`;
     });
     container.appendChild(div);
@@ -214,7 +226,8 @@ function renderPagination() {
   }
 }
 
-document.getElementById('searchInput').addEventListener('input',()=>{
+// Search
+document.getElementById('searchInput').addEventListener('input', ()=>{
   const keyword = document.getElementById('searchInput').value.toLowerCase();
   const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
   currentPage = 1;
@@ -224,12 +237,12 @@ document.getElementById('searchInput').addEventListener('input',()=>{
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
     const div=document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
-    div.innerHTML=`
-      ${n.image?`<img src="${n.image}">`:``}
+    div.innerHTML= `
+      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
+        <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
       </div>
     `;
     div.addEventListener('click',()=>{ window.location.href = `news.html?slug=${n.slug}`; });
@@ -237,8 +250,18 @@ document.getElementById('searchInput').addEventListener('input',()=>{
   });
 });
 
-async function init(){ await fetchAuthors(); await fetchNews(); displayNews(); }
+// Modal close
+document.getElementById('newsModalClose').onclick = ()=>{ document.getElementById('newsModal').style.display='none'; };
+document.getElementById('newsModal').onclick = e=>{ if(e.target.id==='newsModal') document.getElementById('newsModal').style.display='none'; };
+
+async function init(){
+  await fetchAuthors();
+  await fetchNews();
+  displayNews();
+}
+
 init();
+
 </script>
 </body>
 </html>

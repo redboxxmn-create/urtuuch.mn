@@ -8,9 +8,21 @@
     <style>
         /* ТАНЫ CSS */
         body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
+        
+        /* HEADER (Дэсктоп) */
         header{ background:#fff; padding:10px 15px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
         header h1{margin:0; font-size:22px;}
         .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
+        
+        /* ЛОГОНЫ СТИЛЬ (МУУХАЙ ХАРАГДАХГҮЙ БАЙХААР ЗАСВАРЛАВ) */
+        .logo-container img {
+            max-height: 40px; 
+            margin: 10px 0;
+            object-fit: contain; /* Логоны суналтыг зогсооно */
+            width: auto;
+        }
+
+        /* NAVIGATION (Дэсктоп) */
         nav {background:#3d85c6; display:flex; flex-wrap:wrap; padding:10px;}
         nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
         nav ul li {position:relative; margin-right:20px;}
@@ -21,9 +33,7 @@
         nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
         nav ul li ul li a:hover {background:#3d85c6;}
         
-        /* --------------------------------------------------- */
-        /* ШИНЭЧИЛСЭН GRID, FEATURED CARD-ЫН ТОХИРГОО (29 Мэдээний Загвар) */
-        /* --------------------------------------------------- */
+        /* GRID & CARD (Дэсктоп) */
         .grid{
             display:grid; 
             grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); 
@@ -41,7 +51,7 @@
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
         
-        /* Featured card-ын загвар: 2 багана эзэлнэ, Flex layout-тай */
+        /* Featured card (Дэсктоп) */
         .featured-card {
             grid-column: span 2; 
             display: flex; 
@@ -50,15 +60,10 @@
         }
         .featured-card img{
             width: 50%; 
-            height: auto; 
-            object-fit: cover;
             min-height: 250px; 
         } 
         .featured-card .card-content{
             width: 50%; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
             padding: 20px;
         }
         .featured-card .card-title {
@@ -69,52 +74,142 @@
             background: #d9534f; 
             font-size: 14px;
         }
+
+        /* --------------------------------------------------- */
+        /* ✅ ГАР УТАСНЫ ШИНЭЧИЛСЭН ЗАГВАР (MEDIA QUERY) */
+        /* --------------------------------------------------- */
         
-        /* Бусад загварууд */
-        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-        .card:hover .card-desc-preview{display:block;} 
-        .video-card{grid-column:1/-1; padding:0; margin-bottom:20px;}
-        .video-card iframe{width:100%; height:300px; border:none; border-radius:12px;}
-        .authors-container {display:flex; gap:10px; padding:10px; justify-content:center; flex-wrap:wrap; background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-        .author-card {flex:1 1 80px; max-width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
-        .author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
-        .author-name{font-weight:bold; font-size:14px;}
-        .author-title{font-size:12px; color:#555;}
-        .pagination{display:flex; justify-content:center; gap:5px; margin:10px 0; flex-wrap:wrap;}
-        .pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
-        .pagination button:hover{background:#3d85c6;}
-        .contact{background:#fff; padding:15px 10px; text-align:center; margin:15px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-        
-        /* Modal */
-        #newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
-        #newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:15px; position:relative;}
-        #newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
-        #newsModalContent img{width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
-        
+        /* Hamburger Icon-ын стиль */
+        .menu-toggle {
+            display: none; /* Дэсктоп дээр нууна */
+            cursor: pointer;
+            padding: 5px;
+            font-size: 28px;
+            color: #3d85c6;
+        }
+        .mobile-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
         @media(max-width:768px){
-            .grid{grid-template-columns:1fr; gap:10px; padding:10px;}
+            /* HEADER-ийг mobile-д тохируулах */
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 15px;
+            }
+            .mobile-header-bar {
+                margin-bottom: 10px; /* Лого, Icon-ы доор зай авах */
+            }
+            .menu-toggle {
+                display: block; /* Mobile дээр icon-ыг гаргана */
+            }
+            nav {
+                width: 100%;
+                background: #3d85c6;
+                /* Үүнийг JS-ээр 'display: none;' эсвэл 'max-height: 0;' болгож нуугаад, 
+                   icon-ыг дарахад нээгдэхээр хийнэ. Одоогоор л нуулаа. */
+                display: none; 
+                flex-direction: column;
+                padding: 0;
+                overflow: hidden;
+            }
+            nav ul {
+                flex-direction: column;
+            }
+            nav ul li {
+                margin-right: 0;
+                border-top: 1px solid #6fa8dc;
+            }
+            nav ul li:first-child { border-top: none; }
+            nav ul li a {
+                padding: 12px 15px;
+            }
+            nav ul li ul { 
+                position: relative; 
+                min-width: 100%;
+            }
+
+            /* GRID & CARDS (Mobile) */
+            .grid{
+                grid-template-columns:1fr; 
+                gap: 10px; 
+                padding: 10px;
+            }
             .video-card iframe{height:200px;}
-            header h1{font-size:18px;}
-            .search-box input{font-size:12px;}
-            nav ul{flex-direction:column;}
-            nav ul li{margin-right:0; margin-bottom:5px;}
-            nav ul li ul {position:relative; top:0;}
             
-            /* Featured card-г гар утасны хувьд нэг багана болгоно */
-            .featured-card{grid-column:1/-1; flex-direction:column;} 
-            .featured-card img{width:100%; height:200px; min-height: 150px;}
-            .featured-card .card-content{width:100%;}
+            /* Featured card - mobile дээр бүтэн дүүргэнэ */
+            .featured-card{
+                grid-column:1/-1; 
+                flex-direction:column;
+            } 
+            .featured-card img{
+                width:100%; 
+                height:200px; 
+                min-height: 150px;
+            }
+            .featured-card .card-content{
+                width:100%;
+            }
+
+            /* ✅ ЕРДИЙН CARD-уудыг Хэвтээ (Horizontal) болгож шинэчлэв */
+            .card:not(.featured-card) {
+                display: flex;
+                flex-direction: row;
+                height: 120px; /* Өндрийг тогтооно */
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                transform: none; /* Hover эффектийг хасна */
+            }
+            .card:not(.featured-card):hover{
+                transform: none;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            }
+            .card:not(.featured-card) img{
+                width: 120px; /* Зургийн өргөн */
+                height: 100%;
+                object-fit: cover;
+                border-radius: 12px 0 0 12px;
+            }
+            .card:not(.featured-card) .card-content{
+                padding: 10px 10px;
+                flex-grow: 1;
+            }
+            .card-title{
+                font-size: 14px;
+                line-height: 1.3;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 3; /* Зөвхөн 3 мөр гарчиг харуулна */
+                -webkit-box-orient: vertical;
+            }
+            .card-author{
+                display: none; /* Mobile дээр зохиогчийг нууна */
+            }
+            .card-meta{
+                margin-top: 0;
+                font-size: 11px;
+            }
+            .card-meta span.category{
+                 padding: 1px 6px;
+                 font-size: 10px;
+            }
         }
     </style>
 </head>
 <body>
 <header>
-    <a href="index.html">
-        <img src="https://i.imgur.com/L79pL1W.png" alt="urtuuch.mn лого" style="max-height: 40px; margin: 10px 0;">
-    </a>
+    <div class="mobile-header-bar">
+        <a href="index.html" class="logo-container">
+            <img src="https://i.imgur.com/L79pL1W.png" alt="urtuuch.mn лого">
+        </a>
+        <span class="menu-toggle" id="menuToggle">&#9776;</span>
+    </div>
     
     <div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
-    <nav>
+    <nav id="mainNav">
         <ul>
             <li><a href="#">Улс төр</a>
                 <ul>
@@ -205,8 +300,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let authorsData = [];
 let newsData = [];
 let currentPage = 1;
-const NEWS_PER_PAGE = 12; // Пагинацийн нэг хуудсан дахь тоо
-const TOTAL_NEWS_LIMIT = 29; // ✅ Нэг таталтаар авах нийт мэдээний тоо (Таны хүсэлтээр 29)
+const NEWS_PER_PAGE = 12; 
+const TOTAL_NEWS_LIMIT = 29; 
 
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
@@ -215,7 +310,6 @@ async function fetchAuthors() {
 }
 
 async function fetchNews() {
-    // 🔔 29 МЭДЭЭГ featured болон огноогоор эрэмбэлэн татаж байна 🔔
     const { data, error } = await supabase.from('news')
         .select('*')
         .eq('active', true) 
@@ -256,7 +350,6 @@ function displayNews() {
     let featuredItem = null;
     const itemsToDisplay = [];
 
-    // Зөвхөн одоогийн хуудсан дахь мэдээллээс featured-ийг ялгаж байна.
     for (const n of pageNews) {
         if (n.featured && !featuredItem) {
             featuredItem = n;
@@ -265,13 +358,11 @@ function displayNews() {
         }
     }
     
-    // Featured мэдээг хамгийн эхэнд томруулж гаргах
     if (featuredItem) {
         const featuredDiv = createNewsCard(featuredItem, true);
         container.appendChild(featuredDiv);
     }
     
-    // Үлдсэн мэдээг ердийн card-аар харуулах
     itemsToDisplay.forEach(n=>{
         const div = createNewsCard(n, false);
         container.appendChild(div);
@@ -313,7 +404,6 @@ function createNewsCard(n, isFeatured) {
 
 function renderPagination() {
     const container = document.getElementById('pagination');
-    // Пагинацийг татсан нийт 29 мэдээгээр тооцно
     const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE); 
     container.innerHTML='';
     if(totalPages<=1) return;
@@ -371,6 +461,17 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
     }
 });
 
+
+// ✅ HAMBURGER MENU JS LOGIC
+document.getElementById('menuToggle').addEventListener('click', function() {
+    const nav = document.getElementById('mainNav');
+    // CSS-т 'display: none' байсныг солино.
+    if (nav.style.display === 'flex') {
+        nav.style.display = 'none';
+    } else {
+        nav.style.display = 'flex'; 
+    }
+});
 
 // Modal close
 document.getElementById('newsModalClose').onclick = ()=>{ document.getElementById('newsModal').style.display='none'; };

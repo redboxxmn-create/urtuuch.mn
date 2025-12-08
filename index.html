@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>urtuuch.mn</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
 body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
-header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100;}
+header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
 .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
 nav {background:#3d85c6; display:flex; padding:10px;}
@@ -21,7 +22,7 @@ nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:b
 nav ul li ul li a:hover {background:#3d85c6;}
 
 .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
-.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform .3s;}
+.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform .3s; position:relative;}
 .card:hover{transform:translateY(-5px);}
 .card img{width:100%; height:150px; object-fit:cover;}
 .card-content{padding:10px;}
@@ -31,7 +32,7 @@ nav ul li ul li a:hover {background:#3d85c6;}
 .card-author{margin-top:6px; font-size:13px;}
 .card-desc-preview{display:none; position:absolute; inset:0; background:#fff; opacity:.95; padding:10px;}
 .card:hover .card-desc-preview{display:block;}
-.featured-card{grid-column:span 2; height:300px;}
+.featured-card{grid-column:span 2;}
 .authors-container{display:flex; gap:15px; padding:10px; flex-wrap:wrap; justify-content:center;}
 .author-card{width:120px; background:#fff; padding:6px; border-radius:8px; text-align:center;}
 .author-card img{width:50px; height:50px; border-radius:50%;}
@@ -43,10 +44,12 @@ nav ul li ul li a:hover {background:#3d85c6;}
 #newsModalClose{position:absolute; right:20px; top:10px; cursor:pointer;}
 </style>
 </head>
+
 <body>
 <header>
 <h1>urtuuch.mn</h1>
 <div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
+
 <nav>
 <ul>
 <li><a href="#">Улс төр</a>
@@ -56,14 +59,16 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <li><a href="#">Сурвалжилга</a></li>
 <li><a href="#">Өртөөчийн үг</a></li>
 <li><a href="#">Хов болох вий</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#">Эдийн засаг</a>
 <ul>
 <li><a href="#">Уул уурхай</a></li>
 <li><a href="#">Дэд бүтэц</a></li>
 <li><a href="#">Монголд үйлдвэрлэв</a></li>
 <li><a href="#">Зар сурталчилгаа</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#">Соёл урлаг</a>
 <ul>
 <li><a href="#">Ярилцлага</a></li>
@@ -71,7 +76,8 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <li><a href="#">Кино ертөнц</a></li>
 <li><a href="#">Утга зохиол</a></li>
 <li><a href="#">Соёл судлал</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#">Медиа</a>
 <ul>
 <li><a href="#">Нэвтрүүлэг</a></li>
@@ -80,18 +86,21 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <li><a href="#">MIC UP</a></li>
 <li><a href="#">Зураглал</a></li>
 <li><a href="#">Өртөөчөөс</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#">Дэлхий дахинд</a>
 <ul>
 <li><a href="#">Улс төр</a></li>
 <li><a href="#">Танин мэдэхүй</a></li>
 <li><a href="#">Шинжлэх ухаан</a></li>
-</ul></li>
+</ul>
+</li>
 <li><a href="#">Ярилцлага</a>
 <ul>
 <li><a href="#">Хөрөг ярилцлага</a></li>
 <li><a href="#">Улс төрийн ярилцлага</a></li>
-</ul></li>
+</ul>
+</li>
 </ul>
 </nav>
 </header>
@@ -107,6 +116,7 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
+<!-- MODAL -->
 <div id="newsModal">
 <div id="newsModalContent">
 <span id="newsModalClose">&times;</span>
@@ -125,7 +135,8 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
-const NEWS_PER_PAGE = 19;
+const NEWS_PER_PAGE = 19; // Нэг хуудсанд 19 мэдээ
+
 let currentPage = 1;
 let authorsCache = [];
 
@@ -155,21 +166,17 @@ async function displayAuthors(){
 }
 
 async function displayNews(filtered=null){
-  const news = filtered || await getNews();
+  let news = filtered || await getNews();
   const authors = await getAuthors();
 
-  // Онцлох мэдээ хамгийн түрүүнд
-  const featuredNews = news.filter(n=>n.featured);
-  const otherNews = news.filter(n=>!n.featured);
-  const combined = [...featuredNews, ...otherNews];
+  // Онцлох мэдээг хамгийн эхэнд
+  news.sort((a,b)=>b.featured - a.featured || new Date(b.created_at)-new Date(a.created_at));
 
-  const totalPages = Math.ceil(combined.length / NEWS_PER_PAGE);
+  const totalPages = Math.ceil(news.length / NEWS_PER_PAGE);
   if(currentPage>totalPages) currentPage = totalPages || 1;
-
-  const slice = combined.slice((currentPage-1)*NEWS_PER_PAGE, currentPage*NEWS_PER_PAGE);
+  const slice = news.slice((currentPage-1)*NEWS_PER_PAGE,currentPage*NEWS_PER_PAGE);
 
   el("newsContainer").innerHTML = "";
-
   slice.forEach(n=>{
      const card = document.createElement("div");
      card.className = n.featured ? "card featured-card":"card";
@@ -179,12 +186,14 @@ async function displayNews(filtered=null){
         <div class='card-content'>
            <div class='card-title'>${n.title}</div>
            <div class='card-meta'><span class='category'>${n.category}</span></div>
-           <div class='card-author'>${authors.find(a=>a.id==n.author_id)?.name||""}</div>
+           <div class='card-author'>
+              ${authors.find(a=>a.id==n.author_id)?.name||""}
+           </div>
            <div class='card-desc-preview'>${n.description||""}</div>
         </div>
      `;
 
-     card.onclick = ()=>{
+     card.onclick = ()=> {
         el("modalTitle").innerText = n.title;
         el("modalMeta").innerText = n.category;
         el("modalImage").src = n.image || "";
@@ -195,7 +204,7 @@ async function displayNews(filtered=null){
      el("newsContainer").appendChild(card);
   });
 
-  renderPagination(combined.length);
+  renderPagination(news.length);
 }
 
 function renderPagination(total){
@@ -203,7 +212,6 @@ function renderPagination(total){
   const box = el("pagination");
   box.innerHTML = "";
   if(pages<2) return;
-
   for(let i=1;i<=pages;i++){
      const b = document.createElement("button");
      b.innerText = i;
@@ -218,12 +226,17 @@ el("searchInput").addEventListener("input", async ()=>{
    displayNews(news.filter(n=>n.title.toLowerCase().includes(q)));
 });
 
+// Modal controls
 el("newsModalClose").onclick = ()=> el("newsModal").style.display="none";
-el("newsModal").onclick = e =>{ if(e.target.id === "newsModal") el("newsModal").style.display="none"; };
+el("newsModal").onclick = e =>{
+   if(e.target.id === "newsModal")
+       el("newsModal").style.display="none";
+};
 
 // Init
 displayNews();
 displayAuthors();
+
 </script>
 </body>
 </html>

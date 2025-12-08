@@ -10,30 +10,23 @@
 
     <style>
         body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-        /* Header-ийг relative болгож, гарах товчийг байршуулна */
+        /* Header нь энгийн харагдацтай болсон */
         header { 
             background: #3d85c6; 
             color: #fff; 
             padding: 15px 20px; 
-            position: relative; /* Нэмсэн */
-            display: flex; /* Нэмсэн */
-            justify-content: space-between; /* Нэмсэн */
-            align-items: center; /* Нэмсэн */
+            display: flex; 
+            justify-content: flex-start; /* Эхлэл рүү зэрэгцүүлэв */
+            align-items: center; 
         }
         .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
         button { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 8px; cursor: pointer; background: #6fa8dc; color: #fff; transition: background 0.3s; }
         button:hover { background: #3d85c6; }
-        /* Гарах товчны өөрчлөлт */
-        #logoutBtn {
-            background: #c63d3d; 
-            transition: background 0.3s;
-        }
-        #logoutBtn:hover {
-            background: #a93232; 
-        }
-
+        
+        /* Гарах товчны стилийг хассан */
+        
         .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
         #editor { height: 150px; }
         .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; border-bottom: 2px solid #3d85c6; padding-bottom: 5px; }
@@ -49,7 +42,7 @@
 
 <header>
     <h1>Админ Панел</h1>
-    <button onclick="logout()" id="logoutBtn">Гарах</button> </header>
+    </header>
 
 <div class="container">
 
@@ -135,35 +128,6 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Quill editor
 const quill = new Quill("#editor", { theme: "snow" });
-
-// ---------------------------------------------------
-// ✅ AUTHENTICATION (Нэвтрэх/Гарах)
-// ---------------------------------------------------
-
-async function checkAdminAuth() {
-    // Supabase-аас одоогийн хэрэглэгчийг шалгана
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    
-    if (!user) {
-        // Хэрэв нэвтрээгүй бол login.html руу шилжүүлнэ
-        window.location.href = 'login.html';
-        return false;
-    }
-    return true;
-}
-
-window.logout = async function() {
-    if (!confirm('Системээс гарахдаа итгэлтэй байна уу?')) return;
-    
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        alert("Гарахад алдаа гарлаа: " + error.message);
-    } else {
-        // Амжилттай гарсны дараа login.html руу буцаах
-        window.location.href = 'login.html';
-    }
-}
 
 
 // ---------------------------------------------------
@@ -412,18 +376,13 @@ window.saveAuthor = saveAuthor;
 window.clearAuthorForm = clearAuthorForm;
 window.editAuthor = editAuthor;
 window.removeAuthor = removeAuthor;
-window.logout = logout; // Гарах функцийг заавал гаргана
+
 
 // INIT
-async function initializeAdminPanel() {
-    const isAuthenticated = await checkAdminAuth();
-    
-    // Зөвхөн нэвтэрсэн бол бусад функцуудыг дуудна
-    if (isAuthenticated) {
-        populateAuthorSelect();
-        displayAuthors();
-        displayNews();
-    }
+function initializeAdminPanel() {
+    populateAuthorSelect();
+    displayAuthors();
+    displayNews();
 }
 
 initializeAdminPanel();

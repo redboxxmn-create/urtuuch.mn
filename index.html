@@ -3,285 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>urtuuch.mn</title>
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<title>urtuuch.mn - Мэдээ</title>
+
 <style>
-body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
-header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
-header h1{margin:0; font-size:24px;}
-.search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
-nav {background:#3d85c6; display:flex; padding:10px;}
-nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
-nav ul li {position:relative; margin-right:20px;}
-nav ul li a {color:#fff; text-decoration:none; padding:8px 12px; display:block; font-weight:bold; border-radius:6px;}
-nav ul li:hover > a {background:#6fa8dc;}
-nav ul li ul {display:none; position:absolute; top:100%; left:0; background:#6fa8dc; list-style:none; padding:0; margin:0; border-radius:6px; min-width:180px; z-index:100;}
-nav ul li:hover ul {display:block;}
-nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
-nav ul li ul li a:hover {background:#3d85c6;}
+body{font-family:Arial;margin:0;padding:0;background:#f5f5f5}
+header{background:#111;padding:15px}
+nav ul{list-style:none;margin:0;padding:0;display:flex;gap:25px}
+nav ul li{position:relative}
+nav ul li a{color:#fff;text-decoration:none;font-size:15px}
+nav ul li ul{
+    position:absolute;top:30px;left:0;background:#222;
+    padding:10px;display:none;flex-direction:column;min-width:150px
+}
+nav ul li:hover ul{display:flex}
+nav ul li ul li{margin:5px 0}
 
-.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
-.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s;}
-.card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
-.card img{width:100%; height:150px; object-fit:cover;}
-.card-content{padding:10px; position:relative;}
-.card-title{font-size:16px; margin:0; font-weight:bold;}
-.card-meta{font-size:12px; color:#666; margin-top:5px; display:flex; justify-content:space-between; flex-wrap:wrap;}
-.card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;}
-.card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
-.card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
-.card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-.card:hover .card-desc-preview{display:block;}
-.featured-card{grid-column: span 2; font-size:18px; box-shadow:0 6px 20px rgba(0,0,0,0.2); border:2px solid #6fa8dc;}
-.video-card{grid-column: span 2; padding:0; margin:20px;}
-.video-card iframe{width:100%; height:400px; border:none; border-radius:12px;}
-.authors-container {display:flex; gap:15px; padding:10px; justify-content:center; flex-wrap:wrap;}
-.author-card {width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
-.author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
-.author-name{font-weight:bold; font-size:14px;}
-.author-title{font-size:12px; color:#555;}
-.pagination{display:flex; justify-content:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
-.pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s;}
-.pagination button:hover{background:#3d85c6;}
-@media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
-.contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.container{width:90%;max-width:1300px;margin:auto;margin-top:20px}
 
-/* Modal */
-#newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
-#newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
-#newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
-#newsModalContent img{width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
+.featured{
+    background:#fff;padding:15px;border-radius:8px;margin-bottom:25px
+}
+.featured img{width:100%;max-height:450px;object-fit:cover;border-radius:8px}
+.featured h2{margin:10px 0;font-size:26px}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{
+    background:#fff;padding:10px;border-radius:8px;
+    cursor:pointer;transition:0.2s
+}
+.card:hover{transform:scale(1.02)}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:6px}
+.card h3{font-size:17px;margin:10px 0}
+
+.pagination{display:flex;gap:10px;margin:20px 0}
+.pagination button{padding:8px 15px;border:0;background:#222;color:#fff;cursor:pointer;border-radius:5px}
+.pagination button:disabled{background:#666}
+
 </style>
 </head>
 <body>
 
 <header>
-<h1>urtuuch.mn</h1>
-<div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
 <nav>
-  <ul>
-    <li><a href="#">Улс төр</a>
-      <ul>
-        <li><a href="#">Тойм</a></li>
-        <li><a href="#">Нийтлэл</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">Өртөөчийн үг</a></li>
-        <li><a href="#">Хов болох вий</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Эдийн засаг</a>
-      <ul>
-        <li><a href="#">Уул уурхай</a></li>
-        <li><a href="#">Дэд бүтэц</a></li>
-        <li><a href="#">Монголд үйлдвэрлэв</a></li>
-        <li><a href="#">Зар сурталчилгаа</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Соёл урлаг</a>
-      <ul>
-        <li><a href="#">Ярилцлага</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">Кино ертөнц</a></li>
-        <li><a href="#">Утга зохиол</a></li>
-        <li><a href="#">Соёл судлал</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Медиа</a>
-      <ul>
-        <li><a href="#">Нэвтрүүлэг</a></li>
-        <li><a href="#">Мэдээ</a></li>
-        <li><a href="#">Сурвалжилга</a></li>
-        <li><a href="#">MIC UP</a></li>
-        <li><a href="#">Зураглал</a></li>
-        <li><a href="#">Өртөөчөөс</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Дэлхий дахинд</a>
-      <ul>
-        <li><a href="#">Улс төр</a></li>
-        <li><a href="#">Танин мэдэхүй</a></li>
-        <li><a href="#">Шинжлэх ухаан</a></li>
-      </ul>
-    </li>
-    <li><a href="#">Ярилцлага</a>
-      <ul>
-        <li><a href="#">Хөрөг ярилцлага</a></li>
-        <li><a href="#">Улс төрийн ярилцлага</a></li>
-      </ul>
-    </li>
-  </ul>
+<ul>
+
+<li><a href="#">Улс төр</a>
+<ul>
+<li><a href="#">Тойм</a></li>
+<li><a href="#">Нийтлэл</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">Өртөөчийн үг</a></li>
+<li><a href="#">Хов болох вий</a></li>
+</ul>
+</li>
+
+<li><a href="#">Эдийн засаг</a>
+<ul>
+<li><a href="#">Уул уурхай</a></li>
+<li><a href="#">Дэд бүтэц</a></li>
+<li><a href="#">Монголд үйлдвэрлэв</a></li>
+<li><a href="#">Зар сурталчилгаа</a></li>
+</ul>
+</li>
+
+<li><a href="#">Соёл урлаг</a>
+<ul>
+<li><a href="#">Ярилцлага</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">Кино ертөнц</a></li>
+<li><a href="#">Утга зохиол</a></li>
+<li><a href="#">Соёл судлал</a></li>
+</ul>
+</li>
+
+<li><a href="#">Медиа</a>
+<ul>
+<li><a href="#">Нэвтрүүлэг</a></li>
+<li><a href="#">Мэдээ</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">MIC UP</a></li>
+<li><a href="#">Зураглал</a></li>
+<li><a href="#">Өртөөчөөс</a></li>
+</ul>
+</li>
+
+<li><a href="#">Дэлхий дахинд</a>
+<ul>
+<li><a href="#">Улс төр</a></li>
+<li><a href="#">Танин мэдэхүй</a></li>
+<li><a href="#">Шинжлэх ухаан</a></li>
+</ul>
+</li>
+
+<li><a href="#">Ярилцлага</a>
+<ul>
+<li><a href="#">Хөрөг ярилцлага</a></li>
+<li><a href="#">Улс төрийн ярилцлага</a></li>
+</ul>
+</li>
+
+</ul>
 </nav>
 </header>
 
-<!-- Grid мэдээ -->
-<div class="grid" id="newsContainer"></div>
 
-<!-- Видео карт -->
-<div class="video-card" id="videoContainer"></div>
+<div class="container">
 
-<!-- Нийтлэлчид -->
-<div class="authors-container" id="authorsContainer"></div>
+    <div id="featuredBox">Онцлох мэдээ ачаалж байна...</div>
 
-<!-- Pagination -->
-<div class="pagination" id="pagination"></div>
+    <div class="grid" id="newsBox">Ачаалж байна...</div>
 
-<div class="contact">
-<h3>Холбоо барих</h3>
-<p>Утас: 94344777</p>
-<p>Face: urtuuch.mn</p>
-<p>Хаяг: Арвайхээр хот</p>
+    <div class="pagination">
+        <button id="prevBtn">Өмнөх</button>
+        <button id="nextBtn">Дараах</button>
+    </div>
+
 </div>
 
-<!-- Modal -->
-<div id="newsModal">
-  <div id="newsModalContent">
-    <span id="newsModalClose">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <div id="modalMeta" style="color:#666; font-size:12px; margin-bottom:10px;"></div>
-    <img id="modalImage" src="">
-    <div id="modalContent"></div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(
+    "https://wpotnvekaoosdkvmhqgo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
+);
 
-let authorsData = [];
-let newsData = [];
-let currentPage = 1;
-const NEWS_PER_PAGE = 18;
+let page = 1;
+const limit = 19;
 
-// Fetch authors from Supabase
-async function fetchAuthors(){
-  const { data, error } = await supabase.from('authors').select('*').order('id');
-  if(error) console.error(error);
-  else authorsData = data;
+async function loadFeatured() {
+    let { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .eq("featured", true)
+        .order("id", { ascending: false })
+        .limit(1);
+
+    if (!data || data.length === 0) {
+        document.getElementById("featuredBox").innerHTML = "Онцлох мэдээ алга.";
+        return;
+    }
+
+    let n = data[0];
+
+    document.getElementById("featuredBox").innerHTML = `
+        <div class="featured" onclick="location.href='news.html?slug=${n.slug}'">
+            ${n.image ? `<img src="${n.image}">` : ""}
+            <h2>${n.title}</h2>
+            <div>${n.category}</div>
+        </div>
+    `;
 }
 
-// Fetch news from Supabase
-async function fetchNews(){
-  const { data, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
-  if(error) console.error(error);
-  else newsData = data;
+async function loadNews() {
+    let start = (page - 1) * limit;
+    let end = start + limit - 1;
+
+    let { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("id", { ascending: false })
+        .range(start, end);
+
+    if (!data) return;
+
+    document.getElementById("newsBox").innerHTML = data
+        .map(
+            (n) => `
+        <div class="card" onclick="location.href='news.html?slug=${n.slug}'">
+            ${n.image ? `<img src="${n.image}">` : ""}
+            <h3>${n.title}</h3>
+            <div>${n.category}</div>
+        </div>
+        `
+        )
+        .join("");
 }
 
-// Display authors
-function displayAuthors(){
-  const container = document.getElementById('authorsContainer');
-  container.innerHTML = authorsData.map(a=>`
-    <div class="author-card">
-      <img src="${a.image}">
-      <div class="author-name">${a.name}</div>
-      <div class="author-title">${a.title}</div>
-    </div>`).join('');
-}
+document.getElementById("prevBtn").onclick = () => {
+    if (page > 1) {
+        page--;
+        loadNews();
+    }
+};
+document.getElementById("nextBtn").onclick = () => {
+    page++;
+    loadNews();
+};
 
-// Display news
-function displayNews(){
-  const container = document.getElementById('newsContainer');
-  container.innerHTML="";
+loadFeatured();
+loadNews();
 
-  const start = (currentPage-1)*NEWS_PER_PAGE;
-  const end = start + NEWS_PER_PAGE;
-  const pageNews = newsData.slice(start,end);
-
-  pageNews.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
-    const div = document.createElement('div');
-    div.className = n.featured?"card featured-card":"card";
-    div.innerHTML = `
-      ${n.image?`<img src="${n.image}">`:''}
-      <div class="card-content">
-        <h3 class="card-title">${n.title}</h3>
-        <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
-        <div class="card-desc-preview">${n.description}</div>
-      </div>`;
-    div.addEventListener('click', ()=>{
-      document.getElementById('modalTitle').innerText = n.title;
-      document.getElementById('modalMeta').innerText = `${n.category} | ${author.name} ${n.featured?'| Онцлох':''}`;
-      document.getElementById('modalImage').src = n.image || '';
-      document.getElementById('modalContent').innerHTML = n.description;
-      document.getElementById('newsModal').style.display = 'flex';
-    });
-    container.appendChild(div);
-  });
-
-  renderPagination();
-  displayAuthors();
-}
-
-// Pagination
-function renderPagination(){
-  const container = document.getElementById('pagination');
-  const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
-  container.innerHTML='';
-  if(totalPages<=1) return;
-  if(currentPage>1){
-    const prev=document.createElement('button');
-    prev.innerText="Өмнөх";
-    prev.onclick=()=>{currentPage--; displayNews();};
-    container.appendChild(prev);
-  }
-  for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement('button');
-    btn.innerText=i;
-    if(i===currentPage) btn.style.background="#3d85c6";
-    btn.onclick=()=>{currentPage=i; displayNews();};
-    container.appendChild(btn);
-  }
-  if(currentPage<totalPages){
-    const next=document.createElement('button');
-    next.innerText="Дараах";
-    next.onclick=()=>{currentPage++; displayNews();};
-    container.appendChild(next);
-  }
-}
-
-// Search
-document.getElementById('searchInput').addEventListener('input',()=>{
-  const keyword=document.getElementById('searchInput').value.toLowerCase();
-  const filtered=newsData.filter(n=>n.title.toLowerCase().includes(keyword));
-  currentPage=1;
-  const container=document.getElementById('newsContainer');
-  container.innerHTML="";
-  filtered.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
-    const div=document.createElement('div');
-    div.className = n.featured?"card featured-card":"card";
-    div.innerHTML=`
-      ${n.image?`<img src="${n.image}">`:''}
-      <div class="card-content">
-        <h3 class="card-title">${n.title}</h3>
-        <div class="card-meta"><span class="category">${n.category}</span></div>
-        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
-      </div>`;
-    div.addEventListener('click',()=>{
-      document.getElementById('modalTitle').innerText=n.title;
-      document.getElementById('modalMeta').innerText=`${n.category} | ${author.name} ${n.featured?'| Онцлох':''}`;
-      document.getElementById('modalImage').src=n.image||'';
-      document.getElementById('modalContent').innerHTML=n.description;
-      document.getElementById('newsModal').style.display='flex';
-    });
-    container.appendChild(div);
-  });
-});
-
-// Modal close
-document.getElementById('newsModalClose').onclick = ()=>{ document.getElementById('newsModal').style.display='none'; };
-document.getElementById('newsModal').onclick = (e)=>{ if(e.target.id==='newsModal') document.getElementById('newsModal').style.display='none'; };
-
-// Init
-async function init(){
-  await fetchAuthors();
-  await fetchNews();
-  displayNews();
-}
-init();
 </script>
 
 </body>

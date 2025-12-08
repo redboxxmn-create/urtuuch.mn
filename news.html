@@ -10,8 +10,11 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="share-default.png"> 
+<meta property="og:image" content="https://via.placeholder.com/1200x630"> 
 <meta property="og:url" content="https://urtuuch.mn"> 
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <style>
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
 .container { max-width:900px; margin:40px auto; background:#fff; padding:25px; border-radius:15px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
@@ -83,7 +86,7 @@ window.shareInstagram = shareInstagram;
 // FETCH NEWS FUNCTION
 // ---------------------------------------------------
 
-// Meta tag-уудыг үүсгэх эсвэл шинэчлэх туслах функц
+// ✅ ЗАСВАР 2/3: createOrUpdateMetaTag функц
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
     let tag = document.querySelector(`meta[property="${property}"]`);
@@ -122,13 +125,17 @@ async function fetchNewsBySlug(slug){
     
     const currentURL = window.location.href;
     
-    // ✅ ЗАСВАР: Зураггүй бол default local зургийг ашиглана
-    const imageUrl = news.image || 'share-default.png'; 
+    // ✅ ЗАСВАР 3/3: Зураггүй бол баталгаатай том зургийг ашиглана
+    const imageUrl = news.image || 'https://via.placeholder.com/1200x630'; 
     
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
     createOrUpdateMetaTag('og:url', currentURL);
+
+    // 🚀 ШИНЭ: Зургийн хэмжээг динамикаар баталгаажуулж байна
+    createOrUpdateMetaTag('og:image:width', '1200');
+    createOrUpdateMetaTag('og:image:height', '630');
     
     // =======================================================
     

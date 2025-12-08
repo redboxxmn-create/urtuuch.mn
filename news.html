@@ -13,6 +13,10 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .news-text { flex:2 1 400px; }
 .news-text h1 { color:#d9534f; margin-bottom:15px; }
 .news-text p { font-size:16px; line-height:1.7; color:#555; }
+/* Description доторх HTML контентийг цэгцлэх */
+.news-content-html p { margin-top: 1em; line-height: 1.6; }
+.news-content-html img { max-width: 100%; height: auto; border-radius: 8px; }
+
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
 .back-btn:hover { background:#f4a6a6; color:#333; }
 @media(max-width:768px){ .news-layout { flex-direction:column; } }
@@ -42,10 +46,12 @@ async function fetchNewsBySlug(slug){
         .from('news')
         .select('*')
         .eq('slug', slug)
-        .single();  // ганц мэдээ ирнэ
-    if(error){
-        document.getElementById('newsContainer').innerHTML = `<p>Мэдээ олдсонгүй. Алдаа: ${error.message}</p>`;
-        console.error(error);
+        .eq('active', true) // ✅ НИЙТЛЭГДСЭН МЭДЭЭГ ЗӨВХӨН ТАТАЖ АВАХ
+        .single();  
+        
+    if(error || !data){ 
+        document.getElementById('newsContainer').innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна.</p>`;
+        if(error) console.error(error);
     } else {
         const authorData = await supabase
             .from('authors')
@@ -54,6 +60,9 @@ async function fetchNewsBySlug(slug){
             .single();
 
         const author = authorData.data || {name:"Тодорхойгүй", image:""};
+        
+        // Description нь Quill editor-оос ирсэн HTML контент тул
+        const descriptionContent = data.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
 
         document.getElementById('newsContainer').innerHTML = `
           <div class="news-layout">
@@ -62,7 +71,7 @@ async function fetchNewsBySlug(slug){
               <h1>${data.title}</h1>
               <p><strong>Төрөл:</strong> ${data.category}</p>
               <p><strong>Зохиогч:</strong> ${author.name}</p>
-              <p>${data.description}</p>
+              <div class="news-content-html">${descriptionContent}</div> 
             </div>
           </div>
         `;

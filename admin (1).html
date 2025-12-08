@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html lang="mn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Админ Панел</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панел</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
-<style>
-body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-header { background: #3d85c6; color: #fff; padding: 15px 20px; }
-.container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
-.list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
-#editor { height: 150px; }
-.group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; }
-.search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
-</style>
+    <style>
+        /* CSS хэсэг (Өөрчлөгдөөгүй) */
+        body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+        header { background: #3d85c6; color: #fff; padding: 15px 20px; }
+        .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
+        .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        #editor { height: 150px; }
+        .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; }
+        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
 
@@ -26,7 +27,6 @@ input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
 
 <div class="container">
 
-    <!-- NEWS -->
     <div class="card">
         <h2>Мэдээ нэмэх / засах</h2>
         <input type="hidden" id="editIndex">
@@ -44,11 +44,11 @@ input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
         <div id="editor"></div>
         <select id="newsAuthor"></select>
         <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
+        <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
         <button onclick="saveNews()">Хадгалах</button>
         <button onclick="clearNewsForm()">Цэвэрлэх</button>
     </div>
 
-    <!-- AUTHORS -->
     <div class="card">
         <h2>Нийтлэлч</h2>
         <input type="hidden" id="editAuthorIndex">
@@ -59,18 +59,15 @@ input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
         <button onclick="clearAuthorForm()">Цэвэрлэх</button>
     </div>
 
-    <!-- SEARCH -->
     <div class="card" style="grid-column: span 2;">
         <input type="text" id="searchInput" class="search-input" placeholder="Мэдээ хайх...">
     </div>
 
-    <!-- NEWS LIST -->
     <div class="card" style="grid-column: span 2;">
         <h2>Мэдээ</h2>
         <div id="newsList"></div>
     </div>
 
-    <!-- AUTHORS LIST -->
     <div class="card" style="grid-column: span 2;">
         <h2>Нийтлэлчид</h2>
         <div id="authorList"></div>
@@ -82,12 +79,13 @@ input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-// DOM элементүүд
+// DOM элементүүд (newsActive нэмэгдсэн)
 const newsTitle = document.getElementById("newsTitle");
 const newsCategory = document.getElementById("newsCategory");
 const newsImage = document.getElementById("newsImage");
 const newsAuthor = document.getElementById("newsAuthor");
 const newsFeatured = document.getElementById("newsFeatured");
+const newsActive = document.getElementById("newsActive"); 
 const newsList = document.getElementById("newsList");
 const editIndex = document.getElementById("editIndex");
 
@@ -99,17 +97,17 @@ const authorList = document.getElementById("authorList");
 
 const searchInput = document.getElementById("searchInput");
 
-// Supabase client
+// Supabase client (Өөрчлөгдөөгүй)
 const supabaseClient = supabase.createClient(
     "https://wpotnvekaoosdkvmhqgo.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
-// Quill editor
+// Quill editor (Өөрчлөгдөөгүй)
 const quill = new Quill("#editor", { theme: "snow" });
 
 // ---------------------------------------------------
-// AUTHORS
+// AUTHORS (Өөрчлөгдөөгүй)
 // ---------------------------------------------------
 async function fetchAuthors() {
     const { data } = await supabaseClient.from("authors").select("*").order("id");
@@ -180,7 +178,7 @@ function clearAuthorForm() {
 }
 
 // ---------------------------------------------------
-// NEWS
+// NEWS (Засварласан хэсэг)
 // ---------------------------------------------------
 async function fetchNews() {
     const { data } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
@@ -214,9 +212,11 @@ async function displayNews(filter = "") {
         newsList.innerHTML += `<div class="group-title">${d}</div>`;
         grouped[d].forEach(n => {
             const aut = authors.find(a => a.id == n.author_id)?.name || "Тодорхойгүй";
+            // active төлөвийг жагсаалтад харуулж байна
+            const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
             newsList.innerHTML += `
             <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}</span>
+                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""} ${activeStatus}</span>
                 <span>
                     <button onclick="editNews(${n.id})">Засах</button>
                     <button onclick="removeNews(${n.id})">Устгах</button>
@@ -235,18 +235,24 @@ async function saveNews() {
         image: newsImage.value.trim(),
         description: html,
         author_id: Number(newsAuthor.value),
-        featured: newsFeatured.checked
+        featured: newsFeatured.checked,
+        // ✅ ЭНЭ БОЛ ТАНЫ АСУУДЛЫГ ШИЙДЭЖ БУЙ ХЭСЭГ: `active` утгыг check box-оос авч байна.
+        active: newsActive.checked 
     };
     if (!data.title) return alert("Гарчиг заавал бөглөнө");
     if (!data.author_id) return alert("Нийтлэлч сонгоно уу");
 
-    if (editIndex.value === "")
+    if (editIndex.value === "") {
+        // Шинэ мэдээ нэмэх
         await supabaseClient.from("news").insert(data);
-    else
+    } else {
+        // Мэдээ засах
         await supabaseClient.from("news").update(data).eq("id", editIndex.value);
+    }
 
     clearNewsForm();
     displayNews(searchInput.value);
+    alert("Амжилттай хадгалагдлаа. Үндсэн вэбсайтыг (urtuuch.mn) Hard Refresh хийж шалгана уу.");
 }
 
 async function editNews(id) {
@@ -257,6 +263,7 @@ async function editNews(id) {
     newsImage.value = data.image;
     newsAuthor.value = data.author_id;
     newsFeatured.checked = data.featured;
+    newsActive.checked = data.active; // ✅ `active` утгыг check box-д оруулж байна.
     quill.root.innerHTML = data.description;
 }
 
@@ -273,15 +280,16 @@ function clearNewsForm() {
     newsCategory.value = "";
     newsImage.value = "";
     newsFeatured.checked = false;
+    newsActive.checked = false; // ✅ Цэвэрлэхэд `active` утгыг false болгох
     quill.setText("");
 }
 
-// Search listener
+// Search listener (Өөрчлөгдөөгүй)
 searchInput.addEventListener("input", () => {
     displayNews(searchInput.value);
 });
 
-// INIT
+// INIT (Өөрчлөгдөөгүй)
 populateAuthorSelect();
 displayAuthors();
 displayNews();

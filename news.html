@@ -20,6 +20,32 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
 .back-btn:hover { background:#f4a6a6; color:#333; }
 @media(max-width:768px){ .news-layout { flex-direction:column; } }
+
+/* ✅ НЭМСЭН: SHARE ТОВЧЛУУРУУДЫН CSS */
+.share-buttons { 
+    margin-top: 20px; 
+    border-top: 1px solid #ddd; 
+    padding-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+.share-buttons button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+.share-buttons button:hover {
+    opacity: 0.8;
+}
+.share-facebook { background: #1877f2; }
+.share-twitter { background: #1da1f2; }
+.share-instagram { background: #e1306c; }
+/* ------------------------------------- */
+
 </style>
 </head>
 <body>
@@ -32,16 +58,44 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
 
 <script>
-// Import шаардлагагүй, учир нь Supabase одоо window.supabase-д байна.
-
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
-// ✅ createClient-ийг window.supabase-аас дуудаж байна.
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
+
+// ---------------------------------------------------
+// ✅ НЭМСЭН: SHARE FUNCTIONS
+// ---------------------------------------------------
+
+function shareFacebook(title) {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(title);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, 'facebook-share', 'width=600,height=400');
+}
+
+function shareTwitter(title) {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(title);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, 'twitter-share', 'width=600,height=400');
+}
+
+function shareInstagram() {
+    alert("Инстаграм нь вэбээс шууд холбоос хуваалцахыг дэмждэггүй. Та манай албан ёсны Инстаграм хуудас руу шилжинэ.");
+    // 💡 Та энд өөрийн Instagram хаягийг оруулна уу
+    window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
+}
+
+// Global scope-д гаргах (HTML onclick ажиллахын тулд)
+window.shareFacebook = shareFacebook;
+window.shareTwitter = shareTwitter;
+window.shareInstagram = shareInstagram;
+
+// ---------------------------------------------------
+// FETCH NEWS FUNCTION
+// ---------------------------------------------------
 
 async function fetchNewsBySlug(slug){
     const container = document.getElementById('newsContainer');
@@ -61,7 +115,7 @@ async function fetchNewsBySlug(slug){
     } 
     
     // 2. Зохиогчийн мэдээллийг author_id-аар тусад нь татаж авах
-    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; // Default утга
+    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
     if(news.author_id){
         const { data: authorData, error: authorError } = await supabase
             .from('authors')
@@ -77,6 +131,9 @@ async function fetchNewsBySlug(slug){
     }
 
     const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
+    
+    // Гарчигт ' тэмдэгт орсон тохиолдолд JS алдаа гаргахаас сэргийлж байна
+    const escapedTitle = news.title.replace(/'/g, "\\'");
 
     container.innerHTML = `
       <div class="news-layout">
@@ -86,7 +143,13 @@ async function fetchNewsBySlug(slug){
           <p><strong>Төрөл:</strong> ${news.category}</p>
           <p><strong>Зохиогч:</strong> ${author.name}</p>
           <div class="news-content-html">${descriptionContent}</div> 
-        </div>
+          
+          <div class="share-buttons">
+            <button class="share-facebook" onclick="shareFacebook('${escapedTitle}')">Facebook</button>
+            <button class="share-twitter" onclick="shareTwitter('${escapedTitle}')">Twitter</button>
+            <button class="share-instagram" onclick="shareInstagram()">Instagram</button>
+          </div>
+          </div>
       </div>
     `;
 }

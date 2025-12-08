@@ -29,13 +29,16 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 </div>
 <button class="back-btn" onclick="history.back()">Буцах</button>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
+
+<script>
+// Import шаардлагагүй, учир нь Supabase одоо window.supabase-д байна.
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ✅ createClient-ийг window.supabase-аас дуудаж байна.
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
@@ -43,7 +46,7 @@ const slug = params.get('slug');
 async function fetchNewsBySlug(slug){
     const container = document.getElementById('newsContainer');
     
-    // 1. Мэдээг татаж авах (Зөвхөн news-ээс)
+    // 1. Мэдээг татаж авах
     const { data: news, error: newsError } = await supabase
         .from('news')
         .select('*') 

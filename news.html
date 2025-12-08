@@ -25,12 +25,13 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 <body>
 
 <div class="container" id="newsContainer">
-  <p>Мэдээ ачаалж байна...</p>
+  <p>Мэдээ ачаалж байна...</p>
 </div>
 <button class="back-btn" onclick="history.back()">Буцах</button>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// ✅ ЗАСВАР: Supabase Client-ийг зөв импортлох
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
@@ -42,46 +43,57 @@ const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
 
 async function fetchNewsBySlug(slug){
-    const { data, error } = await supabase
-        .from('news')
-        .select('*')
-        .eq('slug', slug)
-        .eq('active', true) // ✅ НИЙТЛЭГДСЭН МЭДЭЭГ ЗӨВХӨН ТАТАЖ АВАХ
-        .single();  
-        
-    if(error || !data){ 
-        document.getElementById('newsContainer').innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна.</p>`;
-        if(error) console.error(error);
-    } else {
-        const authorData = await supabase
-            .from('authors')
-            .select('*')
-            .eq('id', data.author_id)
-            .single();
+    const container = document.getElementById('newsContainer');
+    
+    // 1. Мэдээг татаж авах
+    const { data: news, error: newsError } = await supabase
+        .from('news')
+        .select('*, authors(name)') // Зохиогчийн нэрийг хамт татаж авч болно, гэхдээ одоогийн загварыг хэвээр үлдээе.
+        .eq('slug', slug)
+        .eq('active', true) 
+        .single();  
+        
+    if(newsError || !news){ 
+        container.innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна. (Консолыг шалгана уу)</p>`;
+        if(newsError) console.error("News fetch error:", newsError);
+        return;
+    } 
+    
+    // 2. Зохиогчийн мэдээллийг татаж авах
+    let author = {name:"Тодорхойгүй"};
+    if(news.author_id){
+        const { data: authorData, error: authorError } = await supabase
+            .from('authors')
+            .select('*')
+            .eq('id', news.author_id)
+            .single();
+        
+        if(authorData) {
+            author = authorData;
+        } else if (authorError) {
+            console.error("Author fetch error:", authorError);
+        }
+    }
 
-        const author = authorData.data || {name:"Тодорхойгүй", image:""};
-        
-        // Description нь Quill editor-оос ирсэн HTML контент тул
-        const descriptionContent = data.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
+    const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
 
-        document.getElementById('newsContainer').innerHTML = `
-          <div class="news-layout">
-            ${data.image?`<img src="${data.image}" alt="${data.title}">`:''}
-            <div class="news-text">
-              <h1>${data.title}</h1>
-              <p><strong>Төрөл:</strong> ${data.category}</p>
-              <p><strong>Зохиогч:</strong> ${author.name}</p>
-              <div class="news-content-html">${descriptionContent}</div> 
-            </div>
-          </div>
-        `;
-    }
+    container.innerHTML = `
+      <div class="news-layout">
+        ${news.image?`<img src="${news.image}" alt="${news.title}">`:''}
+        <div class="news-text">
+          <h1>${news.title}</h1>
+          <p><strong>Төрөл:</strong> ${news.category}</p>
+          <p><strong>Зохиогч:</strong> ${author.name}</p>
+          <div class="news-content-html">${descriptionContent}</div> 
+        </div>
+      </div>
+    `;
 }
 
 if(slug){
-    fetchNewsBySlug(slug);
+    fetchNewsBySlug(slug);
 } else {
-    document.getElementById('newsContainer').innerHTML = `<p>Мэдээний slug олдсонгүй.</p>`;
+    document.getElementById('newsContainer').innerHTML = `<p>Мэдээний slug олдсонгүй.</p>`;
 }
 </script>
 

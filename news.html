@@ -3,53 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Мэдээ</title>
+<title>Мэдээ дэлгэрэнгүй</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-img{width:100%;max-height:400px;object-fit:cover}
+body{font-family:'Ubuntu',sans-serif; margin:20px; background:#f0f5f5; color:#333;}
+a{color:#3d85c6; text-decoration:none;}
+a:hover{text-decoration:underline;}
+h1{font-size:24px;}
+img{max-width:100%; border-radius:8px; margin:10px 0;}
+.meta{color:#666; font-size:12px; margin-bottom:15px;}
 </style>
 </head>
 <body>
+<a href="index.html">&larr; Буцах</a>
+<div id="newsDetail"></div>
 
-<div id="box">Ачаалж байна...</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-const supabase = createClient(
-    "https://wpotnvekaoosdkvmhqgo.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
-);
-
-const params = new URLSearchParams(location.search);
-const slug = params.get("slug");
-
-async function load(){
-   if(!slug){ 
-       document.getElementById("box").innerHTML="Мэдээ олдсонгүй"; 
-       return;
-   }
-
-   let {data, error} = await supabase
-      .from("news")
-      .select("*")
-      .eq("slug", slug)
-      .single();
-
-   if(error){ 
-       document.getElementById("box").innerHTML="Алдаа гарлаа"; 
-       return;
-   }
-
-   document.getElementById("box").innerHTML = `
-      <h2>${data.title}</h2>
-      <div>${data.category}</div>
-      ${data.image ? `<img src="${data.image}">` : ''}
-      <div>${data.description}</div>
-   `;
+function getSlug(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get('slug');
 }
 
-load();
-</script>
+async function fetchNewsBySlug(slug){
+  const { data, error } = await supabase.from('news').select('*').eq('slug', slug).single();
+  if(error) console.error(error);
+  else displayNews(data);
+}
 
+function displayNews(n){
+  const container = document.getElementById('newsDetail');
+  container.innerHTML = `
+    <h1>${n.title}</h1>
+    <div class="meta">${n.category} | ${n.created_at}</div>
+    ${n.image?`<img src="${n.image}">`:''}
+    <div>${n.description}</div>
+  `;
+}
+
+const slug = getSlug();
+if(slug) fetchNewsBySlug(slug);
+</script>
 </body>
 </html>

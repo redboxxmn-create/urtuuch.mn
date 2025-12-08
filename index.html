@@ -20,7 +20,17 @@
         nav ul li:hover ul {display:block;}
         nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
         nav ul li ul li a:hover {background:#3d85c6;}
-        .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:15px; padding:15px;}
+        
+        /* --------------------------------------------------- */
+        /* ШИНЭЧИЛСЭН GRID, FEATURED CARD-ЫН ТОХИРГОО */
+        /* --------------------------------------------------- */
+        .grid{
+            display:grid; 
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); 
+            gap:15px; 
+            padding:15px;
+        }
+        
         .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s; background:#fff;}
         .card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
         .card img{width:100%; height:150px; object-fit:cover;}
@@ -30,13 +40,39 @@
         .card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;}
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
-        /* card-desc-preview-ийг устгасан тул энэ хэсгийг хадгалах шаардлагагүй, гэхдээ таны кодод байгаа тул үлдээе */
-        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-        .card:hover .card-desc-preview{display:block;} 
-        .featured-card {grid-column: span 2; font-size: 17px; box-shadow:0 6px 20px rgba(0,0,0,0.2); border:2px solid #6fa8dc; display:flex;} /* Featured card-г flex болгож нэмсэн */
-        .featured-card img{width:40%; height:auto; object-fit:cover;} 
-        .featured-card .card-content{width:60%;}
         
+        /* Хуучин featured-card тохиргоог арилгаж, шинэ загварт тохируулж байна */
+        .featured-card {
+            grid-column: span 2; /* 2 багана эзэлнэ */
+            display: flex; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2); 
+            border: 2px solid #3d85c6; /* Тодруулсан хүрээ */
+        }
+        .featured-card img{
+            width: 50%; /* Зургийг тал хувь болгоно */
+            height: auto; 
+            object-fit: cover;
+            min-height: 250px; /* Онцлох мэдээний өндрийг тогтооно */
+        } 
+        .featured-card .card-content{
+            width: 50%; /* Текстийг тал хувь болгоно */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+        }
+        .featured-card .card-title {
+            font-size: 24px; /* Томруулсан гарчиг */
+            font-weight: 700;
+        }
+        .featured-card .card-meta span.category{
+            background: #d9534f; /* Улаан өнгөөр онцлох */
+            font-size: 14px;
+        }
+        
+        /* Бусад загварууд */
+        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
+        .card:hover .card-desc-preview{display:block;} 
         .video-card{grid-column:1/-1; padding:0; margin-bottom:20px;}
         .video-card iframe{width:100%; height:300px; border:none; border-radius:12px;}
         .authors-container {display:flex; gap:10px; padding:10px; justify-content:center; flex-wrap:wrap; background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
@@ -63,8 +99,10 @@
             nav ul{flex-direction:column;}
             nav ul li{margin-right:0; margin-bottom:5px;}
             nav ul li ul {position:relative; top:0;}
-            .featured-card{grid-column:1/-1; flex-direction:column;} /* Featured card-г багана болгосон */
-            .featured-card img{width:100%; height:200px;}
+            
+            /* Featured card-г гар утасны хувьд нэг багана болгож, зургийг дээд талд гаргана */
+            .featured-card{grid-column:1/-1; flex-direction:column;} 
+            .featured-card img{width:100%; height:200px; min-height: 150px;}
             .featured-card .card-content{width:100%;}
         }
     </style>
@@ -164,7 +202,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let authorsData = [];
 let newsData = [];
 let currentPage = 1;
-const NEWS_PER_PAGE = 12;
+// NEWS_PER_PAGE-ийг 29 болгох нь урт хугацаанд тохиромжгүй тул, бид pagination-ийг хэвээр үлдээж, нийт мэдээний тоог хязгаарлая.
+const NEWS_PER_PAGE = 12; 
+const TOTAL_NEWS_LIMIT = 29; // Нэг хуудсанд татах нийт мэдээний тоо (Таны хүсэлтээр 29)
 
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
@@ -173,10 +213,15 @@ async function fetchAuthors() {
 }
 
 async function fetchNews() {
+    // 🔔 29 МЭДЭЭГ ТАТАХ ЛОГИК 🔔
     const { data, error } = await supabase.from('news')
         .select('*')
         .eq('active', true) 
-        .order('created_at',{ascending:false});
+        // Эхлээд featured-ээр (true) дараа нь огноогоор (шинээр) эрэмбэлнэ.
+        .order('featured', { ascending: false }) 
+        .order('created_at',{ascending:false})
+        .limit(TOTAL_NEWS_LIMIT); // Хязгаарыг 29 болгосон
+        
     if(error) console.error("News fetch error:", error); 
     else newsData = data;
 }
@@ -203,35 +248,34 @@ function displayNews() {
         return;
     }
 
+    // Pagination логик (NewsData нь одоо нийт 29 мэдээтэй байх ёстой)
     const start = (currentPage-1)*NEWS_PER_PAGE;
     const end = start + NEWS_PER_PAGE;
     const pageNews = newsData.slice(start,end);
 
-    pageNews.forEach(n=>{
-        const author = authorsData ? authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"} : {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
-        
-        const div = document.createElement('div');
-        div.className = n.featured?"card featured-card":"card";
-        
-        // Featured card-ын бүтцийг зөв болгосон
-        const contentHtml = `
-            <div class="card-content">
-                <h3 class="card-title">${n.title}</h3>
-                <div class="card-meta"><span class="category">${n.category}</span></div>
-                <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
-            </div>
-        `;
-        
-        if (n.featured) {
-             div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
+    // Featured мэдээг ялгах. Зөвхөн эхний Featured мэдээг томруулна.
+    let featuredItem = null;
+    const itemsToDisplay = [];
+
+    // Эхний featured мэдээг хайж олох
+    for (const n of pageNews) {
+        if (n.featured && !featuredItem) {
+            featuredItem = n;
         } else {
-             div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
+            itemsToDisplay.push(n);
         }
-
-
-        div.addEventListener('click', ()=> {
-            window.location.href = `news.html?slug=${n.slug}`;
-        });
+    }
+    
+    // Хэрэв featured мэдээ олдсон бол түүнийг хамгийн эхэнд байрлуулна
+    if (featuredItem) {
+        // Featured мэдээг хамгийн эхний card болгож харуулна
+        const featuredDiv = createNewsCard(featuredItem, true);
+        container.appendChild(featuredDiv);
+    }
+    
+    // Үлдсэн мэдээг ердийн card-аар харуулна
+    itemsToDisplay.forEach(n=>{
+        const div = createNewsCard(n, false);
         container.appendChild(div);
     });
 
@@ -239,9 +283,43 @@ function displayNews() {
     displayAuthors();
 }
 
+/**
+ * News Card үүсгэх туслах функц
+ * @param {Object} n - Мэдээний обьект
+ * @param {boolean} isFeatured - Онцлох мэдээ эсэх
+ * @returns {HTMLElement} - Card div элемент
+ */
+function createNewsCard(n, isFeatured) {
+    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
+    
+    const div = document.createElement('div');
+    div.className = isFeatured ? "card featured-card" : "card";
+    
+    const categorySpan = isFeatured ? 
+        `<span class="category" style="background: #d9534f;">ОНЦЛОХ | ${n.category}</span>` : 
+        `<span class="category">${n.category}</span>`;
+    
+    const contentHtml = `
+        <div class="card-content">
+            <h3 class="card-title">${n.title}</h3>
+            <div class="card-meta">${categorySpan}</div>
+            <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
+        </div>
+    `;
+    
+    div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
+
+    div.addEventListener('click', ()=> {
+        window.location.href = `news.html?slug=${n.slug}`;
+    });
+    return div;
+}
+
+
 function renderPagination() {
     const container = document.getElementById('pagination');
-    const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
+    // Пагинацийг нийт татсан 29 мэдээгээр тооцно
+    const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE); 
     container.innerHTML='';
     if(totalPages<=1) return;
 
@@ -279,28 +357,9 @@ function displayFilteredNews(filteredData) {
         return;
     }
 
+    // Хайлтаар олдсон мэдээний үед featured-ийг томруулах шаардлагагүй (ердийн card-аар харуулна)
     filteredData.forEach(n => {
-        const author = authorsData.find(a => a.id === n.author_id) || { name: "Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png" };
-        const div = document.createElement('div');
-        div.className = n.featured ? "card featured-card" : "card";
-        
-        const contentHtml = `
-            <div class="card-content">
-                <h3 class="card-title">${n.title}</h3>
-                <div class="card-meta"><span class="category">${n.category}</span></div>
-                <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
-            </div>
-        `;
-
-        if (n.featured) {
-             div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
-        } else {
-             div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
-        }
-
-        div.addEventListener('click', () => {
-            window.location.href = `news.html?slug=${n.slug}`;
-        });
+        const div = createNewsCard(n, false);
         container.appendChild(div);
     });
 }

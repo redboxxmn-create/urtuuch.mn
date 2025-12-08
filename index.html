@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>urtuuch.mn</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
 header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
 .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
+
 nav {background:#3d85c6; display:flex; padding:10px;}
 nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
 nav ul li {position:relative; margin-right:20px;}
@@ -22,38 +22,28 @@ nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:b
 nav ul li ul li a:hover {background:#3d85c6;}
 
 .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
-.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform .3s;}
+.card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform .3s; position:relative;}
 .card:hover{transform:translateY(-5px);}
-
 .card img{width:100%; height:150px; object-fit:cover;}
 .card-content{padding:10px;}
-
 .card-title{font-size:16px; font-weight:bold;}
 .card-meta{font-size:12px; color:#666;}
 .card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px;}
 .card-author{margin-top:6px; font-size:13px;}
-
-.card-desc-preview{display:none; position:absolute; inset:0; background:#fff; opacity:.95; padding:10px;}
+.card-desc-preview{display:none; position:absolute; inset:0; background:#fff; opacity:.95; padding:10px; overflow:auto;}
 .card:hover .card-desc-preview{display:block;}
-
-.featured-card{grid-column:span 2;}
-
+.featured-card{grid-column:span 2; height:300px;}
 .authors-container{display:flex; gap:15px; padding:10px; flex-wrap:wrap; justify-content:center;}
 .author-card{width:120px; background:#fff; padding:6px; border-radius:8px; text-align:center;}
 .author-card img{width:50px; height:50px; border-radius:50%;}
-
-.pagination{display:flex; justify-content:center; gap:10px;}
-.pagination button{padding:5px 10px; border-radius:5px; border:none; background:#6fa8dc; color:#fff;}
-
 .contact{background:#fff; padding:15px; margin:20px; border-radius:10px;}
-
 #newsModal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); justify-content:center; align-items:center;}
 #newsModalContent{background:#fff; padding:20px; border-radius:12px; width:90%; max-width:600px;}
 #newsModalClose{position:absolute; right:20px; top:10px; cursor:pointer;}
 </style>
 </head>
-
 <body>
+
 <header>
 <h1>urtuuch.mn</h1>
 <div class="search-box"><input type="text" placeholder="Хайх утга оруулна уу!" id="searchInput"></div>
@@ -120,7 +110,6 @@ nav ul li ul li a:hover {background:#3d85c6;}
 
 <div class="grid" id="newsContainer"></div>
 <div class="authors-container" id="authorsContainer"></div>
-<div class="pagination" id="pagination"></div>
 
 <div class="contact">
 <h3>Холбоо барих</h3>
@@ -129,131 +118,126 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
-<!-- MODAL -->
 <div id="newsModal">
 <div id="newsModalContent">
 <span id="newsModalClose">&times;</span>
 <h2 id="modalTitle"></h2>
 <div id="modalMeta"></div>
-<img id="modalImage">
+<img id="modalImage" style="width:100%; margin:10px 0;">
 <div id="modalContent"></div>
 </div>
 </div>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-const supabase = createClient(
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+const supabase = supabase.createClient(
   "https://wpotnvekaoosdkvmhqgo.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
-const NEWS_PER_PAGE = 12;
-
-let currentPage = 1;
+const el = x=>document.getElementById(x);
 let authorsCache = [];
-
-const el = x => document.getElementById(x);
 
 async function getAuthors(){
   if(authorsCache.length) return authorsCache;
-  let {data} = await supabase.from("authors").select("*");
-  authorsCache = data || [];
+  const { data } = await supabase.from("authors").select("*");
+  authorsCache = data||[];
   return authorsCache;
 }
 
 async function getNews(){
-  let {data} = await supabase.from("news")
-      .select("*")
-      .order("created_at",{ascending:false});
-  return data || [];
+  let { data } = await supabase.from("news")
+    .select("*")
+    .order("created_at",{ascending:false})
+    .limit(19);
+  return data||[];
 }
 
 async function displayAuthors(){
   const authors = await getAuthors();
   el("authorsContainer").innerHTML = authors.map(a=>`
      <div class="author-card">
-       <img src="${a.image}">
+       <img src="${a.image||'https://via.placeholder.com/50'}">
        <div>${a.name}</div>
        <div>${a.title}</div>
      </div>
   `).join("");
 }
 
-async function displayNews(filtered=null){
-  const news = filtered || await getNews();
+async function displayNews(){
+  const news = await getNews();
   const authors = await getAuthors();
-
-  const totalPages = Math.ceil(news.length / NEWS_PER_PAGE);
-  if(currentPage>totalPages) currentPage = totalPages || 1;
-
-  const slice = news.slice((currentPage-1)*NEWS_PER_PAGE,
-                           currentPage*NEWS_PER_PAGE);
 
   el("newsContainer").innerHTML = "";
 
-  slice.forEach(n=>{
+  const featured = news.filter(n=>n.featured);
+  const normal = news.filter(n=>!n.featured);
+  const sorted = [...featured,...normal];
+
+  sorted.forEach(n=>{
      const card = document.createElement("div");
      card.className = n.featured ? "card featured-card":"card";
-
      card.innerHTML = `
         ${n.image ? `<img src='${n.image}'>`:''}
         <div class='card-content'>
            <div class='card-title'>${n.title}</div>
            <div class='card-meta'><span class='category'>${n.category}</span></div>
-           <div class='card-author'>
-              ${authors.find(a=>a.id==n.author_id)?.name||""}
-           </div>
+           <div class='card-author'>${authors.find(a=>a.id==n.author_id)?.name||""}</div>
            <div class='card-desc-preview'>${n.description||""}</div>
         </div>
      `;
-
      card.onclick = ()=>{
         el("modalTitle").innerText = n.title;
         el("modalMeta").innerText = n.category;
-        el("modalImage").src = n.image || "";
-        el("modalContent").innerHTML = n.description || "";
+        el("modalImage").src = n.image||'';
+        el("modalContent").innerHTML = n.description||'';
         el("newsModal").style.display = "flex";
      };
-
      el("newsContainer").appendChild(card);
   });
-
-  renderPagination(news.length);
 }
 
-function renderPagination(total){
-  const pages = Math.ceil(total/NEWS_PER_PAGE);
-  const box = el("pagination");
-  box.innerHTML = "";
-  if(pages<2) return;
-
-  for(let i=1;i<=pages;i++){
-     const b = document.createElement("button");
-     b.innerText = i;
-     b.onclick = ()=>{currentPage=i; displayNews();}
-     box.appendChild(b);
-  }
-}
-
+// Search
 el("searchInput").addEventListener("input", async ()=>{
-   const q = el("searchInput").value.toLowerCase();
-   const news = await getNews();
-   displayNews(news.filter(n=>n.title.toLowerCase().includes(q)));
+  const q = el("searchInput").value.toLowerCase();
+  const news = await getNews();
+  const filtered = news.filter(n=>n.title.toLowerCase().includes(q));
+  displayFiltered(filtered);
 });
 
-// Modal controls
+function displayFiltered(filtered){
+  const authors = authorsCache;
+  el("newsContainer").innerHTML = "";
+  filtered.forEach(n=>{
+     const card = document.createElement("div");
+     card.className = n.featured ? "card featured-card":"card";
+     card.innerHTML = `
+        ${n.image ? `<img src='${n.image}'>`:''}
+        <div class='card-content'>
+           <div class='card-title'>${n.title}</div>
+           <div class='card-meta'><span class='category'>${n.category}</span></div>
+           <div class='card-author'>${authors.find(a=>a.id==n.author_id)?.name||""}</div>
+           <div class='card-desc-preview'>${n.description||""}</div>
+        </div>
+     `;
+     card.onclick = ()=>{
+        el("modalTitle").innerText = n.title;
+        el("modalMeta").innerText = n.category;
+        el("modalImage").src = n.image||'';
+        el("modalContent").innerHTML = n.description||'';
+        el("newsModal").style.display = "flex";
+     };
+     el("newsContainer").appendChild(card);
+  });
+}
+
+// Modal close
 el("newsModalClose").onclick = ()=> el("newsModal").style.display="none";
-el("newsModal").onclick = e =>{
-   if(e.target.id === "newsModal")
-       el("newsModal").style.display="none";
-};
+el("newsModal").onclick = e=>{if(e.target.id==='newsModal') el("newsModal").style.display="none";}
 
 // Init
 displayNews();
 displayAuthors();
-
 </script>
-
 </body>
 </html>

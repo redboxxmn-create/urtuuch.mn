@@ -44,11 +44,6 @@ nav ul li ul li a:hover {background:#3d85c6;}
 .pagination button:hover{background:#3d85c6;}
 @media(max-width:480px){.grid{grid-template-columns:1fr;} nav ul li{margin-right:10px;}}
 .contact{background:#fff; padding:15px 20px; text-align:center; margin:20px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-/* Modal */
-#newsModal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;}
-#newsModalContent {background:#fff; border-radius:12px; max-width:600px; width:90%; max-height:80%; overflow:auto; padding:20px; position:relative;}
-#newsModalClose {position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:18px;}
-#newsModalContent img{width:100%; max-height:250px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -58,78 +53,66 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <nav>
 <ul>
 <li><a href="#">Улс төр</a>
-  <ul>
-    <li><a href="#">Тойм</a></li>
-    <li><a href="#">Нийтлэл</a></li>
-    <li><a href="#">Сурвалжилга</a></li>
-    <li><a href="#">Өртөөчийн үг</a></li>
-    <li><a href="#">Хов болох вий</a></li>
-  </ul>
+<ul>
+<li><a href="#">Тойм</a></li>
+<li><a href="#">Нийтлэл</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">Өртөөчийн үг</a></li>
+<li><a href="#">Хов болох вий</a></li>
+</ul>
 </li>
 <li><a href="#">Эдийн засаг</a>
-  <ul>
-    <li><a href="#">Уул уурхай</a></li>
-    <li><a href="#">Дэд бүтэц</a></li>
-    <li><a href="#">Монголд үйлдвэрлэв</a></li>
-    <li><a href="#">Зар сурталчилгаа</a></li>
-  </ul>
+<ul>
+<li><a href="#">Уул уурхай</a></li>
+<li><a href="#">Дэд бүтэц</a></li>
+<li><a href="#">Монголд үйлдвэрлэв</a></li>
+<li><a href="#">Зар сурталчилгаа</a></li>
+</ul>
 </li>
 <li><a href="#">Соёл урлаг</a>
-  <ul>
-    <li><a href="#">Ярилцлага</a></li>
-    <li><a href="#">Сурвалжилга</a></li>
-    <li><a href="#">Кино ертөнц</a></li>
-    <li><a href="#">Утга зохиол</a></li>
-    <li><a href="#">Соёл судлал</a></li>
-  </ul>
+<ul>
+<li><a href="#">Ярилцлага</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">Кино ертөнц</a></li>
+<li><a href="#">Утга зохиол</a></li>
+<li><a href="#">Соёл судлал</a></li>
+</ul>
 </li>
 <li><a href="#">Медиа</a>
-  <ul>
-    <li><a href="#">Нэвтрүүлэг</a></li>
-    <li><a href="#">Мэдээ</a></li>
-    <li><a href="#">Сурвалжилга</a></li>
-    <li><a href="#">MIC UP</a></li>
-    <li><a href="#">Зураглал</a></li>
-    <li><a href="#">Өртөөчөөс</a></li>
-  </ul>
+<ul>
+<li><a href="#">Нэвтрүүлэг</a></li>
+<li><a href="#">Мэдээ</a></li>
+<li><a href="#">Сурвалжилга</a></li>
+<li><a href="#">MIC UP</a></li>
+<li><a href="#">Зураглал</a></li>
+<li><a href="#">Өртөөчөөс</a></li>
+</ul>
 </li>
 <li><a href="#">Дэлхий дахинд</a>
-  <ul>
-    <li><a href="#">Улс төр</a></li>
-    <li><a href="#">Танин мэдэхүй</a></li>
-    <li><a href="#">Шинжлэх ухаан</a></li>
-  </ul>
+<ul>
+<li><a href="#">Улс төр</a></li>
+<li><a href="#">Танин мэдэхүй</a></li>
+<li><a href="#">Шинжлэх ухаан</a></li>
+</ul>
 </li>
 <li><a href="#">Ярилцлага</a>
-  <ul>
-    <li><a href="#">Хөрөг ярилцлага</a></li>
-    <li><a href="#">Улс төрийн ярилцлага</a></li>
-  </ul>
+<ul>
+<li><a href="#">Хөрөг ярилцлага</a></li>
+<li><a href="#">Улс төрийн ярилцлага</a></li>
+</ul>
 </li>
 </ul>
 </nav>
 </header>
 
 <div class="grid" id="newsContainer"></div>
-<div class="video-card" id="videoContainer"></div>
 <div class="authors-container" id="authorsContainer"></div>
 <div class="pagination" id="pagination"></div>
-
 <div class="contact">
 <h3>Холбоо барих</h3>
 <p>Утас: 94344777</p>
 <p>Face: urtuuch.mn</p>
 <p>Хаяг: Арвайхээр хот</p>
-</div>
-
-<div id="newsModal">
-  <div id="newsModalContent">
-    <span id="newsModalClose">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <div id="modalMeta" style="color:#666; font-size:12px; margin-bottom:10px;"></div>
-    <img id="modalImage" src="">
-    <div id="modalContent"></div>
-  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -141,117 +124,118 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let authorsData = [];
 let newsData = [];
 let currentPage = 1;
-const NEWS_PER_PAGE = 18;
+const NEWS_PER_PAGE = 12;
 
-async function fetchAuthors() {
-    const { data, error } = await supabase.from('authors').select('*').order('id');
-    if(error) console.error(error);
-    else authorsData = data;
+async function fetchAuthors(){
+  const { data, error } = await supabase.from('authors').select('*').order('id');
+  if(error) console.error(error);
+  else authorsData = data;
 }
 
-async function fetchNews() {
-    const { data, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
-    if(error) console.error(error);
-    else newsData = data;
+async function fetchNews(){
+  const { data, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
+  if(error) console.error(error);
+  else newsData = data;
 }
 
-function displayAuthors() {
-    const container = document.getElementById('authorsContainer');
-    container.innerHTML = authorsData.map(a => 
-        `<div class="author-card">
-            <img src="${a.image}">
-            <div class="author-name">${a.name}</div>
-            <div class="author-title">${a.title}</div>
-        </div>`).join('');
+function displayAuthors(){
+  const container = document.getElementById('authorsContainer');
+  container.innerHTML = authorsData.map(a=>`
+    <div class="author-card">
+      <img src="${a.image}">
+      <div class="author-name">${a.name}</div>
+      <div class="author-title">${a.title}</div>
+    </div>
+  `).join('');
 }
 
-function displayNews(dataToDisplay = newsData) {
-    const container = document.getElementById('newsContainer');
-    container.innerHTML = "";
-    const start = (currentPage-1)*NEWS_PER_PAGE;
-    const end = start + NEWS_PER_PAGE;
-    const pageNews = dataToDisplay.slice(start, end);
-
-    pageNews.forEach(n => {
-        const author = authorsData.find(a => a.id === n.author_id) || {name:"Тодорхойгүй", image:""};
-        const div = document.createElement('div');
-        div.className = n.featured?"card featured-card":"card";
-        div.innerHTML = `
-            ${n.image ? `<img src="${n.image}">` : ''}
-            <div class="card-content">
-                <h3 class="card-title">${n.title}</h3>
-                <div class="card-meta"><span class="category">${n.category}</span></div>
-                <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
-                <div class="card-desc-preview">${n.description}</div>
-            </div>
-        `;
-        // Click: modal or slug redirect
-        div.addEventListener('click', () => {
-            if(n.slug){
-                // Slug-тэй URL руу шилжих
-                window.location.href = `/news/${n.slug}`;
-            } else {
-                document.getElementById('modalTitle').innerText = n.title;
-                document.getElementById('modalMeta').innerText = `${n.category} | ${author.name} ${n.featured ? '| Онцлох' : ''}`;
-                document.getElementById('modalImage').src = n.image || '';
-                document.getElementById('modalContent').innerHTML = n.description;
-                document.getElementById('newsModal').style.display = 'flex';
-            }
-        });
-        container.appendChild(div);
+function displayNews(){
+  const container = document.getElementById('newsContainer');
+  container.innerHTML = '';
+  const start = (currentPage-1)*NEWS_PER_PAGE;
+  const end = start + NEWS_PER_PAGE;
+  const pageNews = newsData.slice(start,end);
+  pageNews.forEach(n=>{
+    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
+    const div = document.createElement('div');
+    div.className = n.featured?"card featured-card":"card";
+    div.innerHTML = `
+      ${n.image?`<img src="${n.image}">`:''}
+      <div class="card-content">
+        <h3 class="card-title">${n.title}</h3>
+        <div class="card-meta"><span class="category">${n.category}</span></div>
+        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
+        <div class="card-desc-preview">${n.description}</div>
+      </div>
+    `;
+    div.addEventListener('click', ()=>{
+      // slug-тэй URL рүү redirect
+      window.location.href = `news.html?slug=${n.slug}`;
     });
-    renderPagination(dataToDisplay);
-    displayAuthors();
+    container.appendChild(div);
+  });
+  renderPagination();
+  displayAuthors();
 }
 
-function renderPagination(dataToPaginate = newsData) {
-    const container = document.getElementById('pagination');
-    const totalPages = Math.ceil(dataToPaginate.length/NEWS_PER_PAGE);
-    container.innerHTML='';
-    if(totalPages<=1) return;
-
-    if(currentPage>1){
-        const prev = document.createElement('button');
-        prev.innerText="Өмнөх";
-        prev.onclick = ()=>{ currentPage--; displayNews(dataToPaginate); };
-        container.appendChild(prev);
-    }
-
-    for(let i=1;i<=totalPages;i++){
-        const btn = document.createElement('button');
-        btn.innerText=i;
-        if(i===currentPage) btn.style.background="#3d85c6";
-        btn.onclick = ()=>{ currentPage=i; displayNews(dataToPaginate); };
-        container.appendChild(btn);
-    }
-
-    if(currentPage<totalPages){
-        const next = document.createElement('button');
-        next.innerText="Дараах";
-        next.onclick = ()=>{ currentPage++; displayNews(dataToPaginate); };
-        container.appendChild(next);
-    }
+function renderPagination(){
+  const container = document.getElementById('pagination');
+  const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
+  container.innerHTML='';
+  if(totalPages<=1) return;
+  if(currentPage>1){
+    const prev=document.createElement('button');
+    prev.innerText="Өмнөх";
+    prev.onclick=()=>{currentPage--; displayNews();};
+    container.appendChild(prev);
+  }
+  for(let i=1;i<=totalPages;i++){
+    const btn=document.createElement('button');
+    btn.innerText=i;
+    if(i===currentPage) btn.style.background="#3d85c6";
+    btn.onclick=()=>{currentPage=i; displayNews();};
+    container.appendChild(btn);
+  }
+  if(currentPage<totalPages){
+    const next=document.createElement('button');
+    next.innerText="Дараах";
+    next.onclick=()=>{currentPage++; displayNews();};
+    container.appendChild(next);
+  }
 }
 
+// search
 document.getElementById('searchInput').addEventListener('input',()=>{
-    const keyword = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
-    currentPage = 1;
-    displayNews(filtered);
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
+  currentPage = 1;
+  const container = document.getElementById('newsContainer');
+  container.innerHTML = '';
+  filtered.forEach(n=>{
+    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
+    const div=document.createElement('div');
+    div.className = n.featured?"card featured-card":"card";
+    div.innerHTML= `
+      ${n.image?`<img src="${n.image}">`:''}
+      <div class="card-content">
+        <h3 class="card-title">${n.title}</h3>
+        <div class="card-meta"><span class="category">${n.category}</span></div>
+        <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
+      </div>
+    `;
+    div.addEventListener('click',()=>{
+      window.location.href = `news.html?slug=${n.slug}`;
+    });
+    container.appendChild(div);
+  });
 });
 
-document.getElementById('newsModalClose').onclick = ()=>{
-    document.getElementById('newsModal').style.display='none';
-};
-document.getElementById('newsModal').onclick = (e)=>{
-    if(e.target.id==='newsModal') document.getElementById('newsModal').style.display='none';
-};
-
-async function init() {
-    await fetchAuthors();
-    await fetchNews();
-    displayNews();
+async function init(){
+  await fetchAuthors();
+  await fetchNews();
+  displayNews();
 }
+
 init();
 </script>
 </body>

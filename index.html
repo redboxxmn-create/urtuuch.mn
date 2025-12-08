@@ -6,6 +6,7 @@
 <title>urtuuch.mn</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* --- Таны өмнөх style --- */
 body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
 header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
@@ -105,9 +106,15 @@ nav ul li ul li a:hover {background:#3d85c6;}
 </nav>
 </header>
 
+<!-- Grid мэдээ -->
 <div class="grid" id="newsContainer"></div>
+
+<!-- Нийтлэлчид -->
 <div class="authors-container" id="authorsContainer"></div>
+
+<!-- Pagination -->
 <div class="pagination" id="pagination"></div>
+
 <div class="contact">
 <h3>Холбоо барих</h3>
 <p>Утас: 94344777</p>
@@ -115,33 +122,30 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
-
-  // v2 дээр зөв нь createClient-г Supabase namespace-аар дуудаж байна
- const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"; // өөрийн key
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let authorsData = [];
 let newsData = [];
 let currentPage = 1;
 const NEWS_PER_PAGE = 12;
 
-async function fetchAuthors(){
+async function fetchAuthors() {
   const { data, error } = await supabase.from('authors').select('*').order('id');
   if(error) console.error(error);
   else authorsData = data;
 }
 
-async function fetchNews(){
+async function fetchNews() {
   const { data, error } = await supabase.from('news').select('*').order('created_at',{ascending:false});
   if(error) console.error(error);
   else newsData = data;
 }
 
-function displayAuthors(){
+function displayAuthors() {
   const container = document.getElementById('authorsContainer');
   container.innerHTML = authorsData.map(a=>`
     <div class="author-card">
@@ -152,46 +156,48 @@ function displayAuthors(){
   `).join('');
 }
 
-function displayNews(){
+function displayNews() {
   const container = document.getElementById('newsContainer');
   container.innerHTML = '';
   const start = (currentPage-1)*NEWS_PER_PAGE;
   const end = start + NEWS_PER_PAGE;
   const pageNews = newsData.slice(start,end);
+
   pageNews.forEach(n=>{
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
     const div = document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
     div.innerHTML = `
-      ${n.image?`<img src="${n.image}">`:''}
+      ${n.image?`<img src="${n.image}">`:``}
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>
         <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
-        <div class="card-desc-preview">${n.description}</div>
       </div>
     `;
-    div.addEventListener('click', ()=>{
-      // slug-тэй URL рүү redirect
+    div.addEventListener('click', ()=> {
       window.location.href = `news.html?slug=${n.slug}`;
     });
     container.appendChild(div);
   });
+
   renderPagination();
   displayAuthors();
 }
 
-function renderPagination(){
+function renderPagination() {
   const container = document.getElementById('pagination');
   const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE);
   container.innerHTML='';
   if(totalPages<=1) return;
+
   if(currentPage>1){
     const prev=document.createElement('button');
     prev.innerText="Өмнөх";
     prev.onclick=()=>{currentPage--; displayNews();};
     container.appendChild(prev);
   }
+
   for(let i=1;i<=totalPages;i++){
     const btn=document.createElement('button');
     btn.innerText=i;
@@ -199,6 +205,7 @@ function renderPagination(){
     btn.onclick=()=>{currentPage=i; displayNews();};
     container.appendChild(btn);
   }
+
   if(currentPage<totalPages){
     const next=document.createElement('button');
     next.innerText="Дараах";
@@ -207,7 +214,6 @@ function renderPagination(){
   }
 }
 
-// search
 document.getElementById('searchInput').addEventListener('input',()=>{
   const keyword = document.getElementById('searchInput').value.toLowerCase();
   const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
@@ -218,27 +224,20 @@ document.getElementById('searchInput').addEventListener('input',()=>{
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
     const div=document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
-    div.innerHTML= `
-      ${n.image?`<img src="${n.image}">`:''}
+    div.innerHTML=`
+      ${n.image?`<img src="${n.image}">`:``}
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>
         <div class="card-author"><img src="${author.image}"><span>${author.name}</span></div>
       </div>
     `;
-    div.addEventListener('click',()=>{
-      window.location.href = `news.html?slug=${n.slug}`;
-    });
+    div.addEventListener('click',()=>{ window.location.href = `news.html?slug=${n.slug}`; });
     container.appendChild(div);
   });
 });
 
-async function init(){
-  await fetchAuthors();
-  await fetchNews();
-  displayNews();
-}
-
+async function init(){ await fetchAuthors(); await fetchNews(); displayNews(); }
 init();
 </script>
 </body>

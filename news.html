@@ -10,7 +10,7 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/K12XQ3j.png"> 
+<meta property="og:image" content="share-default.png"> 
 <meta property="og:url" content="https://urtuuch.mn"> 
 <style>
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
@@ -122,8 +122,8 @@ async function fetchNewsBySlug(slug){
     
     const currentURL = window.location.href;
     
-    // ✅ ЗАСВАР 2/2: Зураггүй бол default том зургийг ашиглана (600x315-аас их)
-    const imageUrl = news.image || 'https://i.imgur.com/K12XQ3j.png'; 
+    // ✅ ЗАСВАР: Зураггүй бол default local зургийг ашиглана
+    const imageUrl = news.image || 'share-default.png'; 
     
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);

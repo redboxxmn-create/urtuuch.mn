@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>urtuuch.mn</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
 header{background:#fff; padding:15px 20px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
 header h1{margin:0; font-size:24px;}
-.search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
 nav {background:#3d85c6; display:flex; padding:10px;}
 nav ul {list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap;}
 nav ul li {position:relative; margin-right:20px;}
@@ -20,7 +18,6 @@ nav ul li ul {display:none; position:absolute; top:100%; left:0; background:#6fa
 nav ul li:hover ul {display:block;}
 nav ul li ul li a {padding:8px 12px; color:#fff; text-decoration:none; display:block;}
 nav ul li ul li a:hover {background:#3d85c6;}
-
 .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; padding:20px;}
 .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform .3s; position:relative;}
 .card:hover{transform:translateY(-5px);}
@@ -44,7 +41,6 @@ nav ul li ul li a:hover {background:#3d85c6;}
 #newsModalClose{position:absolute; right:20px; top:10px; cursor:pointer;}
 </style>
 </head>
-
 <body>
 <header>
 <h1>urtuuch.mn</h1>
@@ -52,55 +48,12 @@ nav ul li ul li a:hover {background:#3d85c6;}
 
 <nav>
 <ul>
-<li><a href="#">Улс төр</a>
-<ul>
-<li><a href="#">Тойм</a></li>
-<li><a href="#">Нийтлэл</a></li>
-<li><a href="#">Сурвалжилга</a></li>
-<li><a href="#">Өртөөчийн үг</a></li>
-<li><a href="#">Хов болох вий</a></li>
-</ul>
-</li>
-<li><a href="#">Эдийн засаг</a>
-<ul>
-<li><a href="#">Уул уурхай</a></li>
-<li><a href="#">Дэд бүтэц</a></li>
-<li><a href="#">Монголд үйлдвэрлэв</a></li>
-<li><a href="#">Зар сурталчилгаа</a></li>
-</ul>
-</li>
-<li><a href="#">Соёл урлаг</a>
-<ul>
-<li><a href="#">Ярилцлага</a></li>
-<li><a href="#">Сурвалжилга</a></li>
-<li><a href="#">Кино ертөнц</a></li>
-<li><a href="#">Утга зохиол</a></li>
-<li><a href="#">Соёл судлал</a></li>
-</ul>
-</li>
-<li><a href="#">Медиа</a>
-<ul>
-<li><a href="#">Нэвтрүүлэг</a></li>
-<li><a href="#">Мэдээ</a></li>
-<li><a href="#">Сурвалжилга</a></li>
-<li><a href="#">MIC UP</a></li>
-<li><a href="#">Зураглал</a></li>
-<li><a href="#">Өртөөчөөс</a></li>
-</ul>
-</li>
-<li><a href="#">Дэлхий дахинд</a>
-<ul>
 <li><a href="#">Улс төр</a></li>
-<li><a href="#">Танин мэдэхүй</a></li>
-<li><a href="#">Шинжлэх ухаан</a></li>
-</ul>
-</li>
-<li><a href="#">Ярилцлага</a>
-<ul>
-<li><a href="#">Хөрөг ярилцлага</a></li>
-<li><a href="#">Улс төрийн ярилцлага</a></li>
-</ul>
-</li>
+<li><a href="#">Эдийн засаг</a></li>
+<li><a href="#">Соёл урлаг</a></li>
+<li><a href="#">Медиа</a></li>
+<li><a href="#">Дэлхий дахинд</a></li>
+<li><a href="#">Ярилцлага</a></li>
 </ul>
 </nav>
 </header>
@@ -116,7 +69,6 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
-<!-- MODAL -->
 <div id="newsModal">
 <div id="newsModalContent">
 <span id="newsModalClose">&times;</span>
@@ -135,9 +87,10 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
-const NEWS_PER_PAGE = 19; 
+const NEWS_PER_PAGE = 19;
 let currentPage = 1;
 let authorsCache = [];
+
 const el = x => document.getElementById(x);
 
 async function getAuthors(){
@@ -168,7 +121,6 @@ async function displayNews(filtered=null){
   const authors = await getAuthors();
 
   news.sort((a,b)=>b.featured - a.featured || new Date(b.created_at)-new Date(a.created_at));
-
   const totalPages = Math.ceil(news.length / NEWS_PER_PAGE);
   if(currentPage>totalPages) currentPage = totalPages || 1;
   const slice = news.slice((currentPage-1)*NEWS_PER_PAGE,currentPage*NEWS_PER_PAGE);
@@ -212,7 +164,7 @@ function renderPagination(total){
   for(let i=1;i<=pages;i++){
      const b = document.createElement("button");
      b.innerText = i;
-     b.onclick = ()=>{currentPage=i; displayNews();}
+     b.onclick = ()=>{currentPage=i; displayNews();};
      box.appendChild(b);
   }
 }
@@ -224,24 +176,16 @@ el("searchInput").addEventListener("input", async ()=>{
 });
 
 el("newsModalClose").onclick = ()=> el("newsModal").style.display="none";
-el("newsModal").onclick = e =>{
-   if(e.target.id === "newsModal")
-       el("newsModal").style.display="none";
-};
+el("newsModal").onclick = e => { if(e.target.id==="newsModal") el("newsModal").style.display="none"; };
 
-// --- Realtime listener ---
-supabase
-  .channel('public:news')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, payload => {
-      console.log('Realtime update:', payload);
-      displayNews();
-  })
+// Realtime updates
+supabase.channel('news-authors')
+  .on('postgres_changes', { event:'*', schema:'public', table:'news' }, () => displayNews())
+  .on('postgres_changes', { event:'*', schema:'public', table:'authors' }, () => { authorsCache=[]; displayAuthors(); displayNews(); })
   .subscribe();
 
-// Init
 displayNews();
 displayAuthors();
-
 </script>
 </body>
 </html>

@@ -197,7 +197,7 @@ function displayNews() {
     const div = document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
     div.innerHTML = `
-      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
+      ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}
 
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
@@ -293,7 +293,6 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
     // 2. Хуудаслалтгүйгээр зөвхөн хайлтын үр дүнг харуулах
     displayFilteredNews(filtered);
 
-    // Хайлт хийж дуусмагц pagination-г устгана (displayFilteredNews дотор хийгдсэн)
     // Хэрэв хайлт хийж дуусаад input хоосон болбол үндсэн displayNews-г дуудах логик нэмж болно:
     if (keyword === '') {
         currentPage = 1;

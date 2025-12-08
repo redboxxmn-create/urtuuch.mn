@@ -132,7 +132,8 @@
 </div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// ✅ ЗАСВАР: Cannot read properties of null алдааг засварлахын тулд импортын URL-д @2 хувилбарыг тодорхой зааж өгөв.
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
@@ -146,23 +147,26 @@ const NEWS_PER_PAGE = 12;
 
 async function fetchAuthors() {
   const { data, error } = await supabase.from('authors').select('*').order('id');
-  if(error) console.error(error);
+  if(error) console.error("Authors fetch error:", error); // Алдааг тодорхой харуулах
   else authorsData = data;
 }
 
-// 🛑 ЭНД ГОЛ ЗАСВАР ХИЙГДЛЭЭ: Зөвхөн active=true мэдээг татаж авна.
+// ✅ Зөвхөн active=true мэдээг татаж авна.
 async function fetchNews() {
   const { data, error } = await supabase.from('news')
     .select('*')
-    .eq('active', true) // ✅ Зөвхөн идэвхтэй (нийтлэгдсэн) мэдээг татаж авах нөхцөл
+    .eq('active', true) 
     .order('created_at',{ascending:false});
   
-  if(error) console.error(error);
+  if(error) console.error("News fetch error:", error); // Алдааг тодорхой харуулах
   else newsData = data;
 }
 
 function displayAuthors() {
   const container = document.getElementById('authorsContainer');
+  // Хэрэв authorsData хоосон бол юу ч харуулахгүй
+  if (!authorsData || authorsData.length === 0) return; 
+
   container.innerHTML = authorsData.map(a=>`
     <div class="author-card">
       <img src="${a.image}" alt="${a.name}">
@@ -175,16 +179,26 @@ function displayAuthors() {
 function displayNews() {
   const container = document.getElementById('newsContainer');
   container.innerHTML = '';
+  // Хэрэв newsData хоосон бол мэдээлэл байхгүй гэж харуулна
+  if (!newsData || newsData.length === 0) {
+      container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
+      renderPagination(0);
+      return;
+  }
+
   const start = (currentPage-1)*NEWS_PER_PAGE;
   const end = start + NEWS_PER_PAGE;
   const pageNews = newsData.slice(start,end);
 
   pageNews.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
+    // Зохиогчийг олохдоо authorsData-г шалгана
+    const author = authorsData ? authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"} : {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
+    
     const div = document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
     div.innerHTML = `
       ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
+
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>
@@ -239,12 +253,14 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
   currentPage = 1;
   const container = document.getElementById('newsContainer');
   container.innerHTML = '';
+  // displayNews доторх логикийг давтаж байна, энэ нь зөвхөн хайлтад зориулагдсан
   filtered.forEach(n=>{
-    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:""};
+    const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
     const div=document.createElement('div');
     div.className = n.featured?"card featured-card":"card";
     div.innerHTML= `
       ${n.image?`<img src="${n.image}" alt="${n.title}">`:''}<br>
+
       <div class="card-content">
         <h3 class="card-title">${n.title}</h3>
         <div class="card-meta"><span class="category">${n.category}</span></div>

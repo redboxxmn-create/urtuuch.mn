@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Мэдээ дэлгэрэнгүй</title>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="urtuuch.mn">
+<meta property="og:title" content="Мэдээ ачаалж байна...">
+<meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
+<meta property="og:image" content="https://i.imgur.com/KqJv6N6.png"> <meta property="og:url" content="https://urtuuch.mn"> 
 <style>
+/* ... (Үлдсэн CSS-ийн хэсэг) */
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
 .container { max-width:900px; margin:40px auto; background:#fff; padding:25px; border-radius:15px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
 .news-layout { display:flex; gap:20px; flex-wrap:wrap; }
@@ -13,39 +20,17 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .news-text { flex:2 1 400px; }
 .news-text h1 { color:#d9534f; margin-bottom:15px; }
 .news-text p { font-size:16px; line-height:1.7; color:#555; }
-/* Description доторх HTML контентийг цэгцлэх */
 .news-content-html p { margin-top: 1em; line-height: 1.6; }
 .news-content-html img { max-width: 100%; height: auto; border-radius: 8px; }
-
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
 .back-btn:hover { background:#f4a6a6; color:#333; }
 @media(max-width:768px){ .news-layout { flex-direction:column; } }
-
-/* ✅ НЭМСЭН: SHARE ТОВЧЛУУРУУДЫН CSS */
-.share-buttons { 
-    margin-top: 20px; 
-    border-top: 1px solid #ddd; 
-    padding-top: 15px;
-    display: flex;
-    gap: 10px;
-}
-.share-buttons button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    color: white;
-    font-weight: 600;
-    transition: opacity 0.2s;
-}
-.share-buttons button:hover {
-    opacity: 0.8;
-}
+.share-buttons { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; display: flex; gap: 10px; }
+.share-buttons button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.2s; }
+.share-buttons button:hover { opacity: 0.8; }
 .share-facebook { background: #1877f2; }
 .share-twitter { background: #1da1f2; }
 .share-instagram { background: #e1306c; }
-/* ------------------------------------- */
-
 </style>
 </head>
 <body>
@@ -67,13 +52,14 @@ const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
 
 // ---------------------------------------------------
-// ✅ НЭМСЭН: SHARE FUNCTIONS
+// SHARE FUNCTIONS (Хуваалцах цонхны хэмжээг томруулсан)
 // ---------------------------------------------------
 
 function shareFacebook(title) {
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(title);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, 'facebook-share', 'width=600,height=400');
+    // ✅ ЗАСВАР: Цонхны хэмжээг томруулсан
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, 'facebook-share', 'width=800,height=600'); 
 }
 
 function shareTwitter(title) {
@@ -84,11 +70,9 @@ function shareTwitter(title) {
 
 function shareInstagram() {
     alert("Инстаграм нь вэбээс шууд холбоос хуваалцахыг дэмждэггүй. Та манай албан ёсны Инстаграм хуудас руу шилжинэ.");
-    // 💡 Та энд өөрийн Instagram хаягийг оруулна уу
     window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
 }
 
-// Global scope-д гаргах (HTML onclick ажиллахын тулд)
 window.shareFacebook = shareFacebook;
 window.shareTwitter = shareTwitter;
 window.shareInstagram = shareInstagram;
@@ -96,6 +80,19 @@ window.shareInstagram = shareInstagram;
 // ---------------------------------------------------
 // FETCH NEWS FUNCTION
 // ---------------------------------------------------
+
+// Meta tag-уудыг шинэчлэх туслах функц
+function createOrUpdateMetaTag(property, content) {
+    const head = document.head;
+    let tag = document.querySelector(`meta[property="${property}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
+}
+
 
 async function fetchNewsBySlug(slug){
     const container = document.getElementById('newsContainer');
@@ -109,10 +106,27 @@ async function fetchNewsBySlug(slug){
         .single(); 
         
     if(newsError || !news){ 
+        // ... (Алдаа гарсан үеийн код)
         container.innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна. (Консолыг шалгана уу)</p>`;
         if(newsError) console.error("News fetch error (Could not find news):", newsError);
         return;
     } 
+    
+    // =======================================================
+    // ✅ НЭМСЭН: OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ
+    // =======================================================
+    
+    document.title = news.title + " | urtuuch.mn";
+    const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title; // HTML тагуудыг хасч, тайлбарыг богиносгоно.
+    
+    const currentURL = window.location.href;
+    
+    createOrUpdateMetaTag('og:title', news.title);
+    createOrUpdateMetaTag('og:description', descriptionText);
+    createOrUpdateMetaTag('og:image', news.image || 'https://i.imgur.com/KqJv6N6.png'); // Зураггүй бол default зураг ашиглана
+    createOrUpdateMetaTag('og:url', currentURL);
+    
+    // =======================================================
     
     // 2. Зохиогчийн мэдээллийг author_id-аар тусад нь татаж авах
     let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
@@ -131,8 +145,6 @@ async function fetchNewsBySlug(slug){
     }
 
     const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
-    
-    // Гарчигт ' тэмдэгт орсон тохиолдолд JS алдаа гаргахаас сэргийлж байна
     const escapedTitle = news.title.replace(/'/g, "\\'");
 
     container.innerHTML = `
@@ -149,7 +161,8 @@ async function fetchNewsBySlug(slug){
             <button class="share-twitter" onclick="shareTwitter('${escapedTitle}')">Twitter</button>
             <button class="share-instagram" onclick="shareInstagram()">Instagram</button>
           </div>
-          </div>
+
+        </div>
       </div>
     `;
 }

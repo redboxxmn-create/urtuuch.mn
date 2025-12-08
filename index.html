@@ -135,11 +135,9 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0"
 );
 
-const NEWS_PER_PAGE = 19; // Нэг хуудсанд 19 мэдээ
-
+const NEWS_PER_PAGE = 19; 
 let currentPage = 1;
 let authorsCache = [];
-
 const el = x => document.getElementById(x);
 
 async function getAuthors(){
@@ -169,7 +167,6 @@ async function displayNews(filtered=null){
   let news = filtered || await getNews();
   const authors = await getAuthors();
 
-  // Онцлох мэдээг хамгийн эхэнд
   news.sort((a,b)=>b.featured - a.featured || new Date(b.created_at)-new Date(a.created_at));
 
   const totalPages = Math.ceil(news.length / NEWS_PER_PAGE);
@@ -226,12 +223,20 @@ el("searchInput").addEventListener("input", async ()=>{
    displayNews(news.filter(n=>n.title.toLowerCase().includes(q)));
 });
 
-// Modal controls
 el("newsModalClose").onclick = ()=> el("newsModal").style.display="none";
 el("newsModal").onclick = e =>{
    if(e.target.id === "newsModal")
        el("newsModal").style.display="none";
 };
+
+// --- Realtime listener ---
+supabase
+  .channel('public:news')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, payload => {
+      console.log('Realtime update:', payload);
+      displayNews();
+  })
+  .subscribe();
 
 // Init
 displayNews();

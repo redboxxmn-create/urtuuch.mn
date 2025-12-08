@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ Панел</title>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    
+    <script src="https://cdn.tiny.cloud/1/0xo8rrnri5u1551x3vo90d2zedgkawbi24elx29pv7txbd0n/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    
     <style>
         body { font-family: 'Ubuntu', sans-serif; margin: 0; padding: 0; background: #f0f5f5; color: #333; }
         header { background: #3d85c6; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
@@ -39,8 +41,8 @@
         .form-group textarea { resize: vertical; }
 
         .form-actions button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        #saveNewsBtn { background: #3d85c6; color: white; }
-        #saveNewsBtn:hover { background: #337ab7; }
+        #saveNewsBtn, #saveSettingsBtn { background: #3d85c6; color: white; }
+        #saveNewsBtn:hover, #saveSettingsBtn:hover { background: #337ab7; }
         #cancelEditBtn { background: #ccc; color: #333; margin-left: 10px; }
         #cancelEditBtn:hover { background: #bbb; }
         
@@ -64,7 +66,8 @@
     <div class="sidebar">
         <button id="tabListNews" onclick="openTab('listNews', this)" class="active">Мэдээний жагсаалт</button>
         <button id="tabCreateNews" onclick="openTab('createNews', this)">Мэдээ нэмэх</button>
-        </div>
+        <button id="tabSettings" onclick="openTab('settings', this)">Тохиргоо</button>
+    </div>
 
     <div class="content">
         <div id="listNews" class="tab-content active">
@@ -121,8 +124,23 @@
                 <button id="saveNewsBtn" onclick="saveNews(true)">Хадгалах</button>
                 <button id="cancelEditBtn" onclick="openTab('listNews')">Буцах</button>
             </div>
-            <input type="hidden" id="newsId"> <div id="responseMessage"></div>
+            <input type="hidden" id="newsId"> 
+            <div id="responseMessage"></div>
         </div>
+        
+        <div id="settings" class="tab-content">
+            <h2>Сайтын Үндсэн Тохиргоо</h2>
+            <div class="form-group">
+                <label for="mainVideoUrl">Үндсэн Хуудасны Видео URL (YouTube Embed):</label>
+                <input type="url" id="mainVideoUrl" placeholder="https://www.youtube.com/embed/XXXXXXX">
+                <small style="color:#666;">Зөвхөн YouTube-ийн **Embed** холбоосыг оруулна.</small>
+            </div>
+            <div class="form-actions">
+                <button id="saveSettingsBtn" onclick="saveSettings()">Тохиргоог Хадгалах</button>
+            </div>
+            <div id="settingsResponseMessage"></div>
+        </div>
+
     </div>
 </div>
 
@@ -137,13 +155,11 @@ const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: true }, // СЕССИЙГ ХАДГАЛАХ
+    auth: { persistSession: true }, 
 });
 
-let currentNewsId = null; // Засах үед ашиглана
-
 // ************************************************************
-// ✅ TINYMCE-ИЙГ ИДЭВХЖҮҮЛЭХ
+// TINYMCE-ИЙГ ИДЭВХЖҮҮЛЭХ
 // ************************************************************
 tinymce.init({
     selector: '#newsContent', 
@@ -151,10 +167,8 @@ tinymce.init({
     toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | link image | code', 
     menubar: 'file edit view insert format tools table help',
     height: 500,
-    // setup функц нь мэдээг засах үед TinyMCE-ийн утгыг зөв ачаална
     setup: function(editor) {
         editor.on('init', function() {
-            // Мэдээг засах үед утгыг автоматаар ачаална
             const contentElement = document.getElementById('newsContent');
             if(contentElement.value) {
                 editor.setContent(contentElement.value);
@@ -171,7 +185,7 @@ async function fetchNewsList() {
         .from('news')
         .select('id, title, created_at, active, slug')
         .order('created_at', { ascending: false })
-        .limit(29); // Зөвхөн 29 мэдээг татаж харуулна
+        .limit(29); 
 
     const container = document.getElementById('newsListContainer');
     container.innerHTML = '';
@@ -216,7 +230,6 @@ window.editNews = async function(slug) {
         return;
     }
 
-    // Талбаруудад утгыг оруулах
     document.getElementById('newsId').value = data.id;
     document.getElementById('newsFormTitle').innerText = 'Мэдээ засах';
     document.getElementById('newsTitle').value = data.title;
@@ -226,21 +239,16 @@ window.editNews = async function(slug) {
     document.getElementById('newsFeatured').checked = data.featured || false;
     document.getElementById('newsActive').checked = data.active;
     
-    // TinyMCE-ийн textarea-д HTML утгыг оруулах
     const contentElement = document.getElementById('newsContent');
     contentElement.value = data.content; 
     
-    // TinyMCE Editor-т утгыг ачаалах
-    // Энэ нь TinyMCE-ийг "reset" хийж, шинэ утгыг зөв ачаална.
     if (tinymce.get('newsContent')) {
         tinymce.get('newsContent').setContent(data.content || '');
     }
 
-    // Хадгалах товчийг 'Засах' горимд шилжүүлэх
     document.getElementById('saveNewsBtn').onclick = () => saveNews(false);
     document.getElementById('saveNewsBtn').innerText = 'Өөрчлөлт хадгалах';
     
-    // "Мэдээ нэмэх" таб руу шилжих
     openTab('createNews');
 };
 
@@ -249,10 +257,8 @@ window.editNews = async function(slug) {
 // ************************************************************
 window.saveNews = async function(isNew) {
     
-    // ✅ 1. TINYMCE-ээс Утгыг Авах
     const content = tinymce.get('newsContent').getContent();
     
-    // 2. Бусад талбаруудаас утгыг авах
     const newsId = document.getElementById('newsId').value;
     const title = document.getElementById('newsTitle').value;
     const slug = document.getElementById('newsSlug').value;
@@ -271,19 +277,16 @@ window.saveNews = async function(isNew) {
         slug: slug,
         category: category,
         image: image || null,
-        content: content, // ✅ TINYMCE-ЭЭС АВСАН HTML КОНТЕНТ
+        content: content, 
         featured: featured,
         active: active,
-        // created_at, author_id-г Supabase-д defaults-аар оруулах боломжтой
     };
 
     let response;
     
     if (isNew) {
-        // Шинэ мэдээ оруулах
         response = await supabase.from('news').insert([newsData]);
     } else {
-        // Одоо байгаа мэдээг шинэчлэх
         response = await supabase.from('news').update(newsData).eq('id', newsId);
     }
     
@@ -291,7 +294,7 @@ window.saveNews = async function(isNew) {
         showMessage(`Хадгалахад алдаа гарлаа: ${response.error.message}`, 'error');
     } else {
         showMessage(isNew ? 'Мэдээ амжилттай нэмэгдлээ!' : 'Мэдээ амжилттай шинэчлэгдлээ!', 'success');
-        resetForm();
+        resetNewsForm();
         fetchNewsList();
         openTab('listNews');
     }
@@ -317,7 +320,65 @@ window.deleteNews = async function(id) {
 };
 
 // ************************************************************
-// 5. ТУСЛАХ ФУНКЦҮҮД
+// 5. ТОХИРГООНЫ ФУНКЦҮҮД (ВИДЕО)
+// ************************************************************
+
+/**
+ * Supabase-аас одоогийн тохиргоог татаж, талбарт дүүргэх
+ */
+async function fetchSettings() {
+    // Бид main_video_url-г хадгалахын тулд 'settings' хүснэгтэд нэмж өгнө.
+    const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('key', 'main_video_url')
+        .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 нь "утга олдсонгүй" гэсэн үг
+        console.error("Settings fetch error:", error);
+    }
+
+    if (data) {
+        document.getElementById('mainVideoUrl').value = data.value;
+    } else {
+        // Анхны утга байхгүй бол хоосон үлдээнэ
+        document.getElementById('mainVideoUrl').value = '';
+    }
+}
+
+/**
+ * Тохиргоог Supabase-д хадгалах
+ */
+window.saveSettings = async function() {
+    const url = document.getElementById('mainVideoUrl').value.trim();
+    const key = 'main_video_url';
+
+    if (!url) {
+        // Хэрэв хоосон бол одоо байгаа утгыг устгахыг оролдоно
+        const { error } = await supabase.from('settings').delete().eq('key', key);
+        if (error) {
+            showMessage(`Тохиргоог устгахад алдаа гарлаа: ${error.message}`, 'error', 'settingsResponseMessage');
+        } else {
+            showMessage('Үндсэн видео URL амжилттай арилгагдлаа.', 'success', 'settingsResponseMessage');
+        }
+        return;
+    }
+
+    // Upsert (Олдвол шинэчлэх, Олдохгүй бол нэмэх)
+    const { error } = await supabase.from('settings').upsert([
+        { key: key, value: url }
+    ], { onConflict: 'key' });
+
+    if (error) {
+        showMessage(`Тохиргоог хадгалахад алдаа гарлаа: ${error.message}`, 'error', 'settingsResponseMessage');
+    } else {
+        showMessage('Тохиргоо амжилттай хадгалагдлаа!', 'success', 'settingsResponseMessage');
+    }
+};
+
+
+// ************************************************************
+// 6. ТУСЛАХ ФУНКЦҮҮД
 // ************************************************************
 window.openTab = function(tabName, elm) {
     const tabContents = document.querySelectorAll('.tab-content');
@@ -331,25 +392,23 @@ window.openTab = function(tabName, elm) {
     if (elm) {
         elm.classList.add('active');
     } else {
-        // Хэрэв товчлуургүйгээр буцвал жагсаалтын тавцангийн товчийг идэвхжүүлнэ
         document.getElementById('tabListNews').classList.add('active');
     }
     
-    if (tabName === 'createNews') {
-        // 'Нэмэх' таб руу шилжихэд, хэрэв засах горим биш бол формыг цэвэрлэнэ
-        if (document.getElementById('newsFormTitle').innerText !== 'Мэдээ засах') {
-            resetForm();
-        }
-    } else if (tabName === 'listNews') {
-        // Жагсаалтын таб руу шилжихэд формыг цэвэрлэж, үндсэн товчийг сэргээнэ
-        resetForm();
+    // Тохиргооны таб руу шилжих үед утгыг татна
+    if (tabName === 'settings') {
+        fetchSettings();
     }
     
-    // Мессежийг нуух
+    if (tabName !== 'createNews') {
+        resetNewsForm();
+    }
+    
     document.getElementById('responseMessage').style.display = 'none';
+    document.getElementById('settingsResponseMessage').style.display = 'none';
 };
 
-function resetForm() {
+function resetNewsForm() {
     document.getElementById('newsId').value = '';
     document.getElementById('newsFormTitle').innerText = 'Мэдээ нэмэх';
     document.getElementById('newsTitle').value = '';
@@ -359,35 +418,30 @@ function resetForm() {
     document.getElementById('newsFeatured').checked = false;
     document.getElementById('newsActive').checked = true;
     
-    // TinyMCE-ийн агуулгыг цэвэрлэх
     if (tinymce.get('newsContent')) {
         tinymce.get('newsContent').setContent('');
     }
-    // saveNews товчийг анхны байдалд оруулах
     document.getElementById('saveNewsBtn').onclick = () => saveNews(true);
     document.getElementById('saveNewsBtn').innerText = 'Хадгалах';
 }
 
-function showMessage(message, type) {
-    const msgEl = document.getElementById('responseMessage');
+function showMessage(message, type, elementId = 'responseMessage') {
+    const msgEl = document.getElementById(elementId);
     msgEl.innerText = message;
     msgEl.className = type === 'success' ? 'success' : 'error';
     msgEl.style.display = 'block';
-    // 5 секундын дараа нуух
     setTimeout(() => {
         msgEl.style.display = 'none';
     }, 5000);
 }
 
 window.logout = function() {
-    // Хэрэглэгч гарах үед хийх үйлдлүүд (жишээ нь, LocalStorage цэвэрлэх)
     alert('Системээс гарах үйлдлийг хийх JS логик оруулаарай.');
 };
 
 // Хуудас ачаалагдахад жагсаалтыг татах
 window.onload = function() {
     fetchNewsList();
-    // TinyMCE-ийн init нь өөрөө ачаалагдана
 };
 
 </script>

@@ -115,11 +115,14 @@ nav ul li ul li a:hover {background:#3d85c6;}
 <p>Хаяг: Арвайхээр хот</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
-const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
+
+  // v2 дээр зөв нь createClient-г Supabase namespace-аар дуудаж байна
+  const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 
 let authorsData = [];
 let newsData = [];

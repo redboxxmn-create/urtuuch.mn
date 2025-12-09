@@ -7,18 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* ---------------------------------------------------------------------- */
-        /* ЭНЭ БОЛ ГАР УТАСНЫ ШИНЭЧИЛСЭН ЗАГВАР ОРОХООС ӨМНӨХ ХУУЧИН CSS ХЭСЭГ */
+        /* ЕРӨНХИЙ СТИЛЬ */
         /* ---------------------------------------------------------------------- */
         body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
         header{ background:#fff; padding:10px 15px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
         header h1{margin:0; font-size:22px;}
         .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
         
-        /* ЛОГОНЫ СТИЛЬ (МУУХАЙ ХАРАГДАХГҮЙ БАЙХААР ЗАСВАРЛАВ) */
+        /* ЛОГОНЫ СТИЛЬ */
         .logo-container img {
             max-height: 40px; 
             margin: 10px 0;
-            object-fit: contain; /* Логоны суналтыг зогсооно */
+            object-fit: contain; 
             width: auto;
         }
 
@@ -33,17 +33,19 @@
         nav ul li ul li a:hover {background:#3d85c6;}
         
         /* --------------------------------------------------- */
-        /* ШИНЭЧИЛСЭН GRID, CARD-ЫН ТОХИРГОО (3 төрлийн карттай) */
+        /* МЭДЭЭНИЙ GRID БОЛОН КАРТЫН ЗАГВАР */
         /* --------------------------------------------------- */
+
         .grid{
             display:grid; 
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); 
+            /* Desktop хувилбарыг 4 тэнцүү баганад хуваана */
+            grid-template-columns: repeat(4, 1fr); 
             gap:15px; 
             padding:15px;
         }
         
-        .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s; background:#fff;}
-        .card:hover{transform:translateY(-5px) scale(1.03); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
+        .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s; background:#fff; text-decoration: none; color: inherit;}
+        .card:hover{transform:translateY(-5px); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
         .card img{width:100%; height:150px; object-fit:cover;}
         .card-content{padding:10px; position:relative;}
         .card-title{font-size:16px; margin:0; font-weight:bold;}
@@ -51,37 +53,8 @@
         .card-meta span.category{background:#6fa8dc; color:#fff; padding:2px 8px; border-radius:6px; font-size:12px;}
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
-        
-        /* 1. Featured Large card (2 багана эзэлнэ) - Энэ нь онцлох мэдээний ТОМ загвар */
-        .featured-large-card {
-            grid-column: span 2; 
-            display: flex; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2); 
-            border: 2px solid #3d85c6; 
-        }
-        .featured-large-card img{
-            width: 50%; 
-            height: auto; 
-            object-fit: cover;
-            min-height: 250px; 
-        } 
-        .featured-large-card .card-content{
-            width: 50%; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 20px;
-        }
-        .featured-large-card .card-title {
-            font-size: 24px; 
-            font-weight: 700;
-        }
-        .featured-large-card .card-meta span.category{
-            background: #d9534f; 
-            font-size: 14px;
-        }
 
-        /* 2. Sub-Featured card (2 багана эзэлнэ, илүү том харагдана) - Энэ нь дэд онцлох мэдээний загвар */
+        /* sub-featured-card загварыг энгийн картад ойртуулна */
         .sub-featured-card {
             grid-column: span 2; 
         }
@@ -91,10 +64,125 @@
         .sub-featured-card .card-title {
             font-size: 20px;
         }
+
+        /* --------------------------------------------------- */
+        /* 💡 ЗУРАГТ ҮЗҮҮЛСЭН ОНЦЛОХ МЭДЭЭНИЙ ЗАГВАР (Featured Block) */
+        /* --------------------------------------------------- */
         
-        /* Бусад загварууд */
-        .card-desc-preview{display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); padding:12px; font-size:13px; line-height:1.4; border-radius:12px; overflow:auto; z-index:10;}
-        .card:hover .card-desc-preview{display:block;} 
+        .featured-block-container {
+            grid-column: 1 / -1; /* Бүх 4 баганыг эзэлнэ */
+            display: grid;
+            /* Гол мэдээг 3/4, хажуугийн мэдээг 1/4 харьцаатай хуваана */
+            grid-template-columns: 3fr 1fr; 
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: #fff; 
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        /* "ШУУРХАЙ" гарчиг */
+        .featured-block-container::before {
+            content: "ШУУРХАЙ";
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            background: #d9534f;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        /* 1. Зүүн талын ТОМ Мэдээ (Featured Main) */
+        .featured-main-card {
+            grid-column: 1 / 2; 
+            display: block; 
+            border: none !important; 
+            box-shadow: none !important;
+            padding: 0;
+            overflow: hidden;
+            border-radius: 8px; /* Доторх картын булан */
+        }
+        .featured-main-card img {
+            width: 100%;
+            height: 400px; 
+            object-fit: cover;
+            filter: brightness(0.85); /* Текст тод харагдахын тулд бараав */
+            transition: filter 0.3s;
+        }
+        .featured-main-card:hover img {
+            filter: brightness(0.7);
+        }
+        .featured-main-card .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            color: #fff; 
+            padding: 20px;
+            min-height: 100px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0)); 
+            box-sizing: border-box;
+        }
+        .featured-main-card .card-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .featured-main-card .card-meta {
+            color: #eee;
+        }
+        .featured-main-card .card-meta span.category {
+            background: #e74c3c; 
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .featured-main-card:hover {
+            transform: none; 
+            box-shadow: none;
+        }
+
+        /* 2. Баруун талын Жижиг Мэдээний Самбар (Featured Sidebar) */
+        .featured-sidebar {
+            grid-column: 2 / 3; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .featured-sidebar .card {
+            box-shadow: none;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            display: flex; /* Зураг болон текстийг хажуу хажууд нь байрлуулах */
+        }
+        .featured-sidebar .card img {
+            height: 100px; 
+            width: 35%; /* Зургийн өргөн */
+            object-fit: cover;
+            border-radius: 8px 0 0 8px;
+        }
+        .featured-sidebar .card .card-content {
+            padding: 8px;
+            width: 65%;
+        }
+        .featured-sidebar .card .card-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        .featured-sidebar .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* --------------------------------------------------- */
+        /* БУСАД ТУСЛАХ ЗАГВАРУУД */
+        /* --------------------------------------------------- */
         .video-card{grid-column:1/-1; padding:0; margin-bottom:20px;}
         .video-card iframe{width:100%; height:300px; border:none; border-radius:12px;}
         .authors-container {display:flex; gap:10px; padding:10px; justify-content:center; flex-wrap:wrap; background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
@@ -114,26 +202,84 @@
         #newsModalContent img{width:100%; max-height:200px; object-fit:cover; border-radius:8px; margin-bottom:10px;}
         
         /* ---------------------------------------------------------------------- */
-        /* ГАР УТАСНЫ ШИНЭЧИЛСЭН MEDIA QUERY */
+        /* ГАР УТАСНЫ ЗАГВАР (MEDIA QUERY) */
         /* ---------------------------------------------------------------------- */
+        @media(max-width:992px){
+            /* Featured Block-ийг 2 баганатай болгож харьцааг 2:1 болгоно */
+            .featured-block-container {
+                grid-template-columns: 2fr 1fr;
+            }
+            .featured-main-card img {
+                height: 300px;
+            }
+            .featured-main-card .card-title {
+                font-size: 22px;
+            }
+            .featured-sidebar .card {
+                flex-direction: column; /* Жижиг картууд босоо болно */
+                align-items: center;
+            }
+            .featured-sidebar .card img {
+                width: 100%;
+                height: 120px;
+                border-radius: 8px 8px 0 0;
+            }
+            .featured-sidebar .card .card-content {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+
         @media(max-width:768px){
             .grid{grid-template-columns:1fr; gap:10px; padding:10px;}
             .video-card iframe{height:200px;}
             header h1{font-size:18px;}
             .search-box input{font-size:12px;}
             
-            /* Цэсний хуучин mobile загвар */
             nav ul{flex-direction:column;}
             nav ul li{margin-right:0; margin-bottom:5px;}
             nav ul li ul {position:relative; top:0;}
+
+            /* Featured Block-ийг бүтэн босоо болгоно */
+            .featured-block-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .featured-main-card, .featured-sidebar {
+                grid-column: 1 / -1;
+            }
+            .featured-main-card img {
+                height: 250px;
+            }
+            .featured-main-card .card-title {
+                font-size: 18px;
+            }
+            .featured-main-card .card-content {
+                min-height: 80px;
+                padding: 15px;
+            }
+            .featured-main-card .card-meta span.category {
+                font-size: 12px;
+            }
             
-            /* Бүх том, дунд картнууд гар утсан дээр энгийн карт шиг нэг багана болно */
+            /* Бусад картууд */
             .featured-large-card, .sub-featured-card {grid-column:1/-1; flex-direction:column; display:block; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.1);} 
             .featured-large-card img, .sub-featured-card img{width:100%; height:200px; min-height: 150px;}
             .featured-large-card .card-content, .sub-featured-card .card-content{width:100%;}
             .featured-large-card .card-title {font-size: 18px;}
-            
-            /* Картууд босоо хэвээр үлдэнэ, бүтэн өргөнтэй */
+
+            .featured-sidebar .card {
+                flex-direction: row; /* Баруун самбарын жижиг мэдээг зөвхөн Mobile-д хажуугаар нь болгох */
+            }
+            .featured-sidebar .card img {
+                width: 30%;
+                height: 80px;
+                border-radius: 8px 0 0 8px;
+            }
+            .featured-sidebar .card .card-content {
+                width: 70%;
+            }
+
         }
     </style>
 </head>
@@ -147,59 +293,29 @@
     <nav>
         <ul>
             <li><a href="#">Улс төр</a>
-                <ul>
-                    <li><a href="#">Тойм</a></li>
-                    <li><a href="#">Нийтлэл</a></li>
-                    <li><a href="#">Сурвалжилга</a></li>
-                    <li><a href="#">Өртөөчийн үг</a></li>
-                    <li><a href="#">Хов болох вий</a></li>
-                </ul>
+                <ul><li><a href="#">Тойм</a></li><li><a href="#">Нийтлэл</a></li><li><a href="#">Сурвалжилга</a></li><li><a href="#">Өртөөчийн үг</a></li><li><a href="#">Хов болох вий</a></li></ul>
             </li>
             <li><a href="#">Эдийн засаг</a>
-                <ul>
-                    <li><a href="#">Уул уурхай</a></li>
-                    <li><a href="#">Дэд бүтэц</a></li>
-                    <li><a href="#">Монголд үйлдвэрлэв</a></li>
-                    <li><a href="#">Зар сурталчилгаа</a></li>
-                </ul>
+                <ul><li><a href="#">Уул уурхай</a></li><li><a href="#">Дэд бүтэц</a></li><li><a href="#">Монголд үйлдвэрлэв</a></li><li><a href="#">Зар сурталчилгаа</a></li></ul>
             </li>
             <li><a href="#">Соёл урлаг</a>
-                <ul>
-                    <li><a href="#">Ярилцлага</a></li>
-                    <li><a href="#">Сурвалжилга</a></li>
-                    <li><a href="#">Кино ертөнц</a></li>
-                    <li><a href="#">Утга зохиол</a></li>
-                    <li><a href="#">Соёл судлал</a></li>
-                </ul>
+                <ul><li><a href="#">Ярилцлага</a></li><li><a href="#">Сурвалжилга</a></li><li><a href="#">Кино ертөнц</a></li><li><a href="#">Утга зохиол</a></li><li><a href="#">Соёл судлал</a></li></ul>
             </li>
             <li><a href="#">Медиа</a>
-                <ul>
-                    <li><a href="#">Нэвтрүүлэг</a></li>
-                    <li><a href="#">Мэдээ</a></li>
-                    <li><a href="#">Сурвалжилга</a></li>
-                    <li><a href="#">MIC UP</a></li>
-                    <li><a href="#">Зураглал</a></li>
-                    <li><a href="#">Өртөөчөөс</a></li>
-                </ul>
+                <ul><li><a href="#">Нэвтрүүлэг</a></li><li><a href="#">Мэдээ</a></li><li><a href="#">Сурвалжилга</a></li><li><a href="#">MIC UP</a></li><li><a href="#">Зураглал</a></li><li><a href="#">Өртөөчөөс</a></li></ul>
             </li>
             <li><a href="#">Дэлхий дахинд</a>
-                <ul>
-                    <li><a href="#">Улс төр</a></li>
-                    <li><a href="#">Танин мэдэхүй</a></li>
-                    <li><a href="#">Шинжлэх ухаан</a></li>
-                </ul>
+                <ul><li><a href="#">Улс төр</a></li><li><a href="#">Танин мэдэхүй</a></li><li><a href="#">Шинжлэх ухаан</a></li></ul>
             </li>
             <li><a href="#">Ярилцлага</a>
-                <ul>
-                    <li><a href="#">Хөрөг ярилцлага</a></li>
-                    <li><a href="#">Улс төрийн ярилцлага</a></li>
-                </ul>
+                <ul><li><a href="#">Хөрөг ярилцлага</a></li><li><a href="#">Улс төрийн ярилцлага</a></li></ul>
             </li>
         </ul>
     </nav>
 </header>
 
 <div class="grid" id="newsContainer"></div>
+
 <div class="video-card" id="videoContainer">
     <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
 </div>
@@ -236,7 +352,7 @@ let authorsData = [];
 let newsData = [];
 let currentPage = 1;
 const NEWS_PER_PAGE = 12; // Пагинацийн нэг хуудсан дахь тоо
-const TOTAL_NEWS_LIMIT = 29; // Нэг таталтаар авах нийт мэдээний тоо (Таны хүсэлтээр 29)
+const TOTAL_NEWS_LIMIT = 29; // Нэг таталтаар авах нийт мэдээний тоо 
 
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
@@ -270,6 +386,9 @@ function displayAuthors() {
     `).join('');
 }
 
+/**
+ * Мэдээг Featured Block болон Normal Grid-д хувааж харуулах функц
+ */
 function displayNews() {
     const container = document.getElementById('newsContainer');
     container.innerHTML = '';
@@ -283,47 +402,56 @@ function displayNews() {
     const end = start + NEWS_PER_PAGE;
     const pageNews = newsData.slice(start,end);
 
-    const largeFeatured = []; // featured_large
-    const subFeatured = [];   // sub_featured
-    const normal = [];        // normal буюу NULL
-
+    let mainFeatured = null; // Зүүн талын хамгийн ТОМ мэдээ
+    let sidebarFeatured = []; // Баруун талын 3-4 жижиг мэдээ
+    const normal = []; // Энгийн картууд
+    
     // Мэдээг бүлэглэх
     for (const n of pageNews) {
-        switch (n.card_type) {
-            case 'featured_large':
-                largeFeatured.push(n);
-                break;
-            case 'sub_featured':
-                subFeatured.push(n);
-                break;
-            default:
-                // 'normal' эсвэл NULL утгатай бол
-                normal.push(n);
-                break;
+        // featured_large card_type-тай эхний мэдээг том болгоно
+        if (n.card_type === 'featured_large' && !mainFeatured) {
+            mainFeatured = n; 
+        // Дараагийн 3 мэдээг (featured_large эсвэл sub_featured) баруун самбарт оруулна
+        } else if (sidebarFeatured.length < 3 && (n.card_type === 'featured_large' || n.card_type === 'sub_featured')) {
+            sidebarFeatured.push(n); 
+        } else {
+            // бусад мэдээг энгийн grid-д оруулна
+            normal.push(n); 
         }
     }
     
-    /* * Мэдээг харуулах:
-     * Normal -> Sub-Featured -> Large-Featured гэсэн дарааллаар **prepend()** хийвэл,
-     * Grid дээр Large -> Sub -> Normal дарааллаар, тухайн ангилал дотроо шинэ нь эхэнд гарна.
-    */
-    
-    // 3. Энгийн Картууд (Normal) - Хамгийн шинэ нь эхэнд гарна
+    // 1. Featured Block-ийг Үүсгэх
+    if (mainFeatured) {
+        const featuredBlock = document.createElement('div');
+        featuredBlock.className = 'featured-block-container';
+
+        // Зүүн талын том мэдээ
+        const mainCard = createNewsCard(mainFeatured, 'featured_main'); 
+        mainCard.classList.add('featured-main-card');
+
+        // Баруун талын жижиг мэдээний самбар
+        const sidebar = document.createElement('div');
+        sidebar.className = 'featured-sidebar';
+        
+        sidebarFeatured.forEach(n => {
+             const div = createNewsCard(n, 'featured_sidebar_small'); 
+             sidebar.appendChild(div);
+        });
+
+        featuredBlock.appendChild(mainCard);
+        featuredBlock.appendChild(sidebar);
+        container.appendChild(featuredBlock); // Featured block-ийг Grid-ийн эхэнд байрлуулна
+    }
+
+    // 2. Энгийн Картууд (Normal болон sub-featured, featured_large-д ороогүй мэдээ)
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
-        container.prepend(div);
-    });
-
-    // 2. Дэд Онцлох Карт (Sub-Featured) - Хамгийн шинэ нь эхэнд гарна
-    subFeatured.forEach(n => {
-        const div = createNewsCard(n, 'sub_featured');
-        container.prepend(div); 
-    });
-    
-    // 1. Том Онцлох Карт (Featured Large) - Хамгийн шинэ нь эхэнд гарна
-    largeFeatured.forEach(n => {
-        const div = createNewsCard(n, 'featured_large');
-        container.prepend(div); 
+        
+        // Хуучин sub-featured классыг ашиглаж grid-ийн 2 багана эзлүүлнэ
+        if (n.card_type === 'sub_featured') {
+            div.classList.add('sub-featured-card');
+        }
+        container.appendChild(div);
     });
     
 
@@ -337,33 +465,30 @@ function displayNews() {
 function createNewsCard(n, cardType) {
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
     
-    const div = document.createElement('div');
+    const div = document.createElement('a'); // Card-ийг 'a' tag-аар үүсгэнэ
+    div.className = "card";
     
-    // cardType-ийн дагуу класс нэр оноох
-    if (cardType === 'featured_large') {
-        div.className = "card featured-large-card";
-    } else if (cardType === 'sub_featured') {
-        div.className = "card sub-featured-card";
-    } else {
-        div.className = "card"; // Normal card
-    }
-
     const categoryText = (n.featured ? 'ОНЦЛОХ | ' : '') + n.category;
-    const categoryStyle = (cardType === 'featured_large' || n.featured) ? 'background: #d9534f;' : '';
+    const categoryStyle = (n.featured || cardType === 'featured_main') ? 'background: #d9534f;' : '';
 
     const contentHtml = `
         <div class="card-content">
             <h3 class="card-title">${n.title}</h3>
-            <div class="card-meta"><span class="category" style="${categoryStyle}">${categoryText}</span></div>
-            <div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>
+            <div class="card-meta">
+                <span class="category" style="${categoryStyle}">${categoryText}</span>
+                ${cardType !== 'featured_main' ? `<span>${new Date(n.created_at).toLocaleDateString('mn-MN')}</span>` : ''}
+            </div>
+            ${cardType !== 'featured_main' && cardType !== 'featured_sidebar_small' ? `<div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>` : ''}
+             
+            ${cardType === 'featured_main' ? `<p style="color:#eee; margin-top:10px; font-size:14px;">${n.content ? n.content.substring(0, 150) + '...' : ''}</p>` : ''} 
         </div>
     `;
     
-    div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
+    div.href = `news.html?slug=${n.slug}`; // Link-ийг шууд card-д онооно
 
-    div.addEventListener('click', ()=> {
-        window.location.href = `news.html?slug=${n.slug}`;
-    });
+    // Зургийг оруулах
+    div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
+    
     return div;
 }
 
@@ -377,7 +502,7 @@ function renderPagination() {
     if(currentPage>1){
         const prev=document.createElement('button');
         prev.innerText="Өмнөх";
-        prev.onclick=()=>{currentPage--; displayNews();};
+        prev.onclick=()=>{currentPage--; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(prev);
     }
 
@@ -385,14 +510,14 @@ function renderPagination() {
         const btn=document.createElement('button');
         btn.innerText=i;
         if(i===currentPage) btn.style.background="#3d85c6";
-        btn.onclick=()=>{currentPage=i; displayNews();};
+        btn.onclick=()=>{currentPage=i; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(btn);
     }
 
     if(currentPage<totalPages){
         const next=document.createElement('button');
         next.innerText="Дараах";
-        next.onclick=()=>{currentPage++; displayNews();};
+        next.onclick=()=>{currentPage++; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(next);
     }
 }

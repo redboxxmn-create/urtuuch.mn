@@ -9,7 +9,8 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/example_final_og_image.jpg"> <meta property="og:url" content=""> <meta property="og:image:width" content="1200">
+<meta property="og:image" content="https://i.imgur.com/your_correct_image_link.jpg">
+<meta property="og:url" content=""> <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -110,8 +111,8 @@ async function fetchNewsBySlug(slug){
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // ✅ ЗАСВАР: news.image байхгүй үед ашиглагдах default URL-г IMGur-ийн URL-ээр сольж байна.
-    const imageUrl = news.image || 'https://i.imgur.com/example_final_og_image.jpg'; // 👈 ШИНЭ IMGUR URL
+    // ✅ ЗАСВАР 2/2: news.image байхгүй үед ашиглагдах default URL-г оруулж байна.
+    const imageUrl = news.image || 'https://i.imgur.com/your_correct_image_link.jpg'; // 👈 ШИНЭ IMGUR URL
     
     // OG тагуудыг шинэчлэх
     createOrUpdateMetaTag('og:title', news.title);

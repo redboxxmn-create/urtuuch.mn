@@ -69,7 +69,6 @@ function shareFacebook() {
 
 function shareTwitter(title) {
     const url = encodeURIComponent(window.location.href);
-    // Гарчгийг 280 тэмдэгтээр хязгаарлах
     const text = encodeURIComponent(title.substring(0, 250) + (title.length > 250 ? '...' : '')); 
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, 'twitter-share', 'width=600,height=400');
 }
@@ -132,8 +131,9 @@ async function fetchNewsBySlug(slug){
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // news.image байхгүй үед default URL ашиглана (Сайтын лого)
-    const defaultImageUrl = 'https://i.imgur.com/your_default_site_logo.jpg'; 
+    // news.image байхгүй үед default URL-ийг HTML-ийн head-ээс авах, эсвэл placeholder ашиглах
+    // HTML-д аль хэдийн explicit-ээр заасан тул, зөвхөн news.image байгаа бол шинэчилнэ.
+    const defaultImageUrl = document.querySelector('meta[property="og:image"]').content;
     const imageUrl = news.image || defaultImageUrl; 
     
     // OG тагуудыг шинэчлэх
@@ -141,7 +141,6 @@ async function fetchNewsBySlug(slug){
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
     createOrUpdateMetaTag('og:url', currentURL);
-    // Зургийн хэмжээг баталгаажуулж байна
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
     

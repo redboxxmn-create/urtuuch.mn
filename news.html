@@ -10,12 +10,12 @@
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
 <meta property="og:image" content="https://i.imgur.com/gK2oQ9P.png"> 
-<meta property="og:url" content="https://urtuuch.mn"> 
-<meta property="og:image:width" content="1200">
+<meta property="og:url" content=""> <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* (Өмнөх CSS хэсэг хэвээр үлдэнэ) */
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
 .container { max-width:900px; margin:40px auto; background:#fff; padding:25px; border-radius:15px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
 .news-layout { display:flex; gap:20px; flex-wrap:wrap; }
@@ -25,12 +25,9 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .news-text p { font-size:16px; line-height:1.7; color:#555; }
 .news-content-html p { margin-top: 1em; line-height: 1.6; }
 .news-content-html img { max-width: 100%; height: auto; border-radius: 8px; }
-
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
 .back-btn:hover { background:#f4a6a6; color:#333; }
 @media(max-width:768px){ .news-layout { flex-direction:column; } }
-
-/* SHARE ТОВЧЛУУРУУДЫН CSS */
 .share-buttons { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; display: flex; gap: 10px; }
 .share-buttons button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.2s; }
 .share-buttons button:hover { opacity: 0.8; }
@@ -63,8 +60,7 @@ const slug = params.get('slug');
 // ---------------------------------------------------
 
 function shareFacebook() {
-    // Facebook-ийн хуваалцах цонхыг нээх. Зөвхөн URL-г дамжуулна, учир нь 
-    // Facebook Scraper нь OG тагуудыг (title, image) өөрөө уншина.
+    // Facebook-ийн хуваалцах цонхыг нээх. Зөвхөн URL-г дамжуулна.
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, 'facebook-share', 'width=800,height=600'); 
 }
@@ -80,7 +76,6 @@ function shareInstagram() {
     window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
 }
 
-// Global scope-д Share функцүүдийг таниулах
 window.shareFacebook = shareFacebook;
 window.shareTwitter = shareTwitter;
 window.shareInstagram = shareInstagram;
@@ -94,13 +89,15 @@ window.shareInstagram = shareInstagram;
  */
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
+    // Одоо байгаа тагийг хайх
     let tag = document.querySelector(`meta[property="${property}"]`);
     if (!tag) {
+        // Олддохгүй бол шинээр үүсгэх
         tag = document.createElement('meta');
         tag.setAttribute('property', property);
         head.appendChild(tag);
     }
-    // Content-ийг шинэчилж байна
+    // Content-ийг шинэчлэх
     tag.setAttribute('content', content);
 }
 
@@ -125,30 +122,30 @@ async function fetchNewsBySlug(slug){
     } 
     
     // =======================================================
-    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ (FACEBOOK SHARE-Т ЗОРИУЛАН)
+    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ
     // =======================================================
     
-    // Хуудасны гарчгийг шинэчлэх
     document.title = news.title + " | urtuuch.mn";
     
-    // HTML тагуудыг арилгаад, эхний 160 үсгийг тайлбар болгох
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
-    const currentURL = window.location.href;
+    
+    // 🔑 og:url-г одоогийн URL-ээр баталгаажуулна (хамгийн чухал)
+    const currentURL = window.location.href; 
+    
     // Зураг байхгүй бол default зураг ашиглах
     const imageUrl = news.image || 'https://i.imgur.com/gK2oQ9P.png'; 
     
-    // 🔑 OG тагуудыг шинэчлэх нь Facebook-т зөв мэдээлэл харуулах гол алхам
+    // OG тагуудыг шинэчлэх
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
     createOrUpdateMetaTag('og:url', currentURL);
-    // Зургийн хэмжээг баталгаажуулах (1200x630px-ийг Facebook санал болгодог)
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
     
     // =======================================================
     
-    // 2. Зохиогчийн мэдээллийг татаж авах (Нэмэлт)
+    // 2. Зохиогчийн мэдээллийг татаж авах
     let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
     if(news.author_id){
         const { data: authorData } = await supabase
@@ -160,7 +157,6 @@ async function fetchNewsBySlug(slug){
     }
 
     const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
-    // Share функцэд дамжуулахын тулд гарчгийг escape хийх
     const escapedTitle = news.title.replace(/'/g, "\\'");
 
     // 3. Хуудсанд контентийг оруулах

@@ -12,10 +12,11 @@
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
 <meta property="og:image" content="https://i.imgur.com/gK2oQ9P.png"> 
 <meta property="og:url" content="https://urtuuch.mn"> 
-
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+
 <style>
+/* (CSS хэсэг хэвээр үлдэнэ) */
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
 .container { max-width:900px; margin:40px auto; background:#fff; padding:25px; border-radius:15px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
 .news-layout { display:flex; gap:20px; flex-wrap:wrap; }
@@ -25,12 +26,9 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .news-text p { font-size:16px; line-height:1.7; color:#555; }
 .news-content-html p { margin-top: 1em; line-height: 1.6; }
 .news-content-html img { max-width: 100%; height: auto; border-radius: 8px; }
-
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
 .back-btn:hover { background:#f4a6a6; color:#333; }
 @media(max-width:768px){ .news-layout { flex-direction:column; } }
-
-/* SHARE ТОВЧЛУУРУУДЫН CSS */
 .share-buttons { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; display: flex; gap: 10px; }
 .share-buttons button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: 600; transition: opacity 0.2s; }
 .share-buttons button:hover { opacity: 0.8; }
@@ -42,11 +40,11 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 <body>
 
 <div class="container" id="newsContainer">
-  <p>Мэдээ ачаалж байна...</p>
+  <p>Мэдээ ачаалж байна...</p>
 </div>
 <button class="back-btn" onclick="history.back()">Буцах</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
 
 <script>
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
@@ -61,21 +59,21 @@ const slug = params.get('slug');
 // SHARE FUNCTIONS
 // ---------------------------------------------------
 
-function shareFacebook(title, imageUrl) {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(title);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, 'facebook-share', 'width=800,height=600'); 
+function shareFacebook() {
+    // OG тагуудад байгаа URL-г хуваалцахад Facebook өөрөө зураг, гарчгийг татна.
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, 'facebook-share', 'width=800,height=600'); 
 }
 
 function shareTwitter(title) {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(title);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, 'twitter-share', 'width=600,height=400');
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(title);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, 'twitter-share', 'width=600,height=400');
 }
 
 function shareInstagram() {
-    alert("Инстаграм нь вэбээс шууд холбоос хуваалцахыг дэмждэггүй. Та манай албан ёсны Инстаграм хуудас руу шилжинэ.");
-    window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
+    alert("Инстаграм нь вэбээс шууд холбоос хуваалцахыг дэмждэггүй. Та манай албан ёсны Инстаграм хуудас руу шилжинэ.");
+    window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
 }
 
 window.shareFacebook = shareFacebook;
@@ -87,100 +85,96 @@ window.shareInstagram = shareInstagram;
 // ---------------------------------------------------
 
 function createOrUpdateMetaTag(property, content) {
-    const head = document.head;
-    let tag = document.querySelector(`meta[property="${property}"]`);
-    if (!tag) {
-        tag = document.createElement('meta');
-        tag.setAttribute('property', property);
-        head.appendChild(tag);
-    }
-    tag.setAttribute('content', content);
+    const head = document.head;
+    let tag = document.querySelector(`meta[property="${property}"]`);
+    if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        head.appendChild(tag);
+    }
+    tag.setAttribute('content', content);
 }
 
 async function fetchNewsBySlug(slug){
-    const container = document.getElementById('newsContainer');
-    
-    // 1. Мэдээг татаж авах
-    const { data: news, error: newsError } = await supabase
-        .from('news')
-        .select('*') 
-        .eq('slug', slug)
-        .eq('active', true) 
-        .single(); 
-        
-    if(newsError || !news){ 
-        container.innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна. (Консолыг шалгана уу)</p>`;
-        if(newsError) console.error("News fetch error (Could not find news):", newsError);
-        return;
-    } 
-    
-    // =======================================================
-    // OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ
-    // =======================================================
-    
-    document.title = news.title + " | urtuuch.mn";
-    
-    const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
-    
-    const currentURL = window.location.href;
-    
-    // ✅ ЗАСВАР 2/3: Зураггүй бол баталгаатай Imgur холбоосыг ашиглана
-    const imageUrl = news.image || 'https://i.imgur.com/gK2oQ9P.png'; 
-    
-    createOrUpdateMetaTag('og:title', news.title);
-    createOrUpdateMetaTag('og:description', descriptionText);
-    createOrUpdateMetaTag('og:image', imageUrl); 
-    createOrUpdateMetaTag('og:url', currentURL);
+    const container = document.getElementById('newsContainer');
+    
+    // 1. Мэдээг татаж авах
+    const { data: news, error: newsError } = await supabase
+        .from('news')
+        .select('*') 
+        .eq('slug', slug)
+        .eq('active', true) 
+        .single(); 
+        
+    if(newsError || !news){ 
+        container.innerHTML = `<p>Мэдээ олдсонгүй эсвэл нийтлэгдээгүй байна. (Консолыг шалгана уу)</p>`;
+        if(newsError) console.error("News fetch error (Could not find news):", newsError);
+        return;
+    } 
+    
+    // =======================================================
+    // OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ (FACEBOOK-Т ЗӨВ ХАРУУЛАХ ҮНДСЭН АЛХАМ)
+    // =======================================================
+    
+    document.title = news.title + " | urtuuch.mn";
+    
+    const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
+    const currentURL = window.location.href;
+    const imageUrl = news.image || 'https://i.imgur.com/gK2oQ9P.png'; 
+    
+    createOrUpdateMetaTag('og:title', news.title);
+    createOrUpdateMetaTag('og:description', descriptionText);
+    createOrUpdateMetaTag('og:image', imageUrl); 
+    createOrUpdateMetaTag('og:url', currentURL);
 
-    // Зургийн хэмжээг баталгаажуулж байна (Facebook-ийн алдааг дарна)
-    createOrUpdateMetaTag('og:image:width', '1200');
-    createOrUpdateMetaTag('og:image:height', '630');
-    
-    // =======================================================
-    
-    // 2. Зохиогчийн мэдээллийг author_id-аар тусад нь татаж авах
-    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
-    if(news.author_id){
-        const { data: authorData, error: authorError } = await supabase
-            .from('authors')
-            .select('*')
-            .eq('id', news.author_id)
-            .single();
-        
-        if(authorData) {
-            author = authorData;
-        } else if (authorError) {
-            console.warn("Author fetch warning (Author ID mismatch):", authorError);
-        }
-    }
+    createOrUpdateMetaTag('og:image:width', '1200');
+    createOrUpdateMetaTag('og:image:height', '630');
+    
+    // =======================================================
+    
+    // 2. Зохиогчийн мэдээллийг author_id-аар тусад нь татаж авах
+    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
+    if(news.author_id){
+        const { data: authorData, error: authorError } = await supabase
+            .from('authors')
+            .select('*')
+            .eq('id', news.author_id)
+            .single();
+        
+        if(authorData) {
+            author = authorData;
+        } else if (authorError) {
+            console.warn("Author fetch warning (Author ID mismatch):", authorError);
+        }
+    }
 
-    const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
-    const escapedTitle = news.title.replace(/'/g, "\\'");
+    const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
+    const escapedTitle = news.title.replace(/'/g, "\\'");
 
-    container.innerHTML = `
-      <div class="news-layout">
-        ${news.image ? `<img src="${news.image}" alt="${news.title}">` : ''}
-        <div class="news-text">
-          <h1>${news.title}</h1>
-          <p><strong>Төрөл:</strong> ${news.category}</p>
-          <p><strong>Зохиогч:</strong> ${author.name}</p>
-          <div class="news-content-html">${descriptionContent}</div> 
-          
-          <div class="share-buttons">
-            <button class="share-facebook" onclick="shareFacebook('${escapedTitle}', '${imageUrl}')">Facebook</button>
-            <button class="share-twitter" onclick="shareTwitter('${escapedTitle}')">Twitter</button>
-            <button class="share-instagram" onclick="shareInstagram()">Instagram</button>
-          </div>
+    container.innerHTML = `
+      <div class="news-layout">
+        ${news.image ? `<img src="${news.image}" alt="${news.title}">` : ''}
+        <div class="news-text">
+          <h1>${news.title}</h1>
+          <p><strong>Төрөл:</strong> ${news.category}</p>
+          <p><strong>Зохиогч:</strong> ${author.name}</p>
+          <div class="news-content-html">${descriptionContent}</div> 
+          
+          <div class="share-buttons">
+            <button class="share-facebook" onclick="shareFacebook()">Facebook</button>
+            <button class="share-twitter" onclick="shareTwitter('${escapedTitle}')">Twitter</button>
+            <button class="share-instagram" onclick="shareInstagram()">Instagram</button>
+          </div>
 
-        </div>
-      </div>
-    `;
+        </div>
+      </div>
+    `;
 }
 
 if(slug){
-    fetchNewsBySlug(slug);
+    fetchNewsBySlug(slug);
 } else {
-    document.getElementById('newsContainer').innerHTML = `<p>Мэдээний slug олдсонгүй.</p>`;
+    document.getElementById('newsContainer').innerHTML = `<p>Мэдээний slug олдсонгүй.</p>`;
 }
 </script>
 

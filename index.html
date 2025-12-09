@@ -250,8 +250,7 @@ async function fetchNews() {
         // card_type талбарыг татаж авна
         .select('*, card_type') 
         .eq('active', true) 
-        // Featured-ийн оронд card_type-аар эрэмбэлэхгүй, зүгээр л цаг хугацаагаар эрэмбэлнэ
-        // Учир нь card_type-ийг бид зөвхөн харагдах байдалд ашиглана
+        // Мэдээг зөвхөн ЦАГ ХУГАЦААНЫ дарааллаар татаж авна (шинэ нь эхэнд)
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
         
@@ -285,11 +284,11 @@ function displayNews() {
     const end = start + NEWS_PER_PAGE;
     const pageNews = newsData.slice(start,end);
 
-    const largeFeatured = [];
-    const subFeatured = [];
-    const normal = [];
+    const largeFeatured = []; // featured_large
+    const subFeatured = [];   // sub_featured
+    const normal = [];        // normal буюу NULL
 
-    // card_type-аар мэдээг бүлэглэх
+    // Мэдээг бүлэглэх
     for (const n of pageNews) {
         switch (n.card_type) {
             case 'featured_large':
@@ -299,29 +298,39 @@ function displayNews() {
                 subFeatured.push(n);
                 break;
             default:
-                // featured_large/sub_featured биш болон 'normal', эсвэл NULL утгууд
+                // 'normal' эсвэл NULL утгатай бол
                 normal.push(n);
                 break;
         }
     }
     
-    // 1. Том Онцлох Карт (Featured Large)
-    largeFeatured.forEach(n => {
-        const div = createNewsCard(n, 'featured_large');
-        container.appendChild(div);
-    });
-
-    // 2. Дэд Онцлох Карт (Sub-Featured)
-    subFeatured.forEach(n => {
-        const div = createNewsCard(n, 'sub_featured');
-        container.appendChild(div);
-    });
+    /* * Мэдээг харуулах:
+     * 1. Бүх жагсаалт цаг хугацаагаар (шинэ нь сүүлд) эрэмбэлэгдсэн байгаа.
+     * 2. Харуулахдаа: Normal, Sub-Featured, Large-Featured гэсэн дарааллаар **prepend()** хийвэл,
+     * Grid дээр Large -> Sub -> Normal дарааллаар, тухайн ангилал дотроо шинэ нь эхэнд гарна.
+    */
     
-    // 3. Энгийн Картууд (Normal)
+    // 3. Энгийн Картууд (Normal) - Хамгийн шинэ нь эхэнд гарна
+    // Энэ нь хамгийн түрүүнд Grid-д нэмэгдэнэ.
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
-        container.appendChild(div);
+        container.prepend(div);
     });
+
+    // 2. Дэд Онцлох Карт (Sub-Featured) - Хамгийн шинэ нь эхэнд гарна
+    // Энэ нь Normal-уудын өмнө нэмэгдэнэ.
+    subFeatured.forEach(n => {
+        const div = createNewsCard(n, 'sub_featured');
+        container.prepend(div); 
+    });
+    
+    // 1. Том Онцлох Карт (Featured Large) - Хамгийн шинэ нь эхэнд гарна
+    // Энэ нь бүх мэдээний хамгийн эхэнд (дээд талд) нэмэгдэнэ.
+    largeFeatured.forEach(n => {
+        const div = createNewsCard(n, 'featured_large');
+        container.prepend(div); 
+    });
+    
 
     renderPagination();
     displayAuthors();
@@ -355,11 +364,9 @@ function createNewsCard(n, cardType) {
         </div>
     `;
     
-    // Featured Large card-ын хувьд зургийг content-ийн өмнө гаргана (CSS-ээр зохицуулагддаг)
     div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
 
     div.addEventListener('click', ()=> {
-        // Мэдээллийн дэлгэрэнгүй хуудас руу шилжүүлэх
         window.location.href = `news.html?slug=${n.slug}`;
     });
     return div;
@@ -368,7 +375,6 @@ function createNewsCard(n, cardType) {
 
 function renderPagination() {
     const container = document.getElementById('pagination');
-    // Пагинацийг татсан нийт 29 мэдээгээр тооцно
     const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE); 
     container.innerHTML='';
     if(totalPages<=1) return;
@@ -407,7 +413,6 @@ function displayFilteredNews(filteredData) {
         return;
     }
 
-    // Хайлтад card_type-аар ялгах шаардлагагүй тул бүгдийг нь энгийнээр харуулна
     filteredData.forEach(n => {
         const div = createNewsCard(n, 'normal'); 
         container.appendChild(div);

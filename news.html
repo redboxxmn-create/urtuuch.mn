@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/your_default_image_link.jpg"> 
+<meta property="og:image" content="https://i.imgur.com/your_default_site_logo.jpg"> 
 <meta property="og:url" content="https://urtuuch.mn"> 
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -23,6 +23,7 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 .news-text { flex:2 1 400px; }
 .news-text h1 { color:#d9534f; margin-bottom:15px; }
 .news-text p { font-size:16px; line-height:1.7; color:#555; }
+.news-content-html { margin-top: 20px; }
 .news-content-html p { margin-top: 1em; line-height: 1.6; }
 .news-content-html img { max-width: 100%; height: auto; border-radius: 8px; }
 .back-btn { margin-top:20px; padding:12px 20px; border:none; border-radius:8px; background:#6fa8dc; color:#fff; cursor:pointer; transition:0.3s; }
@@ -39,13 +40,16 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 <body>
 
 <div class="container" id="newsContainer">
-  <p>Мэдээ ачаалж байна...</p>
+  <p style="text-align: center;">Мэдээ ачаалж байна...</p>
 </div>
 <button class="back-btn" onclick="history.back()">Буцах</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
 
 <script>
+// =======================================================
+// SUPABASE CLIENT INIT
+// =======================================================
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
@@ -65,12 +69,14 @@ function shareFacebook() {
 
 function shareTwitter(title) {
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(title);
+    // Гарчгийг 280 тэмдэгтээр хязгаарлах
+    const text = encodeURIComponent(title.substring(0, 250) + (title.length > 250 ? '...' : '')); 
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, 'twitter-share', 'width=600,height=400');
 }
 
 function shareInstagram() {
     alert("Инстаграм нь вэбээс шууд холбоос хуваалцахыг дэмждэггүй. Та манай албан ёсны Инстаграм хуудас руу шилжинэ.");
+    // ⚠️ Энд та өөрийн Инстаграм хуудасны холбоосыг заавал оруулна.
     window.open("https://www.instagram.com/YOUR_INSTAGRAM_PAGE_HERE", '_blank'); 
 }
 
@@ -82,7 +88,7 @@ window.shareInstagram = shareInstagram;
 // ---------------------------------------------------
 // META TAG DYNAMIC UPDATE
 // ---------------------------------------------------
-
+// OG тагуудыг үүсгэх эсвэл шинэчлэх функц
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
     let tag = document.querySelector(`meta[property="${property}"]`);
@@ -117,17 +123,17 @@ async function fetchNewsBySlug(slug){
     } 
     
     // =======================================================
-    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ
+    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ (Facebook-т зориулсан)
     // =======================================================
     
     document.title = news.title + " | urtuuch.mn";
     
-    // Тайлбарыг HTML тагуудаас цэвэрлэж, 160 тэмдэгтээр хязгаарлана
+    // Тайлбарыг HTML тагуудаас цэвэрлэж, 160 тэмдэгтээр хязгаарлана (OG description)
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // news.image байхгүй үед default URL ашиглана.
-    const defaultImageUrl = 'https://i.imgur.com/your_default_image_link.jpg'; 
+    // news.image байхгүй үед default URL ашиглана (Сайтын лого)
+    const defaultImageUrl = 'https://i.imgur.com/your_default_site_logo.jpg'; 
     const imageUrl = news.image || defaultImageUrl; 
     
     // OG тагуудыг шинэчлэх
@@ -135,14 +141,14 @@ async function fetchNewsBySlug(slug){
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
     createOrUpdateMetaTag('og:url', currentURL);
-    // 💡 Зургийн хэмжээг баталгаажуулж байна (Facebook-т заавал хэрэгтэй)
+    // Зургийн хэмжээг баталгаажуулж байна
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
     
     // =======================================================
     
     // 2. Зохиогчийн мэдээллийг татаж авах
-    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png"}; 
+    let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png", title: "Зохиогч"}; 
     if(news.author_id){
         const { data: authorData } = await supabase
             .from('authors')
@@ -162,8 +168,8 @@ async function fetchNewsBySlug(slug){
         ${news.image ? `<img src="${news.image}" alt="${news.title}">` : ''}
         <div class="news-text">
           <h1>${news.title}</h1>
-          <p><strong>Төрөл:</strong> ${news.category}</p>
-          <p><strong>Зохиогч:</strong> ${author.name}</p>
+          <p><strong>Ангилал:</strong> ${news.category || 'Тодорхойгүй'}</p>
+          <p><strong>Зохиогч:</strong> ${author.name} (${author.title || 'Албан тушаалгүй'})</p>
           <div class="news-content-html">${descriptionContent}</div> 
           
           <div class="share-buttons">
@@ -180,7 +186,7 @@ async function fetchNewsBySlug(slug){
 if(slug){
     fetchNewsBySlug(slug);
 } else {
-    document.getElementById('newsContainer').innerHTML = `<p style="text-align:center;">Мэдээний slug олдсонгүй.</p>`;
+    document.getElementById('newsContainer').innerHTML = `<p style="text-align:center;">Мэдээний slug олдсонгүй. Үндсэн хуудас руу шилжинэ үү.</p>`;
 }
 </script>
 

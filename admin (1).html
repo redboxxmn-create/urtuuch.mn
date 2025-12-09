@@ -42,6 +42,9 @@
         .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; border-bottom: 2px solid #3d85c6; padding-bottom: 5px; }
         .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;}
         .checkbox-group { display: flex; gap: 20px; margin: 10px 0; }
+        /* Зураг оруулах талбарын стилийг Mobile-д зөв харуулахын тулд нэмэв */
+        #imageUpload { padding: 4px; height: auto; }
+
         @media (max-width: 768px) {
             .container { grid-template-columns: 1fr; }
             .card { grid-column: span 1 !important; }
@@ -79,14 +82,24 @@
             <option>Медиа</option>
             <option>Дэлхий дахинд</option>
             <option>Ярилцлага</option>
-        </select> 
-        <input id="newsImage" placeholder="Зураг URL">
+        </select>
         
+        <div style="margin: 10px 0;">
+            <label for="imageUpload">Зураг сонгох:</label>
+            <input type="file" id="imageUpload" accept="image/*" style="padding: 4px; height: auto;">
+            <button id="uploadButton" type="button" style="background: #2ecc71;">Зураг оруулах</button>
+            <div id="uploadStatus" style="font-size: 12px; margin-top: 5px;"></div>
+            <img id="previewImage" src="" style="max-width: 150px; height: auto; margin-top: 10px; border-radius: 8px; display: none;">
+            
+            <input type="hidden" id="newsImage" value=""> 
+            
+            <input type="text" id="newsImageURLManual" placeholder="Эсвэл Зураг URL-ийг гараар оруулна уу" style="margin-top: 10px;">
+        </div>
         <select id="newsCardType">
             <option value="normal">Энгийн мэдээ (Normal)</option>
             <option value="sub_featured">Дэд онцлох (Sub-Featured)</option>
             <option value="featured_large">Онцлох Том Карт (Featured Large)</option>
-        </select> 
+        </select>
         <div id="editor"></div>
         <select id="newsAuthor"></select>
         
@@ -138,8 +151,8 @@
 // DOM элементүүд
 const newsTitle = document.getElementById("newsTitle");
 const newsCategory = document.getElementById("newsCategory");
-const newsImage = document.getElementById("newsImage");
-const newsCardType = document.getElementById("newsCardType"); // Шинэ DOM элемент
+const newsImage = document.getElementById("newsImage"); // 💡 Энэ одоо hidden талбар болсон
+const newsCardType = document.getElementById("newsCardType"); 
 const newsAuthor = document.getElementById("newsAuthor");
 const newsFeatured = document.getElementById("newsFeatured");
 const newsActive = document.getElementById("newsActive"); 
@@ -163,6 +176,12 @@ const adminContent = document.getElementById("adminContent");
 const logoutButton = document.getElementById("logoutButton");
 const authUsersList = document.getElementById("authUsersList");
 
+// 💡 Зураг Upload хийх DOM элементүүд
+const imageUploadInput = document.getElementById('imageUpload');
+const uploadButton = document.getElementById('uploadButton');
+const uploadStatus = document.getElementById('uploadStatus');
+const previewImage = document.getElementById('previewImage');
+const newsImageURLManual = document.getElementById('newsImageURLManual');
 
 // Supabase client 
 // ЭНД ТАНЫ SUPABASE ТӨСЛИЙН МЭДЭЭЛЭЛ ОРНО
@@ -172,15 +191,12 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
 
 // ===================================================
-// Quill-д Text Alignment-ийн Загваруудыг Нэмэх
+// Quill Editor Setup
 // ===================================================
 const AlignStyle = Quill.import('attributors/style/align');
-// 'right', 'center', 'justify' (тэгш) гэсэн тэгшлэлтүүдийг зөвшөөрнө
 AlignStyle.whitelist = ['right', 'center', 'justify']; 
 Quill.register(AlignStyle, true);
 
-
-// Quill editor (Тэгшлэх товчлууруудтай)
 const quill = new Quill("#editor", { 
     theme: "snow",
     modules: {
@@ -188,12 +204,76 @@ const quill = new Quill("#editor", {
             [{ 'header': [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike'], 
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            // Текст тэгшлэх товчлуурууд
             [{ 'align': [] }], 
             ['link', 'image'],
             ['clean']
         ]
     }
+});
+
+// ---------------------------------------------------
+// IMAGE UPLOAD (Supabase Storage) - 💡 ГОЛ ФУНКЦ
+// ---------------------------------------------------
+
+const BUCKET_NAME = 'news_images'; // Supabase Storage дээрх Bucket-ийн нэр
+
+uploadButton.addEventListener('click', async () => {
+    const file = imageUploadInput.files[0];
+    if (!file) {
+        uploadStatus.textContent = 'Зураг сонгоно уу.';
+        uploadStatus.style.color = 'red';
+        return;
+    }
+
+    uploadStatus.textContent = 'Зураг оруулж байна... (Хүлээгээрэй)';
+    uploadStatus.style.color = 'orange';
+    newsImage.value = ''; // Нууц URL талбарыг цэвэрлэх
+    newsImageURLManual.value = ''; // Гараар оруулсан талбарыг цэвэрлэх
+
+    // Файлын нэр: Unique ID + Өргөтгөл
+    const fileExtension = file.name.split('.').pop();
+    const filePath = `news/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+
+    try {
+        // 1. Файлыг Supabase Storage руу оруулах
+        const { error: uploadError } = await supabaseClient.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (uploadError) throw uploadError;
+
+        // 2. Оруулсан зургийн нийтийн URL-ийг авах
+        const { data: publicURLData } = supabaseClient.storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(filePath);
+
+        const imageUrl = publicURLData.publicUrl;
+
+        // 3. Үр дүнг хадгалж, UI-д харуулах
+        newsImage.value = imageUrl; 
+        previewImage.src = imageUrl;
+        previewImage.style.display = 'block';
+
+        uploadStatus.textContent = 'Зураг амжилттай оруулав!';
+        uploadStatus.style.color = 'green';
+        
+    } catch (error) {
+        console.error("Зураг оруулах алдаа:", error);
+        uploadStatus.textContent = `Алдаа гарлаа: ${error.message}. Storage-ийн тохиргоог шалгана уу.`;
+        uploadStatus.style.color = 'red';
+    }
+});
+
+// Гараар URL оруулсан үед Upload-ийн үр дүнг устаг (эсвэл URL-ийг ашиглана)
+newsImageURLManual.addEventListener('input', () => {
+    // Хэрэв хэрэглэгч гараар URL оруулбал, бид үүнийг үндсэн утга болгоно.
+    newsImage.value = newsImageURLManual.value.trim();
+    previewImage.style.display = 'none'; // Upload-ийн preview-г нууна
+    uploadStatus.textContent = '(Гараар URL оруулсан)';
+    uploadStatus.style.color = 'blue';
 });
 
 
@@ -286,7 +366,6 @@ async function openAddUserModal() {
         email: email,
         password: password,
         options: {
-            // Энэ нь Confirm Email идэвхтэй байсан ч нэвтрэхийг зөвшөөрөхөд тусалдаг
             emailRedirectTo: window.location.origin
         }
     });
@@ -309,7 +388,7 @@ function cyrillicToLatin(text) {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'ye', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'i',
         'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'ө': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
         'ү': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '',
-        'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'Ye', 'Ё': 'Yo',
+        'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'V': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'Ye', 'Ё': 'Yo',
         'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'М', 'Н': 'Н', 'О': 'O', 'Ө': 'O',
         'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ү': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch',
         'Ш': 'Sh', 'Щ': 'Sh', 'Ъ': '', 'Ы': 'I', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
@@ -442,7 +521,6 @@ async function displayNews(filter = "") {
             const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
             
             const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
-            // Картны төрлийг харуулах
             const cardTypeDisplay = n.card_type ? ` | ТӨРӨЛ: ${n.card_type.toUpperCase()}` : "";
 
 
@@ -462,18 +540,20 @@ async function saveNews() {
     const html = quill.root.innerHTML.trim();
     const titleValue = newsTitle.value.trim();
     
+    // 💡 newsImage.value нь upload хийсэн URL-ийг эсвэл гараар оруулсан URL-ийг агуулна.
+    const imageURL = newsImage.value.trim();
+    
     if (!titleValue) return alert("Гарчиг заавал бөглөнө");
     
     const data = {
         title: titleValue,
         slug: generateSlug(titleValue), 
         category: newsCategory.value || null,
-        image: newsImage.value.trim() || null,
+        image: imageURL || null, // Upload хийсэн URL эсвэл null
         description: html || null,
         author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
         featured: newsFeatured.checked,
         active: newsActive.checked,
-        // Шинэ талбарын утга
         card_type: newsCardType.value || 'normal'
     };
     
@@ -499,14 +579,29 @@ async function saveNews() {
 
 async function editNews(id) {
     const { data } = await supabaseClient.from("news").select("*").eq("id", id).single();
+    
     editIndex.value = data.id;
     newsTitle.value = data.title;
     newsCategory.value = data.category;
-    newsImage.value = data.image;
+    
+    // 💡 Засах үед зургийн URL-ийг нууц болон гар талбарт бөглөж, Preview хийх
+    const currentImage = data.image || "";
+    newsImage.value = currentImage; // Hidden талбар
+    newsImageURLManual.value = currentImage; // Гараар оруулах талбар
+
+    if (currentImage) {
+        previewImage.src = currentImage;
+        previewImage.style.display = 'block';
+    } else {
+        previewImage.style.display = 'none';
+    }
+    uploadStatus.textContent = ""; 
+    imageUploadInput.value = ""; // Upload талбарыг цэвэрлэх
+
     newsAuthor.value = data.author_id;
     newsFeatured.checked = data.featured;
     newsActive.checked = data.active; 
-    newsCardType.value = data.card_type || 'normal'; // Шинэ талбарыг бөглөх
+    newsCardType.value = data.card_type || 'normal'; 
     quill.root.innerHTML = data.description;
 }
 
@@ -521,10 +616,18 @@ function clearNewsForm() {
     editIndex.value = "";
     newsTitle.value = "";
     newsCategory.value = "";
+    
+    // 💡 Upload болон Preview хэсгийг цэвэрлэх
     newsImage.value = "";
+    newsImageURLManual.value = ""; 
+    previewImage.src = "";
+    previewImage.style.display = 'none';
+    uploadStatus.textContent = "";
+    imageUploadInput.value = "";
+
     newsFeatured.checked = false;
     newsActive.checked = false; 
-    newsCardType.value = 'normal'; // Шинэ талбарыг цэвэрлэх
+    newsCardType.value = 'normal'; 
     quill.setText("");
 }
 

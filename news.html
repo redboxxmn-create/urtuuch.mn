@@ -14,6 +14,10 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wpotnvekaoosdkvmhqgo.supabase.co/storage/v1/object/public/news_images/1765272055500_6wfoy24.png">
+<meta name="twitter:title" content="Мэдээ ачаалж байна...">
+<meta name="twitter:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* (CSS хэсэг хэвээр үлдэнэ) */
@@ -92,9 +96,17 @@ window.shareInstagram = shareInstagram;
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
     let tag = document.querySelector(`meta[property="${property}"]`);
+    // Twitter tag-уудад зориулав
+    if(!tag) tag = document.querySelector(`meta[name="${property}"]`);
+    
     if (!tag) {
         tag = document.createElement('meta');
-        tag.setAttribute('property', property);
+        // Property эсвэл Name-ийг тохируулах
+        if(property.startsWith('og:')) {
+          tag.setAttribute('property', property);
+        } else {
+          tag.setAttribute('name', property);
+        }
         head.appendChild(tag);
     }
     tag.setAttribute('content', content);
@@ -123,7 +135,7 @@ async function fetchNewsBySlug(slug){
     } 
     
     // =======================================================
-    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ ( og:url-ийг зөв болгох )
+    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ 
     // =======================================================
     
     document.title = news.title + " | urtuuch.mn";
@@ -134,13 +146,18 @@ async function fetchNewsBySlug(slug){
     const defaultImageUrl = document.querySelector('meta[property="og:image"]').content;
     const imageUrl = news.image || defaultImageUrl; 
     
-    // 🔑 OG тагуудыг шинэчлэх (og:url-ийг тухайн мэдээний линкээр заавал шинэчилж байна)
+    // 🔑 OG тагуудыг шинэчлэх
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
-    createOrUpdateMetaTag('og:url', currentURL); // 🔑 og:url-ийг зөв линкээр шинэчилж байна.
+    createOrUpdateMetaTag('og:url', currentURL);
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
+
+    // 🔑 Twitter тагуудыг шинэчлэх (og:image-ийг давхар баталгаажуулж байна)
+    createOrUpdateMetaTag('twitter:title', news.title);
+    createOrUpdateMetaTag('twitter:description', descriptionText);
+    createOrUpdateMetaTag('twitter:image', imageUrl);
     
     // =======================================================
     

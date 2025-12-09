@@ -190,8 +190,9 @@ const newsImageURLManual = document.getElementById('newsImageURLManual');
 const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co"; 
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
-// 💡 АЛДАА ЗАСВАР: window.supabase.createClient-ийг supabase.createClient болгож өөрчлөв
+// 💡 Supabase Client-ийг зөв үүсгэж байна (window.supabase-ийг ашиглахгүйгээр)
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey); 
+const BUCKET_NAME = 'news_images'; 
 
 // ===================================================
 // Quill Editor Setup
@@ -254,6 +255,7 @@ function generateSlug(title) {
 function generateUniqueSlug(title) {
     if (editIndex.value === "") {
         const slug = generateSlug(title);
+        // Date.now()-ийн сүүлийн 4 орон, мөн random string ашиглаж давхардлаас сэргийлнэ
         const uniquePart = Math.random().toString(36).substring(2, 6); 
         return `${slug}-${uniquePart}`; 
     } else {
@@ -272,12 +274,9 @@ newsTitle.addEventListener('input', () => {
 
 
 // ---------------------------------------------------
-// IMAGE UPLOAD (Supabase Storage)
+// 💡 ZUURAG UPLOAD LOGIC 💡 (ЗУРАГ ОРУУЛАХ ФУНКЦ)
 // ---------------------------------------------------
-
-const BUCKET_NAME = 'news_images'; 
-
-uploadButton.addEventListener('click', async () => {
+async function handleImageUpload() {
     const file = imageUploadInput.files[0];
     if (!file) {
         uploadStatus.textContent = 'Зураг сонгоно уу.';
@@ -287,11 +286,13 @@ uploadButton.addEventListener('click', async () => {
 
     uploadStatus.textContent = 'Зураг оруулж байна... (Хүлээгээрэй)';
     uploadStatus.style.color = 'orange';
-    newsImage.value = ''; 
+    newsImage.value = ''; // Хуучин утгыг цэвэрлэх
     newsImageURLManual.value = ''; 
 
     const fileExtension = file.name.split('.').pop();
-    const filePath = `news/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+    // Давхардлаас сэргийлж, цаг болон random утгаар файлын нэрийг үүсгэж байна.
+    const uniqueFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+    const filePath = uniqueFileName; 
 
     try {
         const { error: uploadError } = await supabaseClient.storage
@@ -303,12 +304,14 @@ uploadButton.addEventListener('click', async () => {
 
         if (uploadError) throw uploadError;
 
+        // Public URL-ийг авах
         const { data: publicURLData } = supabaseClient.storage
             .from(BUCKET_NAME)
             .getPublicUrl(filePath);
 
         const imageUrl = publicURLData.publicUrl;
 
+        // Үндсэн талбаруудыг бөглөх
         newsImage.value = imageUrl; 
         previewImage.src = imageUrl;
         previewImage.style.display = 'block';
@@ -318,16 +321,25 @@ uploadButton.addEventListener('click', async () => {
         
     } catch (error) {
         console.error("Зураг оруулах алдаа:", error);
-        uploadStatus.textContent = `Алдаа гарлаа: ${error.message}. Storage-ийн тохиргоог шалгана уу.`;
+        // Алдааны мессежийг илүү тодорхой болгов.
+        uploadStatus.textContent = `Алдаа гарлаа: ${error.message}. Storage Policy-г шалгана уу (INSERT, authenticated/anon).`;
         uploadStatus.style.color = 'red';
     }
-});
+}
+uploadButton.addEventListener('click', handleImageUpload);
 
 newsImageURLManual.addEventListener('input', () => {
     newsImage.value = newsImageURLManual.value.trim();
-    previewImage.style.display = 'none'; 
-    uploadStatus.textContent = '(Гараар URL оруулсан)';
-    uploadStatus.style.color = 'blue';
+    if(newsImage.value) {
+        previewImage.src = newsImage.value;
+        previewImage.style.display = 'block'; 
+        uploadStatus.textContent = '(Гараар URL оруулсан)';
+        uploadStatus.style.color = 'blue';
+    } else {
+        previewImage.style.display = 'none'; 
+        uploadStatus.textContent = '';
+    }
+    imageUploadInput.value = ''; // File input-ийг цэвэрлэх
 });
 
 
@@ -385,7 +397,6 @@ async function handleLogout() {
 async function displayAuthUsers() {
     const list = await fetchAuthors(); 
     authUsersList.innerHTML = `Системийн хэрэглэгчид (Нийтлэлчдийн тоо): ${list.length}`;
-    // Энд Supabase Auth-ийн хэрэглэгчдийг жагсаах логик нэмэгдэж болно.
 }
 
 async function openAddUserModal() {
@@ -404,9 +415,9 @@ async function fetchAuthors() {
 
 async function populateAuthorSelect() {
     const list = await fetchAuthors();
-    newsAuthor.innerHTML = list.length
-        ? list.map(a => `<option value="${a.id}">${a.name}</option>`).join("")
-        : `<option disabled>Нийтлэлч байхгүй</option>`;
+    newsAuthor.innerHTML = `<option value="">--- Нийтлэлч Сонгох ---</option>` + list
+        .map(a => `<option value="${a.id}">${a.name}</option>`)
+        .join("");
 }
 
 async function displayAuthors() { 
@@ -476,7 +487,10 @@ async function editAuthor(id) {
 
 async function removeAuthor(id) { 
     if (confirm("Нийтлэлчийг устгах уу?")) {
-        await supabaseClient.from("authors").delete().eq("id", id);
+        const { error } = await supabaseClient.from("authors").delete().eq("id", id);
+        if (error) {
+            alert(`Устгах үед алдаа гарлаа: ${error.message}. Энэ нийтлэлчийг ашигласан мэдээ байгаа эсэхийг шалгана уу.`);
+        }
         populateAuthorSelect();
         displayAuthors();
     }
@@ -491,6 +505,17 @@ async function fetchNews() {
     return data || [];
 }
 
+// 💡 ШИНЭ: SHARE FUNCTION
+function shareOnFacebook(slug) {
+    // ⚠️ Таны үндсэн домайн URL-ийг энд заавал зөв оруулах шаардлагатай!
+    const BASE_URL = 'https://urtuuch.mn/news/?slug='; 
+    const newsUrl = BASE_URL + slug;
+
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(newsUrl)}`;
+
+    window.open(facebookUrl, 'facebook-share-dialog', 'width=800,height=600');
+}
+
 async function displayNews(filter = "") {
     const news = await fetchNews();
     const authors = await fetchAuthors();
@@ -499,7 +524,8 @@ async function displayNews(filter = "") {
 
     let filteredNews = news;
     if (filter) {
-        filteredNews = news.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()));
+        filteredNews = news.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()) || 
+                                       n.slug?.toLowerCase().includes(filter.toLowerCase())); // slug-аар хайх
     }
 
     if (!filteredNews.length) { newsList.innerHTML = "Мэдээ байхгүй"; return; }
@@ -525,6 +551,7 @@ async function displayNews(filter = "") {
             <div class="list-item">
                 <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}${cardTypeDisplay} ${activeStatus}${slugStatus}</span>
                 <span>
+                    <button onclick="shareOnFacebook('${n.slug}')" style="background: #4267B2;">🚀 Шэйрлэх</button>
                     <button onclick="editNews(${n.id})">Засах</button>
                     <button onclick="removeNews(${n.id})">Устгах</button>
                 </span>
@@ -540,7 +567,7 @@ async function saveNews() {
     
     if (!titleValue) return alert("Гарчиг заавал бөглөнө");
 
-    const slugValue = generateUniqueSlug(titleValue);
+    const slugValue = editIndex.value === "" ? generateUniqueSlug(titleValue) : newsSlugInput.value;
     
     const data = {
         title: titleValue,
@@ -563,7 +590,8 @@ async function saveNews() {
     } else {
         // Мэдээ засах
         const updateData = { ...data };
-        delete updateData.slug; // Засварлах үед slug-ийг update хийхгүй
+        // Засварлах үед slug-ийг update хийхгүй байхаар үлдээсэн. Хэрэв update хийх шаардлагатай бол энийг авна.
+        delete updateData.slug; 
         
         result = await supabaseClient.from("news").update(updateData).eq("id", editIndex.value);
     }
@@ -605,6 +633,8 @@ async function editNews(id) {
     newsActive.checked = data.active; 
     newsCardType.value = data.card_type || 'normal'; 
     quill.root.innerHTML = data.description;
+    
+    window.scrollTo(0, 0); // Хуудсыг дээш гүйлгэх
 }
 
 function clearNewsForm() {
@@ -628,7 +658,10 @@ function clearNewsForm() {
 
 async function removeNews(id) {
     if (confirm("Устгах уу?")) {
-        await supabaseClient.from("news").delete().eq("id", id);
+        const { error } = await supabaseClient.from("news").delete().eq("id", id);
+        if(error) {
+            alert(`Устгах үед алдаа гарлаа: ${error.message}`);
+        }
         displayNews(searchInput.value);
     }
 }
@@ -643,6 +676,7 @@ window.saveNews = saveNews;
 window.clearNewsForm = clearNewsForm;
 window.editNews = editNews;
 window.removeNews = removeNews;
+window.shareOnFacebook = shareOnFacebook; // Шинээр нэмсэн
 
 window.saveAuthor = saveAuthor; 
 window.clearAuthorForm = clearAuthorForm; 

@@ -15,7 +15,7 @@
             color: #fff; 
             padding: 15px 20px; 
             display: flex; 
-            justify-content: space-between; /* Гарах товчийг баруун тийш зэрэгцүүлэв */
+            justify-content: space-between; 
             align-items: center; 
         }
         .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -104,6 +104,12 @@
     </div>
 
     <div class="card" style="grid-column: span 2;">
+        <h2>Системийн Хэрэглэгчид (Supabase Auth)</h2>
+        <button onclick="openAddUserModal()">+ Хэрэглэгч Нэмэх</button>
+        <div id="authUsersList"></div>
+    </div>
+    
+    <div class="card" style="grid-column: span 2;">
         <input type="text" id="searchInput" class="search-input" placeholder="Мэдээ хайх...">
     </div>
 
@@ -148,6 +154,7 @@ const loginError = document.getElementById("loginError");
 const loginFormContainer = document.getElementById("loginFormContainer");
 const adminContent = document.getElementById("adminContent");
 const logoutButton = document.getElementById("logoutButton");
+const authUsersList = document.getElementById("authUsersList");
 
 
 // Supabase client 
@@ -157,8 +164,30 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
 
-// Quill editor
-const quill = new Quill("#editor", { theme: "snow" });
+// ===================================================
+// Quill-д Text Alignment-ийн Загваруудыг Нэмэх
+// ===================================================
+const AlignStyle = Quill.import('attributors/style/align');
+// 'right', 'center', 'justify' (тэгш) гэсэн тэгшлэлтүүдийг зөвшөөрнө
+AlignStyle.whitelist = ['right', 'center', 'justify']; 
+Quill.register(AlignStyle, true);
+
+
+// Quill editor (Тэгшлэх товчлууруудтай)
+const quill = new Quill("#editor", { 
+    theme: "snow",
+    modules: {
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'], 
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            // Текст тэгшлэх товчлуурууд
+            [{ 'align': [] }], 
+            ['link', 'image'],
+            ['clean']
+        ]
+    }
+});
 
 
 // ---------------------------------------------------
@@ -166,7 +195,6 @@ const quill = new Quill("#editor", { theme: "snow" });
 // ---------------------------------------------------
 
 async function checkAuthAndRenderUI() {
-    // Хэрэглэгч нэвтэрсэн эсэхийг шалгах
     const { data: { user } } = await supabaseClient.auth.getUser();
 
     if (user) {
@@ -212,6 +240,61 @@ async function handleLogout() {
     if (confirm("Системээс гарах уу?")) {
         await supabaseClient.auth.signOut();
         await checkAuthAndRenderUI();
+    }
+}
+
+
+// ---------------------------------------------------
+// AUTH USERS (Зөвхөн Authors-ийг Auth Users-ийн оронд харуулъя)
+// ---------------------------------------------------
+
+async function displayAuthUsers() {
+    // Client side-аас Supabase-ын бүх Auth хэрэглэгчдийг татах нь RLS-ээр хязгаарлагддаг.
+    // Энэ хэсэгт бид зөвхөн "Авторууд"-ыг харуулж, UI-г бэлдлээ.
+    const list = await fetchAuthors(); 
+    authUsersList.innerHTML = "";
+
+    if (!list.length) { 
+        authUsersList.innerHTML = "<p>Системд хэрэглэгч/нийтлэлч байхгүй. Дээрх товчоор нэмнэ үү.</p>"; 
+        return; 
+    }
+    
+    authUsersList.innerHTML = `<div style="margin-top: 10px;">` + list.map(a => `
+        <div class="list-item">
+            <span>${a.name} (ID: ${a.id})</span>
+            <span>
+                <button onclick="alert('Энэхүү функц нь зөвхөн Auth ID-аар ажиллах ёстой.')">Удирдах</button>
+            </span>
+        </div>
+    `).join("") + `</div>`;
+}
+
+
+async function openAddUserModal() {
+    const email = prompt("Шинэ хэрэглэгчийн и-мэйл:");
+    if (!email) return;
+    const password = prompt("Шинэ хэрэглэгчийн нууц үг:");
+    if (!password) return;
+
+    // Supabase Auth-д бүртгэнэ
+    const { error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            // Энэ нь Confirm Email идэвхтэй байсан ч нэвтрэхийг зөвшөөрөхөд тусалдаг
+            emailRedirectTo: window.location.origin
+        }
+    });
+
+    if (error) {
+        alert("Хэрэглэгч нэмэхэд алдаа гарлаа: " + error.message);
+    } else {
+        alert(`Хэрэглэгч ${email} амжилттай нэмэгдлээ. Хэрэв Email Confirmation идэвхтэй бол, и-мэйлээ шалгана уу.`);
+        
+        // Хэрэв та Auth-д нэмэгдсэн хэрэглэгчийг Authors хүснэгтэд автоматаар нэмэхийг хүсвэл:
+        // await supabaseClient.from("authors").insert({ name: email, title: "Системийн хэрэглэгч", image: null }); 
+        
+        displayAuthUsers();
     }
 }
 
@@ -297,6 +380,7 @@ async function saveAuthor() {
     clearAuthorForm();
     populateAuthorSelect();
     displayAuthors();
+    displayAuthUsers(); // Auth User-ийн жагсаалтыг шинэчлэх
 }
 
 async function editAuthor(id) {
@@ -312,6 +396,7 @@ async function removeAuthor(id) {
         await supabaseClient.from("authors").delete().eq("id", id);
         populateAuthorSelect();
         displayAuthors();
+        displayAuthUsers(); // Auth User-ийн жагсаалтыг шинэчлэх
     }
 }
 
@@ -451,6 +536,7 @@ window.editAuthor = editAuthor;
 window.removeAuthor = removeAuthor;
 window.handleLogin = handleLogin;
 window.handleLogout = handleLogout;
+window.openAddUserModal = openAddUserModal;
 
 
 // INIT
@@ -458,6 +544,7 @@ function initializeAdminPanel() {
     populateAuthorSelect();
     displayAuthors();
     displayNews();
+    displayAuthUsers();
 }
 
 // Хуудсыг эхлүүлэх: Эхлээд Auth-г шалгана

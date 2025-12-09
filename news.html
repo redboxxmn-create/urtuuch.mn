@@ -9,13 +9,12 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/gK2oQ9P.png"> 
-<meta property="og:url" content=""> <meta property="og:image:width" content="1200">
+<meta property="og:image" content="https://new-1200x630-image-url.jpg"> <meta property="og:url" content=""> <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* (Өмнөх CSS хэсэг хэвээр үлдэнэ) */
+/* (CSS хэсэг хэвээр үлдэнэ) */
 body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0; }
 .container { max-width:900px; margin:40px auto; background:#fff; padding:25px; border-radius:15px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
 .news-layout { display:flex; gap:20px; flex-wrap:wrap; }
@@ -46,7 +45,6 @@ body { font-family:'Ubuntu',sans-serif; background:#f0f5f5; margin:0; padding:0;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
 
 <script>
-// Supabase Тохиргоо (Таны өгсөн утга)
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
@@ -55,12 +53,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
 
-// ---------------------------------------------------
-// SHARE FUNCTIONS
-// ---------------------------------------------------
-
 function shareFacebook() {
-    // Facebook-ийн хуваалцах цонхыг нээх. Зөвхөн URL-г дамжуулна.
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, 'facebook-share', 'width=800,height=600'); 
 }
@@ -80,30 +73,17 @@ window.shareFacebook = shareFacebook;
 window.shareTwitter = shareTwitter;
 window.shareInstagram = shareInstagram;
 
-// ---------------------------------------------------
-// FETCH NEWS AND DYNAMIC OG TAG UPDATE
-// ---------------------------------------------------
-
-/**
- * OG Meta тагуудыг үүсгэх эсвэл одоо байгааг шинэчлэх функц.
- */
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
-    // Одоо байгаа тагийг хайх
     let tag = document.querySelector(`meta[property="${property}"]`);
     if (!tag) {
-        // Олддохгүй бол шинээр үүсгэх
         tag = document.createElement('meta');
         tag.setAttribute('property', property);
         head.appendChild(tag);
     }
-    // Content-ийг шинэчлэх
     tag.setAttribute('content', content);
 }
 
-/**
- * Slug-аар мэдээг татаж, хуудсыг үүсгэнэ.
- */
 async function fetchNewsBySlug(slug){
     const container = document.getElementById('newsContainer');
     
@@ -128,12 +108,10 @@ async function fetchNewsBySlug(slug){
     document.title = news.title + " | urtuuch.mn";
     
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
-    
-    // 🔑 og:url-г одоогийн URL-ээр баталгаажуулна (хамгийн чухал)
     const currentURL = window.location.href; 
     
-    // Зураг байхгүй бол default зураг ашиглах
-    const imageUrl = news.image || 'https://i.imgur.com/gK2oQ9P.png'; 
+    // ✅ ЗАСВАР 2/2: news.image байхгүй үед ашиглагдах default URL-г шинээр сольж байна.
+    const imageUrl = news.image || 'https://new-1200x630-image-url.jpg'; // 👈 ҮҮНИЙГ ӨӨРИЙН URL-ЭЭР СОЛИНО!
     
     // OG тагуудыг шинэчлэх
     createOrUpdateMetaTag('og:title', news.title);

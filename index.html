@@ -11,7 +11,6 @@
         /* ---------------------------------------------------------------------- */
         body { font-family:'Ubuntu',sans-serif; margin:0; padding:0; background:#f0f5f5; color:#333; }
         header{ background:#fff; padding:10px 15px; position:sticky; top:0; box-shadow:0 2px 10px rgba(0,0,0,0.1); z-index:100; display:flex; flex-direction:column;}
-        header h1{margin:0; font-size:22px;}
         .search-box input{width:100%; padding:8px 12px; border-radius:8px; border:1px solid #ccc; margin:10px 0; font-size:14px; box-sizing:border-box;}
         
         /* ЛОГОНЫ СТИЛЬ */
@@ -54,7 +53,7 @@
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
 
-        /* sub-featured-card загварыг энгийн картад ойртуулна */
+        /* sub-featured-card-ийг энгийн grid-д орох үед (Featured Block-т ороогүй бол) */
         .sub-featured-card {
             grid-column: span 2; 
         }
@@ -106,13 +105,13 @@
             box-shadow: none !important;
             padding: 0;
             overflow: hidden;
-            border-radius: 8px; /* Доторх картын булан */
+            border-radius: 8px;
         }
         .featured-main-card img {
             width: 100%;
             height: 400px; 
             object-fit: cover;
-            filter: brightness(0.85); /* Текст тод харагдахын тулд бараав */
+            filter: brightness(0.85);
             transition: filter 0.3s;
         }
         .featured-main-card:hover img {
@@ -158,22 +157,27 @@
             box-shadow: none;
             border: 1px solid #ccc;
             border-radius: 8px;
-            display: flex; /* Зураг болон текстийг хажуу хажууд нь байрлуулах */
+            display: flex; 
+            overflow: hidden; /* Доторх зургийн булангуудыг удирдах */
         }
         .featured-sidebar .card img {
-            height: 100px; 
-            width: 35%; /* Зургийн өргөн */
-            object-fit: cover;
-            border-radius: 8px 0 0 8px;
+            /* Зураг харагдахгүй, зөвхөн гарчиг үлдэнэ */
+            display: none; 
         }
         .featured-sidebar .card .card-content {
-            padding: 8px;
-            width: 65%;
+            padding: 10px;
+            width: 100%; /* Текст бүх өргөнийг эзэлнэ */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         .featured-sidebar .card .card-title {
             font-size: 14px;
             margin-bottom: 5px;
             line-height: 1.3;
+        }
+        .featured-sidebar .card .card-meta {
+            margin-top: 5px;
         }
         .featured-sidebar .card:hover {
             transform: translateY(-2px);
@@ -205,7 +209,6 @@
         /* ГАР УТАСНЫ ЗАГВАР (MEDIA QUERY) */
         /* ---------------------------------------------------------------------- */
         @media(max-width:992px){
-            /* Featured Block-ийг 2 баганатай болгож харьцааг 2:1 болгоно */
             .featured-block-container {
                 grid-template-columns: 2fr 1fr;
             }
@@ -215,14 +218,9 @@
             .featured-main-card .card-title {
                 font-size: 22px;
             }
-            .featured-sidebar .card {
-                flex-direction: column; /* Жижиг картууд босоо болно */
-                align-items: center;
-            }
+            /* Жижиг картуудыг 992px-ээс дээш зураггүйгээр харуулна */
             .featured-sidebar .card img {
-                width: 100%;
-                height: 120px;
-                border-radius: 8px 8px 0 0;
+                display: none;
             }
             .featured-sidebar .card .card-content {
                 width: 100%;
@@ -233,13 +231,7 @@
         @media(max-width:768px){
             .grid{grid-template-columns:1fr; gap:10px; padding:10px;}
             .video-card iframe{height:200px;}
-            header h1{font-size:18px;}
-            .search-box input{font-size:12px;}
             
-            nav ul{flex-direction:column;}
-            nav ul li{margin-right:0; margin-bottom:5px;}
-            nav ul li ul {position:relative; top:0;}
-
             /* Featured Block-ийг бүтэн босоо болгоно */
             .featured-block-container {
                 grid-template-columns: 1fr;
@@ -254,24 +246,13 @@
             .featured-main-card .card-title {
                 font-size: 18px;
             }
-            .featured-main-card .card-content {
-                min-height: 80px;
-                padding: 15px;
-            }
-            .featured-main-card .card-meta span.category {
-                font-size: 12px;
-            }
             
-            /* Бусад картууд */
-            .featured-large-card, .sub-featured-card {grid-column:1/-1; flex-direction:column; display:block; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.1);} 
-            .featured-large-card img, .sub-featured-card img{width:100%; height:200px; min-height: 150px;}
-            .featured-large-card .card-content, .sub-featured-card .card-content{width:100%;}
-            .featured-large-card .card-title {font-size: 18px;}
-
+            /* Жижиг картуудыг гар утсан дээр зургийг нь харуулна */
             .featured-sidebar .card {
-                flex-direction: row; /* Баруун самбарын жижиг мэдээг зөвхөн Mobile-д хажуугаар нь болгох */
+                flex-direction: row; 
             }
             .featured-sidebar .card img {
+                display: block; /* Зургийг харуулна */
                 width: 30%;
                 height: 80px;
                 border-radius: 8px 0 0 8px;
@@ -279,7 +260,6 @@
             .featured-sidebar .card .card-content {
                 width: 70%;
             }
-
         }
     </style>
 </head>
@@ -351,8 +331,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let authorsData = [];
 let newsData = [];
 let currentPage = 1;
-const NEWS_PER_PAGE = 12; // Пагинацийн нэг хуудсан дахь тоо
-const TOTAL_NEWS_LIMIT = 29; // Нэг таталтаар авах нийт мэдээний тоо 
+const NEWS_PER_PAGE = 12; 
+const TOTAL_NEWS_LIMIT = 29; 
 
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
@@ -362,10 +342,8 @@ async function fetchAuthors() {
 
 async function fetchNews() {
     const { data, error } = await supabase.from('news')
-        // card_type талбарыг татаж авна
         .select('*, card_type') 
         .eq('active', true) 
-        // Мэдээг зөвхөн ЦАГ ХУГАЦААНЫ дарааллаар татаж авна (шинэ нь эхэнд)
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
         
@@ -403,7 +381,7 @@ function displayNews() {
     const pageNews = newsData.slice(start,end);
 
     let mainFeatured = null; // Зүүн талын хамгийн ТОМ мэдээ
-    let sidebarFeatured = []; // Баруун талын 3-4 жижиг мэдээ
+    let sidebarFeatured = []; // Баруун талын 3 жижиг мэдээ
     const normal = []; // Энгийн картууд
     
     // Мэдээг бүлэглэх
@@ -440,14 +418,14 @@ function displayNews() {
 
         featuredBlock.appendChild(mainCard);
         featuredBlock.appendChild(sidebar);
-        container.appendChild(featuredBlock); // Featured block-ийг Grid-ийн эхэнд байрлуулна
+        container.appendChild(featuredBlock); 
     }
 
-    // 2. Энгийн Картууд (Normal болон sub-featured, featured_large-д ороогүй мэдээ)
+    // 2. Энгийн Картууд (Normal)
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
         
-        // Хуучин sub-featured классыг ашиглаж grid-ийн 2 багана эзлүүлнэ
+        // Featured Block-т ороогүй sub-featured мэдээг 2 багана эзлүүлнэ
         if (n.card_type === 'sub_featured') {
             div.classList.add('sub-featured-card');
         }
@@ -465,11 +443,14 @@ function displayNews() {
 function createNewsCard(n, cardType) {
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
     
-    const div = document.createElement('a'); // Card-ийг 'a' tag-аар үүсгэнэ
+    const div = document.createElement('a'); 
     div.className = "card";
     
-    const categoryText = (n.featured ? 'ОНЦЛОХ | ' : '') + n.category;
-    const categoryStyle = (n.featured || cardType === 'featured_main') ? 'background: #d9534f;' : '';
+    // Featured Block доторх жижиг мэдээг Featured-ээр тооцохгүй
+    const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
+
+    const categoryText = (isFeatured ? 'ОНЦЛОХ | ' : '') + n.category;
+    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #d9534f;' : '';
 
     const contentHtml = `
         <div class="card-content">
@@ -484,9 +465,9 @@ function createNewsCard(n, cardType) {
         </div>
     `;
     
-    div.href = `news.html?slug=${n.slug}`; // Link-ийг шууд card-д онооно
+    div.href = `news.html?slug=${n.slug}`; 
 
-    // Зургийг оруулах
+    // featured_sidebar_small-д зөвхөн текстийг үлдээхээр CSS-д тохируулсан тул энд зургийг нь оруулах нь зөв
     div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
     
     return div;

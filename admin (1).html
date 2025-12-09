@@ -452,21 +452,24 @@ async function saveAuthor() {
 
     let result;
     if (editAuthorIndex.value === "") {
+        // Шинэ Нийтлэлч Нэмэх
         result = await supabaseClient.from("authors").insert(data);
     } else {
+        // Одоо байгааг Засах
         result = await supabaseClient.from("authors").update(data).eq("id", editAuthorIndex.value);
     }
 
+    // 💡 ЗАСВАР: Supabase-ийн алдааг result обьектоос зөв шалгаж байна.
     if (result.error) {
         console.error("Author save error:", result.error);
-        alert(`Нийтлэлч хадгалахад алдаа гарлаа: ${result.error.message}`);
+        alert(`Нийтлэлч хадгалахад алдаа гарлаа: ${result.error.message}. (RLS Policy-г шалгана уу)`);
     } else {
         alert("Нийтлэлч амжилттай хадгалагдлаа.");
     }
     
     clearAuthorForm();
     populateAuthorSelect();
-    displayAuthors();
+    displayAuthors(); // Хадгалсны дараа жагсаалтыг дахин дуудаж харуулна.
 }
 
 function clearAuthorForm() { 

@@ -52,7 +52,7 @@
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
         
-        /* 1. Featured Large card (2 багана эзэлнэ) */
+        /* 1. Featured Large card (2 багана эзэлнэ) - Энэ нь онцлох мэдээний ТОМ загвар */
         .featured-large-card {
             grid-column: span 2; 
             display: flex; 
@@ -81,8 +81,7 @@
             font-size: 14px;
         }
 
-        /* 2. Sub-Featured card (1.5 багана эзэлнэ, илүү том харагдана) */
-        /* Энэ нь мөн 2 багана эзлэх боловч featured-ээс арай жижиг байхыг илэрхийлнэ */
+        /* 2. Sub-Featured card (2 багана эзэлнэ, илүү том харагдана) - Энэ нь дэд онцлох мэдээний загвар */
         .sub-featured-card {
             grid-column: span 2; 
         }
@@ -305,27 +304,23 @@ function displayNews() {
     }
     
     /* * Мэдээг харуулах:
-     * 1. Бүх жагсаалт цаг хугацаагаар (шинэ нь сүүлд) эрэмбэлэгдсэн байгаа.
-     * 2. Харуулахдаа: Normal, Sub-Featured, Large-Featured гэсэн дарааллаар **prepend()** хийвэл,
+     * Normal -> Sub-Featured -> Large-Featured гэсэн дарааллаар **prepend()** хийвэл,
      * Grid дээр Large -> Sub -> Normal дарааллаар, тухайн ангилал дотроо шинэ нь эхэнд гарна.
     */
     
     // 3. Энгийн Картууд (Normal) - Хамгийн шинэ нь эхэнд гарна
-    // Энэ нь хамгийн түрүүнд Grid-д нэмэгдэнэ.
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
         container.prepend(div);
     });
 
     // 2. Дэд Онцлох Карт (Sub-Featured) - Хамгийн шинэ нь эхэнд гарна
-    // Энэ нь Normal-уудын өмнө нэмэгдэнэ.
     subFeatured.forEach(n => {
         const div = createNewsCard(n, 'sub_featured');
         container.prepend(div); 
     });
     
     // 1. Том Онцлох Карт (Featured Large) - Хамгийн шинэ нь эхэнд гарна
-    // Энэ нь бүх мэдээний хамгийн эхэнд (дээд талд) нэмэгдэнэ.
     largeFeatured.forEach(n => {
         const div = createNewsCard(n, 'featured_large');
         container.prepend(div); 

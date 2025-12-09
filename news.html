@@ -9,10 +9,10 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/your_correct_image_link.jpg">
-<meta property="og:url" content=""> <meta property="og:image:width" content="1200">
+<meta property="og:image" content="https://i.imgur.com/your_default_image_link.jpg"> 
+<meta property="og:url" content="https://urtuuch.mn"> 
+<meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* (CSS хэсэг хэвээр үлдэнэ) */
@@ -54,6 +54,10 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(window.location.search);
 const slug = params.get('slug');
 
+// ---------------------------------------------------
+// SHARE FUNCTIONS
+// ---------------------------------------------------
+
 function shareFacebook() {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, 'facebook-share', 'width=800,height=600'); 
@@ -74,6 +78,11 @@ window.shareFacebook = shareFacebook;
 window.shareTwitter = shareTwitter;
 window.shareInstagram = shareInstagram;
 
+
+// ---------------------------------------------------
+// META TAG DYNAMIC UPDATE
+// ---------------------------------------------------
+
 function createOrUpdateMetaTag(property, content) {
     const head = document.head;
     let tag = document.querySelector(`meta[property="${property}"]`);
@@ -84,6 +93,11 @@ function createOrUpdateMetaTag(property, content) {
     }
     tag.setAttribute('content', content);
 }
+
+
+// ---------------------------------------------------
+// FETCH NEWS AND RENDER
+// ---------------------------------------------------
 
 async function fetchNewsBySlug(slug){
     const container = document.getElementById('newsContainer');
@@ -108,17 +122,20 @@ async function fetchNewsBySlug(slug){
     
     document.title = news.title + " | urtuuch.mn";
     
+    // Тайлбарыг HTML тагуудаас цэвэрлэж, 160 тэмдэгтээр хязгаарлана
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // ✅ ЗАСВАР 2/2: news.image байхгүй үед ашиглагдах default URL-г оруулж байна.
-    const imageUrl = news.image || 'https://i.imgur.com/your_correct_image_link.jpg'; // 👈 ШИНЭ IMGUR URL
+    // news.image байхгүй үед default URL ашиглана.
+    const defaultImageUrl = 'https://i.imgur.com/your_default_image_link.jpg'; 
+    const imageUrl = news.image || defaultImageUrl; 
     
     // OG тагуудыг шинэчлэх
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
     createOrUpdateMetaTag('og:url', currentURL);
+    // 💡 Зургийн хэмжээг баталгаажуулж байна (Facebook-т заавал хэрэгтэй)
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
     
@@ -136,6 +153,7 @@ async function fetchNewsBySlug(slug){
     }
 
     const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
+    // Twitter share-д зориулж гарчигийг тэмдэгтээс цэвэрлэх
     const escapedTitle = news.title.replace(/'/g, "\\'");
 
     // 3. Хуудсанд контентийг оруулах
@@ -162,7 +180,7 @@ async function fetchNewsBySlug(slug){
 if(slug){
     fetchNewsBySlug(slug);
 } else {
-    document.getElementById('newsContainer').innerHTML = `<p style="text-align:center;">Мэдээний slug олдсонгүй. index.html-ээс зөв холбогдсон эсэхийг шалгана уу.</p>`;
+    document.getElementById('newsContainer').innerHTML = `<p style="text-align:center;">Мэдээний slug олдсонгүй.</p>`;
 }
 </script>
 

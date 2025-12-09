@@ -10,9 +10,10 @@
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
 <meta property="og:image" content="https://wpotnvekaoosdkvmhqgo.supabase.co/storage/v1/object/public/news_images/1765272055500_6wfoy24.png"> 
-<meta property="og:url" content="https://urtuuch.mn"> 
+<meta property="og:url" content="https://urtuuch.mn/"> 
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* (CSS хэсэг хэвээр үлдэнэ) */
@@ -122,7 +123,7 @@ async function fetchNewsBySlug(slug){
     } 
     
     // =======================================================
-    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ 
+    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ ( og:url-ийг зөв болгох )
     // =======================================================
     
     document.title = news.title + " | urtuuch.mn";
@@ -130,15 +131,14 @@ async function fetchNewsBySlug(slug){
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // Default URL-ийг HTML-ийн head-ээс авах. news.image байхгүй бол default-ийг ашиглана.
     const defaultImageUrl = document.querySelector('meta[property="og:image"]').content;
     const imageUrl = news.image || defaultImageUrl; 
     
-    // OG тагуудыг шинэчлэх (news-ийн мэдээллээр)
+    // 🔑 OG тагуудыг шинэчлэх (og:url-ийг тухайн мэдээний линкээр заавал шинэчилж байна)
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
-    createOrUpdateMetaTag('og:url', currentURL);
+    createOrUpdateMetaTag('og:url', currentURL); // 🔑 og:url-ийг зөв линкээр шинэчилж байна.
     createOrUpdateMetaTag('og:image:width', '1200');
     createOrUpdateMetaTag('og:image:height', '630');
     

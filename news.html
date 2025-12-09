@@ -9,7 +9,7 @@
 <meta property="og:site_name" content="urtuuch.mn">
 <meta property="og:title" content="Мэдээ ачаалж байна...">
 <meta property="og:description" content="Мэдээний дэлгэрэнгүйг үзнэ үү.">
-<meta property="og:image" content="https://i.imgur.com/your_default_site_logo.jpg"> 
+<meta property="og:image" content="https://wpotnvekaoosdkvmhqgo.supabase.co/storage/v1/object/public/news_images/1765272055500_6wfoy24.png"> 
 <meta property="og:url" content="https://urtuuch.mn"> 
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -122,21 +122,19 @@ async function fetchNewsBySlug(slug){
     } 
     
     // =======================================================
-    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ (Facebook-т зориулсан)
+    // 💡 OG META TAG-УУДЫГ ДИНАМИКААР ШИНЭЧЛЭХ 
     // =======================================================
     
     document.title = news.title + " | urtuuch.mn";
     
-    // Тайлбарыг HTML тагуудаас цэвэрлэж, 160 тэмдэгтээр хязгаарлана (OG description)
     const descriptionText = news.description ? news.description.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : news.title;
     const currentURL = window.location.href; 
     
-    // news.image байхгүй үед default URL-ийг HTML-ийн head-ээс авах, эсвэл placeholder ашиглах
-    // HTML-д аль хэдийн explicit-ээр заасан тул, зөвхөн news.image байгаа бол шинэчилнэ.
+    // Default URL-ийг HTML-ийн head-ээс авах. news.image байхгүй бол default-ийг ашиглана.
     const defaultImageUrl = document.querySelector('meta[property="og:image"]').content;
     const imageUrl = news.image || defaultImageUrl; 
     
-    // OG тагуудыг шинэчлэх
+    // OG тагуудыг шинэчлэх (news-ийн мэдээллээр)
     createOrUpdateMetaTag('og:title', news.title);
     createOrUpdateMetaTag('og:description', descriptionText);
     createOrUpdateMetaTag('og:image', imageUrl); 
@@ -146,7 +144,7 @@ async function fetchNewsBySlug(slug){
     
     // =======================================================
     
-    // 2. Зохиогчийн мэдээллийг татаж авах
+    // 2. Зохиогчийн мэдээллийг татах (Хэрэв байгаа бол)
     let author = {name:"Тодорхойгүй", image: "https://i.imgur.com/KqJv6N6.png", title: "Зохиогч"}; 
     if(news.author_id){
         const { data: authorData } = await supabase
@@ -158,7 +156,6 @@ async function fetchNewsBySlug(slug){
     }
 
     const descriptionContent = news.description || 'Мэдээний дэлгэрэнгүй байхгүй.'; 
-    // Twitter share-д зориулж гарчигийг тэмдэгтээс цэвэрлэх
     const escapedTitle = news.title.replace(/'/g, "\\'");
 
     // 3. Хуудсанд контентийг оруулах

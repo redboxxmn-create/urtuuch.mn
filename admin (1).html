@@ -81,6 +81,12 @@
             <option>Ярилцлага</option>
         </select> 
         <input id="newsImage" placeholder="Зураг URL">
+        
+        <select id="newsCardType">
+            <option value="normal">Энгийн мэдээ (Normal)</option>
+            <option value="sub_featured">Дэд онцлох (Sub-Featured)</option>
+            <option value="featured_large">Онцлох Том Карт (Featured Large)</option>
+        </select> 
         <div id="editor"></div>
         <select id="newsAuthor"></select>
         
@@ -133,6 +139,7 @@
 const newsTitle = document.getElementById("newsTitle");
 const newsCategory = document.getElementById("newsCategory");
 const newsImage = document.getElementById("newsImage");
+const newsCardType = document.getElementById("newsCardType"); // Шинэ DOM элемент
 const newsAuthor = document.getElementById("newsAuthor");
 const newsFeatured = document.getElementById("newsFeatured");
 const newsActive = document.getElementById("newsActive"); 
@@ -249,8 +256,6 @@ async function handleLogout() {
 // ---------------------------------------------------
 
 async function displayAuthUsers() {
-    // Client side-аас Supabase-ын бүх Auth хэрэглэгчдийг татах нь RLS-ээр хязгаарлагддаг.
-    // Энэ хэсэгт бид зөвхөн "Авторууд"-ыг харуулж, UI-г бэлдлээ.
     const list = await fetchAuthors(); 
     authUsersList.innerHTML = "";
 
@@ -290,10 +295,6 @@ async function openAddUserModal() {
         alert("Хэрэглэгч нэмэхэд алдаа гарлаа: " + error.message);
     } else {
         alert(`Хэрэглэгч ${email} амжилттай нэмэгдлээ. Хэрэв Email Confirmation идэвхтэй бол, и-мэйлээ шалгана уу.`);
-        
-        // Хэрэв та Auth-д нэмэгдсэн хэрэглэгчийг Authors хүснэгтэд автоматаар нэмэхийг хүсвэл:
-        // await supabaseClient.from("authors").insert({ name: email, title: "Системийн хэрэглэгч", image: null }); 
-        
         displayAuthUsers();
     }
 }
@@ -309,7 +310,7 @@ function cyrillicToLatin(text) {
         'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'ө': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
         'ү': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '',
         'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'Ye', 'Ё': 'Yo',
-        'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'Ө': 'O',
+        'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'М', 'Н': 'Н', 'О': 'O', 'Ө': 'O',
         'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ү': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch',
         'Ш': 'Sh', 'Щ': 'Sh', 'Ъ': '', 'Ы': 'I', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
     };
@@ -380,7 +381,7 @@ async function saveAuthor() {
     clearAuthorForm();
     populateAuthorSelect();
     displayAuthors();
-    displayAuthUsers(); // Auth User-ийн жагсаалтыг шинэчлэх
+    displayAuthUsers();
 }
 
 async function editAuthor(id) {
@@ -396,7 +397,7 @@ async function removeAuthor(id) {
         await supabaseClient.from("authors").delete().eq("id", id);
         populateAuthorSelect();
         displayAuthors();
-        displayAuthUsers(); // Auth User-ийн жагсаалтыг шинэчлэх
+        displayAuthUsers();
     }
 }
 
@@ -441,10 +442,13 @@ async function displayNews(filter = "") {
             const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
             
             const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
+            // Картны төрлийг харуулах
+            const cardTypeDisplay = n.card_type ? ` | ТӨРӨЛ: ${n.card_type.toUpperCase()}` : "";
+
 
             newsList.innerHTML += `
             <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""} ${activeStatus}${slugStatus}</span>
+                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}${cardTypeDisplay} ${activeStatus}${slugStatus}</span>
                 <span>
                     <button onclick="editNews(${n.id})">Засах</button>
                     <button onclick="removeNews(${n.id})">Устгах</button>
@@ -468,7 +472,9 @@ async function saveNews() {
         description: html || null,
         author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
         featured: newsFeatured.checked,
-        active: newsActive.checked 
+        active: newsActive.checked,
+        // Шинэ талбарын утга
+        card_type: newsCardType.value || 'normal'
     };
     
     if (!data.author_id) return alert("Нийтлэлч сонгоно уу");
@@ -500,6 +506,7 @@ async function editNews(id) {
     newsAuthor.value = data.author_id;
     newsFeatured.checked = data.featured;
     newsActive.checked = data.active; 
+    newsCardType.value = data.card_type || 'normal'; // Шинэ талбарыг бөглөх
     quill.root.innerHTML = data.description;
 }
 
@@ -517,6 +524,7 @@ function clearNewsForm() {
     newsImage.value = "";
     newsFeatured.checked = false;
     newsActive.checked = false; 
+    newsCardType.value = 'normal'; // Шинэ талбарыг цэвэрлэх
     quill.setText("");
 }
 

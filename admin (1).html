@@ -1,153 +1,3 @@
-<!DOCTYPE html>
-<html lang="mn">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ Панел</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
-    <style>
-        body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-        header { 
-            background: #3d85c6; 
-            color: #fff; 
-            padding: 15px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 8px; cursor: pointer; background: #6fa8dc; color: #fff; transition: background 0.3s; }
-        button:hover { background: #3d85c6; }
-        
-        #logoutButton {
-            background: #ff5252;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            color: #fff;
-            transition: background 0.3s;
-        }
-        #logoutButton:hover {
-            background: #e04040;
-        }
-        
-        .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        #editor { height: 150px; }
-        .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; border-bottom: 2px solid #3d85c6; padding-bottom: 5px; }
-        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;}
-        .checkbox-group { display: flex; gap: 20px; margin: 10px 0; }
-        #imageUpload { padding: 4px; height: auto; }
-
-        @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .card { grid-column: span 1 !important; }
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <h1>Админ Панел</h1>
-    <button id="logoutButton" onclick="handleLogout()" style="display: none;">Гарах</button>
-</header>
-
-<div id="loginFormContainer">
-    <div class="card" style="max-width: 400px; margin: 50px auto; text-align: center;">
-        <h2>Админ Нэвтрэх</h2>
-        <input id="loginEmail" type="email" placeholder="И-мэйл" required>
-        <input id="loginPassword" type="password" placeholder="Нууц үг" required>
-        <button onclick="handleLogin()">Нэвтрэх</button>
-        <p id="loginError" style="color: red; margin-top: 10px;"></p>
-    </div>
-</div>
-
-<div class="container" id="adminContent" style="display: none;">
-
-    <div class="card">
-        <h2>Мэдээ нэмэх / засах</h2>
-        <input type="hidden" id="editIndex">
-        <input id="newsTitle" placeholder="Гарчиг">
-        <input id="newsSlugInput" placeholder="Slug (Автоматаар үүснэ)" style="margin-top: 0px;" readonly> 
-
-        <select id="newsCategory">
-            <option value="">Ангилал</option>
-            <option>Улс төр</option>
-            <option>Эдийн засаг</option>
-            <option>Соёл урлаг</option>
-            <option>Медиа</option>
-            <option>Дэлхий дахинд</option>
-            <option>Ярилцлага</option>
-        </select>
-        
-        <div style="margin: 10px 0;">
-            <label for="imageUpload">Зураг сонгох:</label>
-            <input type="file" id="imageUpload" accept="image/*" style="padding: 4px; height: auto;">
-            <button id="uploadButton" type="button" style="background: #2ecc71;">Зураг оруулах</button>
-            <div id="uploadStatus" style="font-size: 12px; margin-top: 5px;"></div>
-            <img id="previewImage" src="" style="max-width: 150px; height: auto; margin-top: 10px; border-radius: 8px; display: none;">
-            
-            <input type="hidden" id="newsImage" value=""> 
-            
-            <input type="text" id="newsImageURLManual" placeholder="Эсвэл Зураг URL-ийг гараар оруулна уу" style="margin-top: 10px;">
-        </div>
-        <select id="newsCardType">
-            <option value="normal">Энгийн мэдээ (Normal)</option>
-            <option value="sub_featured">Дэд онцлох (Sub-Featured)</option>
-            <option value="featured_large">Онцлох Том Карт (Featured Large)</option>
-        </select>
-        <div id="editor"></div>
-        <select id="newsAuthor"></select>
-        
-        <div class="checkbox-group">
-            <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
-            <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
-        </div>
-        
-        <button onclick="saveNews()">Хадгалах</button>
-        <button onclick="clearNewsForm()">Цэвэрлэх</button>
-    </div>
-
-    <div class="card">
-        <h2>Нийтлэлч</h2>
-        <input type="hidden" id="editAuthorIndex">
-        <input id="authorName" placeholder="Нэр">
-        <input id="authorTitle" placeholder="Албан тушаал">
-        <input id="authorImage" placeholder="Зураг">
-        <button onclick="saveAuthor()">Хадгалах</button>
-        <button onclick="clearAuthorForm()">Цэвэрлэх</button>
-    </div>
-
-    <div class="card" style="grid-column: span 2;">
-        <h2>Системийн Хэрэглэгчид (Supabase Auth)</h2>
-        <button onclick="openAddUserModal()">+ Хэрэглэгч Нэмэх</button>
-        <div id="authUsersList"></div>
-    </div>
-    
-    <div class="card" style="grid-column: span 2;">
-        <input type="text" id="searchInput" class="search-input" placeholder="Мэдээ хайх...">
-    </div>
-
-    <div class="card" style="grid-column: span 2;">
-        <h2>Мэдээ</h2>
-        <div id="newsList"></div>
-    </div>
-
-    <div class="card" style="grid-column: span 2;">
-        <h2>Нийтлэлчид</h2>
-        <div id="authorList"></div>
-    </div>
-
-</div>
-
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
-
 <script>
 // DOM элементүүд
 const newsTitle = document.getElementById("newsTitle");
@@ -248,8 +98,7 @@ function generateSlug(title) {
 }
 
 // ---------------------------------------------------
-// 💡 UNIQUE SLUG GENERATION FUNCTION (Шинээр нэмэгдэв)
-// Slug давхардахаас сэргийлж, ард нь тохиолдлын ID нэмнэ
+// 💡 UNIQUE SLUG GENERATION FUNCTION
 // ---------------------------------------------------
 function generateUniqueSlug(title) {
     // Зөвхөн шинэ мэдээ оруулах үед (editIndex хоосон үед) уникал ID нэмнэ
@@ -340,7 +189,6 @@ newsImageURLManual.addEventListener('input', () => {
 // ---------------------------------------------------
 // AUTH FUNCTIONS (Нэвтрэх / Гарах) - Өөрчлөгдөөгүй
 // ---------------------------------------------------
-// (Зургийг хэт уртаас сэргийлж энэ хэсгийг товчлов)
 
 async function checkAuthAndRenderUI() {
     const { data: { user } } = await supabaseClient.auth.getUser();
@@ -390,20 +238,22 @@ async function handleLogout() {
 }
 
 async function displayAuthUsers() {
+    // Энэ функц нь Supabase auth.users-ийг харуулах логиктой. 
+    // Одоогоор Author-ийн мэдээллийг ашиглаж байна.
     const list = await fetchAuthors(); 
-    authUsersList.innerHTML = "";
-    // ...
+    authUsersList.innerHTML = `Хэрэглэгчдийн мэдээлэл (Author-оор) харагдах болно. Нийт: ${list.length}`;
+    // ... Үндсэн Auth user-ийн жагсаалт харуулах логик энд нэмэгдэнэ
 }
 
 async function openAddUserModal() {
-    // ...
+    alert("Шинэ Auth хэрэглэгч нэмэх модаль нээгдэх болно.");
+    // ... Шинэ хэрэглэгч нэмэх логик энд нэмэгдэнэ
 }
 
 
 // ---------------------------------------------------
-// AUTHORS (Нийтлэлч) - Өөрчлөгдөөгүй
+// AUTHORS (Нийтлэлч) - ДУТУУ БАЙСАН ФУНКЦУУДЫГ НЭМЭВ
 // ---------------------------------------------------
-// (Зургийг хэт уртаас сэргийлж энэ хэсгийг товчлов)
 
 async function fetchAuthors() {
     const { data } = await supabaseClient.from("authors").select("*").order("id");
@@ -416,11 +266,85 @@ async function populateAuthorSelect() {
         ? list.map(a => `<option value="${a.id}">${a.name}</option>`).join("")
         : `<option disabled>Нийтлэлч байхгүй</option>`;
 }
-// ... үлдсэн Author функцууд
+
+async function displayAuthors() { // 👈 Нэмэгдсэн
+    const list = await fetchAuthors();
+    authorList.innerHTML = "";
+    if (!list.length) { authorList.innerHTML = "Нийтлэлч байхгүй"; return; }
+    
+    list.forEach(a => {
+        authorList.innerHTML += `
+            <div class="list-item">
+                <span>${a.name} (${a.title})</span>
+                <span>
+                    <button onclick="editAuthor(${a.id})">Засах</button>
+                    <button onclick="removeAuthor(${a.id})">Устгах</button>
+                </span>
+            </div>`;
+    });
+}
+
+async function saveAuthor() { // 👈 Нэмэгдсэн
+    const nameValue = authorName.value.trim();
+    const titleValue = authorTitle.value.trim();
+    const imageValue = authorImage.value.trim();
+
+    if (!nameValue) return alert("Нийтлэлчийн нэрийг бөглөнө үү.");
+
+    const data = {
+        name: nameValue,
+        title: titleValue || null,
+        image: imageValue || null
+    };
+
+    let result;
+    if (editAuthorIndex.value === "") {
+        // Шинэ нийтлэлч
+        result = await supabaseClient.from("authors").insert(data);
+    } else {
+        // Нийтлэлч засах
+        result = await supabaseClient.from("authors").update(data).eq("id", editAuthorIndex.value);
+    }
+
+    if (result.error) {
+        console.error("Author save error:", result.error);
+        alert(`Нийтлэлч хадгалахад алдаа гарлаа: ${result.error.message}`);
+    } else {
+        alert("Нийтлэлч амжилттай хадгалагдлаа.");
+    }
+    
+    clearAuthorForm();
+    populateAuthorSelect();
+    displayAuthors();
+}
+
+function clearAuthorForm() { // 👈 Нэмэгдсэн
+    editAuthorIndex.value = "";
+    authorName.value = "";
+    authorTitle.value = "";
+    authorImage.value = "";
+}
+
+async function editAuthor(id) { // 👈 Нэмэгдсэн
+    const { data } = await supabaseClient.from("authors").select("*").eq("id", id).single();
+    
+    editAuthorIndex.value = data.id;
+    authorName.value = data.name;
+    authorTitle.value = data.title;
+    authorImage.value = data.image;
+}
+
+async function removeAuthor(id) { // 👈 Нэмэгдсэн
+    if (confirm("Нийтлэлчийг устгах уу?")) {
+        await supabaseClient.from("authors").delete().eq("id", id);
+        populateAuthorSelect();
+        displayAuthors();
+    }
+}
 
 
 // ---------------------------------------------------
-// NEWS (Мэдээ)
+// NEWS (Мэдээ) - Өөрчлөгдөөгүй
 // ---------------------------------------------------
 async function fetchNews() {
     const { data } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
@@ -430,7 +354,7 @@ async function fetchNews() {
 async function displayNews(filter = "") {
     const news = await fetchNews();
     const authors = await fetchAuthors();
-    // ... үлдсэн displayNews логик
+    
     newsList.innerHTML = "";
 
     let filteredNews = news;
@@ -476,7 +400,7 @@ async function saveNews() {
     
     if (!titleValue) return alert("Гарчиг заавал бөглөнө");
 
-    // 💡 UNIQUE SLUG-ийг үүсгэх/авах. Давхардлын алдаа гарахгүй.
+    // UNIQUE SLUG-ийг үүсгэх/авах. Давхардлын алдаа гарахгүй.
     const slugValue = generateUniqueSlug(titleValue);
     
     const data = {
@@ -498,12 +422,10 @@ async function saveNews() {
         // Шинэ мэдээ оруулах
         result = await supabaseClient.from("news").insert(data);
     } else {
-        // Мэдээ засах (Slug-ийг өөрчлөхгүй)
-        // Засварлах үед Slug-ийг Manual Input-аас авна
-        delete data.slug; // Засварлах үед slug-ийг update хийхгүй
+        // Мэдээ засах
+        // Засварлах үед Slug-ийг update хийхгүй.
         const updateData = { ...data };
-        
-        // Хэрэв гарчиг өөрчлөгдсөн ч, бид Slug-ийг auto-update хийхгүй, хадгална.
+        delete updateData.slug; 
         
         result = await supabaseClient.from("news").update(updateData).eq("id", editIndex.value);
     }
@@ -578,15 +500,17 @@ searchInput.addEventListener("input", () => {
     displayNews(searchInput.value);
 });
 
-// Global scope-д функцуудыг гаргах
+// Global scope-д функцуудыг гаргах (onClick үйлдлүүд зөв ажиллахын тулд)
 window.saveNews = saveNews;
 window.clearNewsForm = clearNewsForm;
 window.editNews = editNews;
 window.removeNews = removeNews;
-window.saveAuthor = saveAuthor;
-window.clearAuthorForm = clearAuthorForm;
-window.editAuthor = editAuthor;
-window.removeAuthor = removeAuthor;
+
+window.saveAuthor = saveAuthor; // 👈 Зөв тодорхойлогдсон
+window.clearAuthorForm = clearAuthorForm; // 👈 Зөв тодорхойлогдсон
+window.editAuthor = editAuthor; // 👈 Зөв тодорхойлогдсон
+window.removeAuthor = removeAuthor; // 👈 Зөв тодорхойлогдсон
+
 window.handleLogin = handleLogin;
 window.handleLogout = handleLogout;
 window.openAddUserModal = openAddUserModal;
@@ -595,7 +519,7 @@ window.openAddUserModal = openAddUserModal;
 // INIT
 function initializeAdminPanel() {
     populateAuthorSelect();
-    displayAuthors();
+    displayAuthors(); // 👈 Одоо энэ функц тодорхойлогдсон
     displayNews();
     displayAuthUsers();
 }
@@ -603,5 +527,3 @@ function initializeAdminPanel() {
 // Хуудсыг эхлүүлэх: Эхлээд Auth-г шалгана
 checkAuthAndRenderUI();
 </script>
-</body>
-</html>

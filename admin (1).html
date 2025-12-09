@@ -10,13 +10,12 @@
 
     <style>
         body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-        /* Header нь энгийн харагдацтай болсон */
         header { 
             background: #3d85c6; 
             color: #fff; 
             padding: 15px 20px; 
             display: flex; 
-            justify-content: flex-start; /* Эхлэл рүү зэрэгцүүлэв */
+            justify-content: space-between; /* Гарах товчийг баруун тийш зэрэгцүүлэв */
             align-items: center; 
         }
         .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -25,7 +24,18 @@
         button { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 8px; cursor: pointer; background: #6fa8dc; color: #fff; transition: background 0.3s; }
         button:hover { background: #3d85c6; }
         
-        /* Гарах товчны стилийг хассан */
+        #logoutButton {
+            background: #ff5252;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.3s;
+        }
+        #logoutButton:hover {
+            background: #e04040;
+        }
         
         .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
         #editor { height: 150px; }
@@ -42,9 +52,20 @@
 
 <header>
     <h1>Админ Панел</h1>
-    </header>
+    <button id="logoutButton" onclick="handleLogout()" style="display: none;">Гарах</button>
+</header>
 
-<div class="container">
+<div id="loginFormContainer">
+    <div class="card" style="max-width: 400px; margin: 50px auto; text-align: center;">
+        <h2>Админ Нэвтрэх</h2>
+        <input id="loginEmail" type="email" placeholder="И-мэйл" required>
+        <input id="loginPassword" type="password" placeholder="Нууц үг" required>
+        <button onclick="handleLogin()">Нэвтрэх</button>
+        <p id="loginError" style="color: red; margin-top: 10px;"></p>
+    </div>
+</div>
+
+<div class="container" id="adminContent" style="display: none;">
 
     <div class="card">
         <h2>Мэдээ нэмэх / засах</h2>
@@ -120,8 +141,18 @@ const authorList = document.getElementById("authorList");
 
 const searchInput = document.getElementById("searchInput");
 
+// Нэвтрэх хэсгийн DOM элементүүд
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
+const loginFormContainer = document.getElementById("loginFormContainer");
+const adminContent = document.getElementById("adminContent");
+const logoutButton = document.getElementById("logoutButton");
+
+
 // Supabase client 
-const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+// ЭНД ТАНЫ SUPABASE ТӨСЛИЙН МЭДЭЭЛЭЛ ОРНО
+const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co"; 
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
@@ -131,10 +162,64 @@ const quill = new Quill("#editor", { theme: "snow" });
 
 
 // ---------------------------------------------------
+// AUTH FUNCTIONS (Нэвтрэх / Гарах)
+// ---------------------------------------------------
+
+async function checkAuthAndRenderUI() {
+    // Хэрэглэгч нэвтэрсэн эсэхийг шалгах
+    const { data: { user } } = await supabaseClient.auth.getUser();
+
+    if (user) {
+        // Нэвтэрсэн
+        loginFormContainer.style.display = 'none';
+        adminContent.style.display = 'grid';
+        logoutButton.style.display = 'block';
+        initializeAdminPanel(); 
+    } else {
+        // Нэвтрээгүй
+        loginFormContainer.style.display = 'block';
+        adminContent.style.display = 'none';
+        logoutButton.style.display = 'none';
+    }
+}
+
+async function handleLogin() {
+    loginError.textContent = '';
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (!email || !password) {
+        loginError.textContent = "И-мэйл болон нууц үг заавал бөглөнө.";
+        return;
+    }
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        console.error("Login error:", error);
+        loginError.textContent = "Нэвтрэх нэр эсвэл нууц үг буруу байна. (" + error.message + ")";
+    } else {
+        loginEmail.value = '';
+        loginPassword.value = '';
+        await checkAuthAndRenderUI();
+    }
+}
+
+async function handleLogout() {
+    if (confirm("Системээс гарах уу?")) {
+        await supabaseClient.auth.signOut();
+        await checkAuthAndRenderUI();
+    }
+}
+
+
+// ---------------------------------------------------
 // SLUG GENERATION FUNCTION
 // ---------------------------------------------------
 
-// Кирилл үсгийг Латин руу хөрвүүлэх (Transliteration) функц
 function cyrillicToLatin(text) {
     const cyrToLat = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'ye', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'i',
@@ -155,22 +240,11 @@ function cyrillicToLatin(text) {
 }
 
 function generateSlug(title) {
-    // 1. Кирилл үсгийг Латин руу хөрвүүлэх
     let slug = cyrillicToLatin(title);
-
-    // 2. Жижиг үсэгт хөрвүүлэх
     slug = slug.toLowerCase();
-
-    // 3. Хоосон зайг зураасаар солих
     slug = slug.replace(/\s+/g, '-');
-
-    // 4. Үсэг, тоо, зурааснаас бусад тэмдэгтийг арилгах
     slug = slug.replace(/[^\w-]+/g, '');
-
-    // 5. Давхардсан зураасыг нэгээр солих
     slug = slug.replace(/--+/g, '-');
-
-    // 6. Эхлэл төгсгөлийн зураасыг арилгах
     slug = slug.replace(/^-+|-+$/g, '');
     
     return slug;
@@ -281,7 +355,6 @@ async function displayNews(filter = "") {
             const aut = authors.find(a => a.id == n.author_id)?.name || "Тодорхойгүй";
             const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
             
-            // Slug байхгүй бол анхааруулга өгнө
             const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
 
             newsList.innerHTML += `
@@ -376,6 +449,8 @@ window.saveAuthor = saveAuthor;
 window.clearAuthorForm = clearAuthorForm;
 window.editAuthor = editAuthor;
 window.removeAuthor = removeAuthor;
+window.handleLogin = handleLogin;
+window.handleLogout = handleLogout;
 
 
 // INIT
@@ -385,7 +460,8 @@ function initializeAdminPanel() {
     displayNews();
 }
 
-initializeAdminPanel();
+// Хуудсыг эхлүүлэх: Эхлээд Auth-г шалгана
+checkAuthAndRenderUI();
 </script>
 </body>
 </html>

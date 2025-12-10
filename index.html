@@ -34,7 +34,7 @@
         nav ul li ul li a:hover {background:#3d85c6;}
         
         /* --------------------------------------------------- */
-        /* МЭДЭЭНИЙ GRID БОЛОН КАРТЫН ЗАГВАР (Ergelt.mn-д ойртуулсан) */
+        /* МЭДЭЭНИЙ GRID БОЛОН КАРТЫН ЗАГВАР (Зураг 200px) */
         /* --------------------------------------------------- */
 
         /* Энэ grid class нь зөвхөн Ангиллын хуудсанд (Sidebar-гүй) ашиглагдана */
@@ -62,11 +62,14 @@
             transform:translateY(-3px); /* Зөөлөн дээшлэх */
             box-shadow:0 8px 20px rgba(0,0,0,0.15); 
         }
+        
+        /* ЗУРГИЙН ЗАГВАР: Энгийн болон дэд онцлох картын зургийг 200px болгож, дүүргэсэн */
         .card img{
             width:100%; 
-            height:180px; /* Зургийн өндрийг нэмж, тэгш харагдуулна */
-            object-fit:cover;
+            height:200px; /* ШИНЭЧЛЭЛТ: Энгийн картын зургийн өндөр 200px болсон */
+            object-fit:cover; /* Зураг картын хэмжээнд дүүрэн орно */
         }
+        
         .card-content{
             padding:15px; 
             position:relative;
@@ -86,7 +89,7 @@
             grid-column: span 2; 
         }
         .sub-featured-card img{
-            height: 200px;
+            height: 200px; /* Дэд онцлох картын зураг 200px хэвээр */
         }
         .sub-featured-card .card-title {
             font-size: 20px;
@@ -274,7 +277,7 @@
         }
 
         /* ---------------------------------------------------------------------- */
-        /* SIDEBAR (Сүүлийн үеийн мэдээ) ЗАГВАР (Зурагтай болгосон) */
+        /* SIDEBAR (Сүүлийн үеийн мэдээ) ЗАГВАР */
         /* ---------------------------------------------------------------------- */
 
         /* #allNewsSection-ийг 2 баганатай болгож хуваах (Гол хуудас) */
@@ -283,20 +286,6 @@
             grid-template-columns: 3fr 1fr; /* Гол контент 3/4, Sidebar 1/4 хувийг эзэлнэ */
             gap: 20px;
             padding: 15px;
-        }
-
-        /* Ангиллын хуудсууд (Sidebarгүй) нь grid классыг ашиглана */
-        .category-section:not(#allNewsSection) {
-            /* padding нь grid-ээр тодорхойлогдоно */
-        }
-        
-        /* Ангилал тус бүрийг харуулах/нуух */
-        .category-section {
-            display: none; 
-        }
-
-        .category-section.active {
-            display: block; 
         }
         
         /* Гол контент болон Sidebar-ын тохиргоо */
@@ -308,7 +297,7 @@
             align-content: start; 
         }
 
-        /* SIDEBAR ЗАГВАР: Зурагтай болгож, Ergelt.mn-д ойртуулсан */
+        /* SIDEBAR ЗАГВАР: Зурагтай */
         .sidebar-container {
             grid-column: 2 / 3;
             background: #fff; 
@@ -329,14 +318,13 @@
             font-weight: bold;
         }
 
-        /* ШИНЭ: Sidebar-ын мэдээний нэгж элемент */
         .latest-news-item {
             padding: 10px 0;
             border-bottom: 1px dashed #eee;
             transition: background 0.2s; 
-            display: flex; /* Зураг болон текстийг хажуу хажуу талд нь байрлуулах */
-            gap: 10px; /* Хоорондын зай */
-            align-items: flex-start; /* Дээд талаас нь эхлүүлэх */
+            display: flex; 
+            gap: 10px; 
+            align-items: flex-start; 
             cursor: pointer;
         }
         .latest-news-item:last-child {
@@ -346,11 +334,10 @@
             background: #fcfcfc;
         }
 
-        /* ШИНЭ: Sidebar-ын жижиг зургийн загвар */
         .sidebar-img-wrapper {
-            flex-shrink: 0; /* Зураг багасгахгүй байх */
-            width: 70px; /* Жижиг зургийн өргөн */
-            height: 70px; /* Жижиг зургийн өндөр */
+            flex-shrink: 0; 
+            width: 70px; 
+            height: 70px; 
             border-radius: 4px;
             overflow: hidden;
         }
@@ -358,20 +345,19 @@
         .sidebar-img-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Зургийг тааруулж дүүргэх */
+            object-fit: cover; 
             display: block;
         }
 
-        /* ШИНЭ: Sidebar-ын текстийн загвар */
         .sidebar-content-wrapper {
-            flex-grow: 1; /* Текстний хэсэг үлдсэн зайг эзлэх */
+            flex-grow: 1; 
         }
 
         .latest-news-item a {
             text-decoration: none;
             color: #333;
             font-size: 13px; 
-            font-weight: bold; /* Гарчгийг тодоор */
+            font-weight: bold; 
             line-height: 1.4;
             display: block;
             transition: color 0.2s;
@@ -393,6 +379,15 @@
         /* БУСАД ТУСЛАХ ЗАГВАРУУД */
         /* --------------------------------------------------- */
         
+        /* Ангилал тус бүрийг харуулах/нуух */
+        .category-section {
+            display: none; 
+        }
+
+        .category-section.active {
+            display: block; 
+        }
+
         .authors-container {display:flex; gap:10px; padding:15px; justify-content:center; flex-wrap:wrap; background:#fff; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin: 15px;}
         .author-card {flex:1 1 80px; max-width:120px; text-align:center; padding:10px; border-radius:8px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;}
         .author-card:hover {transform: translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15);}
@@ -483,8 +478,10 @@
             .featured-sidebar .card {
                 flex-direction: row; 
             }
+            
+            /* ШИНЭЧЛЭЛТ: Гар утасны энгийн картын зургийн өндөр */
             .card img{
-                height: 100px;
+                height: 100px; 
                 max-width: 40%;
             }
             .card-content {
@@ -744,7 +741,7 @@ function generateCategoryTabs() {
  * Ангиллын товчлуур дарахад ажиллах функц
  */
 window.showCategory = function(categoryName) {
-    // Бүх таб товчлууруудаас 'active' классыг хасах
+    // Бүх таб товчлуур/аас 'active' классыг хасах
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     
     // Бүх ангиллын хэсгүүдээс 'active' классыг хасах (нуух)
@@ -787,7 +784,7 @@ window.showCategory = function(categoryName) {
 }
 
 // ===================================================================================
-// SIDEBAR: Сүүлийн 5 мэдээг Зурагтайгаар харуулах (Шинэчилсэн)
+// SIDEBAR: Сүүлийн 5 мэдээг Зурагтайгаар харуулах
 // ===================================================================================
 function displaySidebarNews() {
     const container = document.getElementById('sidebarContainer');

@@ -96,6 +96,10 @@
             
             <input type="text" id="newsImageURLManual" placeholder="Эсвэл Зураг URL-ийг гараар оруулна уу" style="margin-top: 10px;">
         </div>
+
+        <input type="text" id="newsVideoLink" placeholder="YouTube Видео Линк (Бүтэн URL: https://www.youtube.com/watch?v=...)">
+
+
         <select id="newsCardType">
             <option value="normal">Энгийн мэдээ (Normal)</option>
             <option value="sub_featured">Дэд онцлох (Sub-Featured)</option>
@@ -184,6 +188,10 @@ const uploadButton = document.getElementById('uploadButton');
 const uploadStatus = document.getElementById('uploadStatus');
 const previewImage = document.getElementById('previewImage');
 const newsImageURLManual = document.getElementById('newsImageURLManual');
+
+// 💡 ШИНЭ: Видео линкний input-ийг зарлаж байна
+const newsVideoLink = document.getElementById("newsVideoLink");
+
 
 // Supabase client 
 // ЭНД ТАНЫ SUPABASE ТӨСЛИЙН МЭДЭЭЛЭЛ ОРНО
@@ -288,6 +296,7 @@ async function handleImageUpload() {
     uploadStatus.style.color = 'orange';
     newsImage.value = ''; // Хуучин утгыг цэвэрлэх
     newsImageURLManual.value = ''; 
+    newsVideoLink.value = ''; // Видео линкийг цэвэрлэх (Зураг оруулахад)
 
     const fileExtension = file.name.split('.').pop();
     // Давхардлаас сэргийлж, цаг болон random утгаар файлын нэрийг үүсгэж байна.
@@ -504,11 +513,12 @@ async function removeAuthor(id) {
 // NEWS (Мэдээ)
 // ---------------------------------------------------
 async function fetchNews() {
-    const { data } = await supabaseClient.from("news").select("*").order("created_at", { ascending: false });
+    // 💡 video_link талбарыг татаж авч байна
+    const { data } = await supabaseClient.from("news").select("*, video_link").order("created_at", { ascending: false });
     return data || [];
 }
 
-// 💡 ШИНЭ: SHARE FUNCTION
+// 💡 SHARE FUNCTION
 function shareOnFacebook(slug) {
     // ⚠️ Таны үндсэн домайн URL-ийг энд заавал зөв оруулах шаардлагатай!
     const BASE_URL = 'https://urtuuch.mn/news/?slug='; 
@@ -528,7 +538,7 @@ async function displayNews(filter = "") {
     let filteredNews = news;
     if (filter) {
         filteredNews = news.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()) || 
-                                       n.slug?.toLowerCase().includes(filter.toLowerCase())); // slug-аар хайх
+                                             n.slug?.toLowerCase().includes(filter.toLowerCase())); // slug-аар хайх
     }
 
     if (!filteredNews.length) { newsList.innerHTML = "Мэдээ байхгүй"; return; }
@@ -548,11 +558,13 @@ async function displayNews(filter = "") {
             
             const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
             const cardTypeDisplay = n.card_type ? ` | ТӨРӨЛ: ${n.card_type.toUpperCase()}` : "";
+            // Видео байгаа эсэхийг шалгах
+            const videoStatus = n.video_link ? " | 📹 ВИДЕО" : "";
 
 
             newsList.innerHTML += `
             <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}${cardTypeDisplay} ${activeStatus}${slugStatus}</span>
+                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}${cardTypeDisplay} ${videoStatus} ${activeStatus}${slugStatus}</span>
                 <span>
                     <button onclick="shareOnFacebook('${n.slug}')" style="background: #4267B2;">🚀 Шэйрлэх</button>
                     <button onclick="editNews(${n.id})">Засах</button>
@@ -567,6 +579,8 @@ async function saveNews() {
     const html = quill.root.innerHTML.trim();
     const titleValue = newsTitle.value.trim();
     const imageURL = newsImage.value.trim();
+    // 💡 ШИНЭ: newsVideoLink-ийн утгыг авч байна
+    const videoLinkValue = newsVideoLink.value.trim(); 
     
     if (!titleValue) return alert("Гарчиг заавал бөглөнө");
 
@@ -577,6 +591,8 @@ async function saveNews() {
         slug: slugValue, 
         category: newsCategory.value || null,
         image: imageURL || null, 
+        // 💡 ШИНЭ: video_link-ийг дата объект руу нэмж байна
+        video_link: videoLinkValue || null, 
         description: html || null,
         author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
         featured: newsFeatured.checked,
@@ -593,7 +609,7 @@ async function saveNews() {
     } else {
         // Мэдээ засах
         const updateData = { ...data };
-        // Засварлах үед slug-ийг update хийхгүй байхаар үлдээсэн. Хэрэв update хийх шаардлагатай бол энийг авна.
+        // Засварлах үед slug-ийг update хийхгүй байхаар үлдээсэн.
         delete updateData.slug; 
         
         result = await supabaseClient.from("news").update(updateData).eq("id", editIndex.value);
@@ -631,6 +647,9 @@ async function editNews(id) {
     uploadStatus.textContent = ""; 
     imageUploadInput.value = ""; 
 
+    // 💡 ШИНЭ: video_link утгыг input руу буцааж оруулах
+    newsVideoLink.value = data.video_link || ""; 
+
     newsAuthor.value = data.author_id;
     newsFeatured.checked = data.featured;
     newsActive.checked = data.active; 
@@ -648,6 +667,9 @@ function clearNewsForm() {
     
     newsImage.value = "";
     newsImageURLManual.value = ""; 
+    // 💡 ШИНЭ: Видео линкийн талбарыг цэвэрлэх
+    newsVideoLink.value = ""; 
+
     previewImage.src = "";
     previewImage.style.display = 'none';
     uploadStatus.textContent = "";

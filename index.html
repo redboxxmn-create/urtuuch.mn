@@ -74,7 +74,7 @@
             grid-column: 1 / -1; /* Бүх 4 баганыг эзэлнэ */
             display: grid;
             
-            /* 💡 ӨӨРЧЛӨЛТ: Гол мэдээг 2/3, хажуугийн мэдээг 1/3 харьцаатай хуваасан */
+            /* ӨӨРЧЛӨЛТ: Гол мэдээг 2/3, хажуугийн мэдээг 1/3 харьцаатай хуваасан */
             grid-template-columns: 2fr 1fr; 
             
             gap: 15px;
@@ -200,7 +200,7 @@
         .video-card iframe{width:100%; height:300px; border:none; border-radius:12px;}
         .authors-container {display:flex; gap:10px; padding:10px; justify-content:center; flex-wrap:wrap; background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
         .author-card {flex:1 1 80px; max-width:120px; text-align:center; padding:5px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
-        .author-card img {width:50px; height:50px; border-radius:50%; margin-bottom:5px;}
+        .author-card img {width:50px; height:50px; border-radius:50%; object-fit:cover;}
         .author-name{font-weight:bold; font-size:14px;}
         .author-title{font-size:12px; color:#555;}
         .pagination{display:flex; justify-content:center; gap:5px; margin:10px 0; flex-wrap:wrap;}
@@ -219,7 +219,6 @@
         /* ---------------------------------------------------------------------- */
         @media(max-width:992px){
             .featured-block-container {
-                /* 💡 ӨӨРЧЛӨЛТ: 2fr 1fr хэвээр үлдэнэ (768px-ээс дээш) */
                 grid-template-columns: 2fr 1fr;
             }
             .featured-main-card img {
@@ -303,8 +302,13 @@
 <div class="grid" id="newsContainer"></div>
 
 <div class="video-card" id="videoContainer">
-    <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+    <iframe 
+        src="" 
+        allowfullscreen
+        style="width:100%; height:300px; border:none; border-radius:12px;"
+    ></iframe>
 </div>
+
 <div class="authors-container" id="authorsContainer"></div>
 <div class="pagination" id="pagination"></div>
 
@@ -347,8 +351,9 @@ async function fetchAuthors() {
 }
 
 async function fetchNews() {
+    // 💡 Та video_link гэсэн талбарыг Supabase-д нэмсэн байх ёстой
     const { data, error } = await supabase.from('news')
-        .select('*, card_type') 
+        .select('*, card_type, video_link') // video_link-ийг татаж байна
         .eq('active', true) 
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
@@ -386,20 +391,17 @@ function displayNews() {
     const end = start + NEWS_PER_PAGE;
     const pageNews = newsData.slice(start,end);
 
-    let mainFeatured = null; // Зүүн талын хамгийн ТОМ мэдээ
-    let sidebarFeatured = []; // Баруун талын 4 жижиг мэдээ
-    const normal = []; // Энгийн картууд
+    let mainFeatured = null; 
+    let sidebarFeatured = []; 
+    const normal = []; 
     
     // Мэдээг бүлэглэх
     for (const n of pageNews) {
-        // featured_large card_type-тай эхний мэдээг том болгоно
         if (n.card_type === 'featured_large' && !mainFeatured) {
             mainFeatured = n; 
-        // Дараагийн 4 мэдээг (featured_large эсвэл sub_featured) баруун самбарт оруулна
         } else if (sidebarFeatured.length < 4 && (n.card_type === 'featured_large' || n.card_type === 'sub_featured')) {
             sidebarFeatured.push(n); 
         } else {
-            // бусад мэдээг энгийн grid-д оруулна
             normal.push(n); 
         }
     }
@@ -409,11 +411,9 @@ function displayNews() {
         const featuredBlock = document.createElement('div');
         featuredBlock.className = 'featured-block-container';
 
-        // Зүүн талын том мэдээ
         const mainCard = createNewsCard(mainFeatured, 'featured_main'); 
         mainCard.classList.add('featured-main-card');
 
-        // Баруун талын жижиг мэдээний самбар
         const sidebar = document.createElement('div');
         sidebar.className = 'featured-sidebar';
         
@@ -431,7 +431,6 @@ function displayNews() {
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
         
-        // Featured Block-т ороогүй sub-featured мэдээг 2 багана эзлүүлнэ
         if (n.card_type === 'sub_featured') {
             div.classList.add('sub-featured-card');
         }
@@ -452,11 +451,10 @@ function createNewsCard(n, cardType) {
     const div = document.createElement('a'); 
     div.className = "card";
     
-    // Featured Block доторх жижиг мэдээг Featured-ээр тооцохгүй
     const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
 
     const categoryText = (isFeatured ? 'ОНЦЛОХ | ' : '') + n.category;
-    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #e74c3c;' : ''; // Онцлохын өнгө
+    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #e74c3c;' : ''; 
 
     const contentHtml = `
         <div class="card-content">
@@ -508,6 +506,43 @@ function renderPagination() {
     }
 }
 
+
+// 💡 ШИНЭ ФУНКЦ: Видео картны агуулгыг олох, оруулах
+function displayVideoCard() {
+    const videoContainer = document.getElementById('videoContainer');
+    
+    // Эхний "Медиа" категорийг (эсвэл video_link-тэй мэдээг) хайж олно.
+    const videoNews = newsData.find(n => n.category === 'Медиа' && n.video_link);
+    
+    if (videoNews && videoNews.video_link) {
+        let embedLink = videoNews.video_link;
+        
+        // YouTube линкийг embed линк болгох
+        if (embedLink.includes('youtube.com/watch?v=')) {
+            embedLink = embedLink.replace('watch?v=', 'embed/');
+        } else if (embedLink.includes('youtu.be/')) {
+            embedLink = embedLink.replace('youtu.be/', 'youtube.com/embed/');
+        }
+        
+        // iframe-ийг шинэчлэх
+        videoContainer.innerHTML = `
+            <iframe 
+                src="${embedLink}" 
+                allowfullscreen 
+                title="${videoNews.title}"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                style="width:100%; height:300px; border:none; border-radius:12px;"
+            ></iframe>
+        `;
+        videoContainer.style.display = 'block'; // Видео олдвол харуулна
+    } else {
+        // Видео олохгүй бол карт харагдахгүй байх
+        videoContainer.style.display = 'none';
+    }
+}
+// -------------------------------------------------------------------
+
+
 function displayFilteredNews(filteredData) {
     const container = document.getElementById('newsContainer');
     container.innerHTML = '';
@@ -547,6 +582,7 @@ async function init(){
     await fetchAuthors();
     await fetchNews();
     displayNews();
+    displayVideoCard(); // 💡 Шинэ функцээ дуудаж байна
 }
 
 init();

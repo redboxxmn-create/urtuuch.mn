@@ -57,6 +57,7 @@
             text-decoration: none; 
             color: inherit;
             border: 1px solid #eee; 
+            display: block; /* Гар утасны загварт ч block байна */
         }
         .card:hover{
             transform:translateY(-3px); /* Зөөлөн дээшлэх */
@@ -73,6 +74,7 @@
         .card-content{
             padding:15px; 
             position:relative;
+            max-width: none; /* Гар утасны загварт хэрэгтэй */
         }
         .card-title{
             font-size:17px; 
@@ -192,7 +194,7 @@
             box-shadow: none;
             border: 1px solid #ccc;
             border-radius: 8px;
-            display: flex;
+            display: flex; /* Жижиг картуудыг хэвтээгээр байрлуулна */
             flex-direction: column; 
             overflow: hidden; 
         }
@@ -433,14 +435,14 @@
             
             /* Sidebar-тай Үндсэн хуудас (allNewsSection) */
             #allNewsSection {
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr; /* Нэг баганатай болгоно */
                 gap: 10px;
             }
             
             /* Гол контентыг бүтэн өргөн болгоно */
             .main-content-area {
                 grid-column: 1 / -1; 
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr; /* Карт нэг баганатай (босоо) */
                 padding: 0 5px;
             }
 
@@ -479,17 +481,20 @@
                 flex-direction: row; 
             }
             
-            /* ШИНЭЧЛЭЛТ: Гар утасны энгийн картын зургийн өндөр */
+            /* ШИНЭЧЛЭЛТ: Энгийн картын загварыг босоо болгох */
+            .card {
+                display: block; /* Flex-ийг буцааж блоклоно (Зураг дээд, текст доод) */
+                max-width: none; 
+            }
+
             .card img{
-                height: 100px; 
-                max-width: 40%;
+                height: 200px; /* Компьютерийн загвартай ижил 200px */
+                width: 100%; 
+                max-width: 100%; 
             }
             .card-content {
-                padding: 10px;
-                max-width: 60%;
-            }
-            .card {
-                display: flex;
+                padding: 15px; /* Компьютерийн загвартай ижил padding өгнө */
+                max-width: none; 
             }
         }
     </style>

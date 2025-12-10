@@ -39,13 +39,11 @@
 
         .grid{
             display:grid; 
-            /* Desktop хувилбарыг 4 тэнцүү баганад хуваана */
             grid-template-columns: repeat(4, 1fr); 
             gap:15px; 
             padding:15px;
         }
         
-        /* 💡 АНХААРУУЛГА: <a> тагийг <div> болгосноос үүдэн, курсор pointer нэмэв */
         .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s; background:#fff; text-decoration: none; color: inherit;}
         .card:hover{transform:translateY(-5px); box-shadow:0 8px 25px rgba(0,0,0,0.2);}
         .card img{width:100%; height:150px; object-fit:cover;}
@@ -56,7 +54,6 @@
         .card-author{display:flex; align-items:center; gap:5px; margin-top:8px;}
         .card-author img{width:25px; height:25px; border-radius:50%; object-fit:cover;}
 
-        /* sub-featured-card-ийг энгийн grid-д орох үед (Featured Block-т ороогүй бол) */
         .sub-featured-card {
             grid-column: span 2; 
         }
@@ -68,11 +65,11 @@
         }
 
         /* --------------------------------------------------- */
-        /* 💡 ОНЦЛОХ МЭДЭЭНИЙ ЗАГВАР (Featured Block) */
+        /* ОНЦЛОХ МЭДЭЭНИЙ ЗАГВАР (Featured Block) */
         /* --------------------------------------------------- */
         
         .featured-block-container {
-            grid-column: 1 / -1; /* Бүх 4 баганыг эзэлнэ */
+            grid-column: 1 / -1; 
             display: grid;
             grid-template-columns: 2fr 1fr; 
             gap: 15px;
@@ -191,10 +188,10 @@
         }
 
         /* --------------------------------------------------- */
-        /* 💡 ШИНЭ: ХАМГИЙН ДООРХ ТОМ ВИДЕО КАРТНЫ ЗАГВАР */
+        /* ХАМГИЙН ДООРХ ТОМ ВИДЕО КАРТНЫ ЗАГВАР */
         /* --------------------------------------------------- */
         .video-card-bottom {
-            grid-column: 1 / -1; /* Бүх өргөнийг эзэлнэ */
+            grid-column: 1 / -1; 
             padding: 20px 15px; 
             margin: 20px 0;
             background: #fff;
@@ -210,7 +207,7 @@
         }
         .video-card-bottom iframe {
             width: 100%; 
-            height: 450px; /* Илүү том болгов */
+            height: 450px; 
             border: none; 
             border-radius: 12px;
         }
@@ -321,7 +318,7 @@
 <div class="pagination" id="pagination"></div>
 
 <div class="video-card-bottom" id="videoContainer" style="display: none;"> 
-    <h3 id="videoTitle"></h3>
+    <h3 id="videoTitle">Онцлох Видео</h3>
     <iframe 
         src="" 
         allowfullscreen
@@ -350,7 +347,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2RrdmJocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
+// 💡 ЗАСВАР: Таны өгсөн түлхүүрийг ашиглав. Хэрэв мэдээ гарч ирэхгүй бол Supabase RLS Policy-г шалгана уу.
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -361,7 +359,7 @@ const NEWS_PER_PAGE = 12;
 const TOTAL_NEWS_LIMIT = 29; 
 
 // ===================================================================================
-// YouTube ID-г URL-аас салгаж, embed HTML үүсгэх туслах функц
+// YouTube ID-г URL-аас салгаж, embed HTML үүсгэх туслах функц (Модальд зориулсан)
 // ===================================================================================
 function getYouTubeEmbedHtml(videoUrl) {
     if (!videoUrl) return '';
@@ -380,7 +378,7 @@ function getYouTubeEmbedHtml(videoUrl) {
 
         const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
 
-        // Модаль доторх видеоны HTML (Том картын HTML-ээс ялгаатай)
+        // Модаль доторх видеоны HTML
         return `
             <div class="modal-video-container">
                 <iframe 
@@ -401,17 +399,20 @@ function getYouTubeEmbedHtml(videoUrl) {
 
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
+    // 💡 Алдааг консолд харуулах
     if(error) console.error("Authors fetch error:", error); 
     else authorsData = data;
 }
 
 async function fetchNews() {
+    // 💡 ЗАСВАР: .eq('active', true)-г RLS асуудлаас сэргийлж түр хасаж туршвал зүгээр. Одоогоор үлдээв.
     const { data, error } = await supabase.from('news')
         .select('*, card_type, video_link') 
         .eq('active', true) 
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
         
+    // 💡 Алдааг консолд харуулах
     if(error) console.error("News fetch error:", error); 
     else newsData = data;
 }
@@ -435,7 +436,6 @@ function displayAuthors() {
 function createNewsCard(n, cardType) {
     const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
     
-    // 💡 ӨӨРЧЛӨЛТ: <a>-г <div> болгож, onclick нэмэв
     const div = document.createElement('div'); 
     div.className = "card";
     div.onclick = () => openNewsModal(n); 
@@ -473,6 +473,8 @@ function displayNews() {
     if (!newsData || newsData.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
         renderPagination(0);
+        // Видеог доор гаргахгүй
+        document.getElementById('videoContainer').style.display = 'none'; 
         return;
     }
 
@@ -526,7 +528,6 @@ function displayNews() {
         container.appendChild(div);
     });
     
-    // 💡 displayVideoCard-ийг дуудах
     displayVideoCard();
     renderPagination();
     displayAuthors();
@@ -562,13 +563,13 @@ function renderPagination() {
 }
 
 
-// 💡 ШИНЭЧЛЭЛТ: Хамгийн доорх том видеог харуулах
+// 💡 Хамгийн доорх том видеог харуулах
 function displayVideoCard() {
     const videoContainer = document.getElementById('videoContainer');
     const iframeElement = videoContainer.querySelector('iframe');
     const titleElement = document.getElementById('videoTitle');
     
-    // Эхний "Медиа" категорийг (эсвэл video_link-тэй мэдээг) хайж олно.
+    // Эхний "Медиа" категорийн video_link-тэй мэдээг хайж олно.
     const videoNews = newsData.find(n => n.category === 'Медиа' && n.video_link);
     
     if (videoNews && videoNews.video_link) {
@@ -590,10 +591,11 @@ function displayVideoCard() {
             return;
         }
 
+        // Embed линк
         const embedLink = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
 
         // Видео картны title болон iframe-ийн src-г шинэчлэх
-        titleElement.innerText = videoNews.title;
+        titleElement.innerText = videoNews.title || "Онцлох Видео";
         iframeElement.src = embedLink;
         
         videoContainer.style.display = 'block'; // Видео олдвол харуулна
@@ -608,15 +610,12 @@ function displayVideoCard() {
 // Мэдээг Модальд нээх болон Видеог оруулах
 // ===================================================================================
 function openNewsModal(newsItem) {
-    // 1. YouTube-ийн HTML-ийг үүсгэх
     const videoHtml = getYouTubeEmbedHtml(newsItem.video_link);
 
-    // 2. DOM элементүүдийг сонгох
     const modal = document.getElementById('newsModal');
     const modalContentDiv = document.getElementById('modalContent');
     const author = authorsData.find(a=>a.id===newsItem.author_id) || {name:"Тодорхойгүй"};
 
-    // 3. Модаль руу агуулгыг оруулах
     document.getElementById('modalTitle').innerText = newsItem.title;
     document.getElementById('modalImage').src = newsItem.image || ''; 
     document.getElementById('modalMeta').innerHTML = `
@@ -625,10 +624,9 @@ function openNewsModal(newsItem) {
         Нийтлэлч: ${author.name}
     `;
     
-    // 4. Видеог (хэрэв байгаа бол) текстийн өмнө нэмэх
-    modalContentDiv.innerHTML = videoHtml + newsItem.description;
+    // Видеог (хэрэв байгаа бол) текстийн өмнө нэмэх
+    modalContentDiv.innerHTML = videoHtml + (newsItem.description || "");
     
-    // 5. Модалийг нээх
     modal.style.display = 'flex';
 }
 
@@ -645,6 +643,8 @@ function displayFilteredNews(filteredData) {
 
     if (!filteredData || filteredData.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
+        // Хайлт хийх үед доорх видеог нууна.
+        document.getElementById('videoContainer').style.display = 'none';
         return;
     }
 
@@ -653,7 +653,12 @@ function displayFilteredNews(filteredData) {
         container.appendChild(div);
     });
     
-    displayVideoCard(); // Хайлт хийх үед ч видео карт зөв харагдах ёстой
+    // Хайлт дууссаны дараа анхны мэдээг харуулна
+    if (document.getElementById('searchInput').value === '') {
+        displayVideoCard(); 
+    } else {
+        document.getElementById('videoContainer').style.display = 'none';
+    }
 }
 
 document.getElementById('searchInput').addEventListener('input', ()=>{

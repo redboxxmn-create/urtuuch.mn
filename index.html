@@ -67,7 +67,7 @@
         }
 
         /* --------------------------------------------------- */
-        /* 💡 ЗУРАГТ ҮЗҮҮЛСЭН ОНЦЛОХ МЭДЭЭНИЙ ЗАГВАР (Featured Block) */
+        /* 💡 ШИНЭЧИЛСЭН ОНЦЛОХ МЭДЭЭНИЙ ЗАГВАР (Featured Block) */
         /* --------------------------------------------------- */
         
         .featured-block-container {
@@ -151,32 +151,36 @@
         /* 2. Баруун талын Жижиг Мэдээний Самбар (Featured Sidebar) */
         .featured-sidebar {
             grid-column: 2 / 3; 
-            display: flex;
-            flex-direction: column;
+            /* ӨӨРЧЛӨЛТ 1: Flex-ээс Grid рүү шилжинэ, 2x2 торон үүсгэнэ */
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 багана үүсгэнэ */
             gap: 10px;
         }
         .featured-sidebar .card {
             box-shadow: none;
             border: 1px solid #ccc;
             border-radius: 8px;
-            display: flex; 
-            overflow: hidden; /* Доторх зургийн булангуудыг удирдах */
+            /* Босоо Grid-д ажиллахад тохируулна */
+            display: flex;
+            flex-direction: column; 
+            overflow: hidden; 
         }
         .featured-sidebar .card img {
-            /* Зураг харагдахгүй, зөвхөн гарчиг үлдэнэ */
-            display: none; 
+            /* Зургийг харуулна, жижиг хэмжээтэй */
+            display: block; /* ӨӨРЧЛӨЛТ: Зургийг нуухгүй, харуулна */
+            width: 100%;
+            height: 80px; /* Жижиг картын зургийн өндөр */
+            object-fit: cover;
         }
         .featured-sidebar .card .card-content {
-            padding: 10px;
-            width: 100%; /* Текст бүх өргөнийг эзэлнэ */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            padding: 8px;
+            width: 100%; 
+            display: block; /* Flex center-ийг устгана */
         }
         .featured-sidebar .card .card-title {
-            font-size: 14px;
+            font-size: 13px; /* Бага зэрэг жижигрүүлсэн */
             margin-bottom: 5px;
-            line-height: 1.3;
+            line-height: 1.2;
         }
         .featured-sidebar .card .card-meta {
             margin-top: 5px;
@@ -212,6 +216,7 @@
         /* ---------------------------------------------------------------------- */
         @media(max-width:992px){
             .featured-block-container {
+                /* 992px-ээс дээш (багцлахгүй) хэсэгт 2/1 хэвээр үлдэнэ */
                 grid-template-columns: 2fr 1fr;
             }
             .featured-main-card img {
@@ -220,14 +225,8 @@
             .featured-main-card .card-title {
                 font-size: 22px;
             }
-            /* Жижиг картуудыг 992px-ээс дээш зураггүйгээр харуулна */
-            .featured-sidebar .card img {
-                display: none;
-            }
-            .featured-sidebar .card .card-content {
-                width: 100%;
-                padding: 10px;
-            }
+            /* featured-sidebar 992px-ээс дээш ч 2x2 хэвээр харагдана */
+            /* Зөвхөн текстийг харуулах байсан өмнөх загварыг устгасан */
         }
 
         @media(max-width:768px){
@@ -249,12 +248,18 @@
                 font-size: 18px;
             }
             
-            /* Жижиг картуудыг гар утсан дээр зургийг нь харуулна */
+            /* Жижиг картуудыг гар утсан дээр 1 баганаар харуулна, гэхдээ зургийг хажууд нь гаргана */
+            .featured-sidebar {
+                /* ӨӨРЧЛӨЛТ: 1 баганатай болгоно */
+                grid-template-columns: 1fr; 
+            }
+
             .featured-sidebar .card {
+                /* Зургийг хажууд нь гаргана */
                 flex-direction: row; 
             }
             .featured-sidebar .card img {
-                display: block; /* Зургийг харуулна */
+                display: block; 
                 width: 30%;
                 height: 80px;
                 border-radius: 8px 0 0 8px;
@@ -383,7 +388,7 @@ function displayNews() {
     const pageNews = newsData.slice(start,end);
 
     let mainFeatured = null; // Зүүн талын хамгийн ТОМ мэдээ
-    let sidebarFeatured = []; // Баруун талын 3 жижиг мэдээ
+    let sidebarFeatured = []; // Баруун талын 4 жижиг мэдээ (Хязгаарыг 4 болгож өөрчилсөн)
     const normal = []; // Энгийн картууд
     
     // Мэдээг бүлэглэх
@@ -391,8 +396,9 @@ function displayNews() {
         // featured_large card_type-тай эхний мэдээг том болгоно
         if (n.card_type === 'featured_large' && !mainFeatured) {
             mainFeatured = n; 
-        // Дараагийн 3 мэдээг (featured_large эсвэл sub_featured) баруун самбарт оруулна
-        } else if (sidebarFeatured.length < 3 && (n.card_type === 'featured_large' || n.card_type === 'sub_featured')) {
+        // Дараагийн 4 мэдээг (featured_large эсвэл sub_featured) баруун самбарт оруулна
+        } else if (sidebarFeatured.length < 4 && (n.card_type === 'featured_large' || n.card_type === 'sub_featured')) {
+            // ӨӨРЧЛӨЛТ 2: 3-аас 4 болгож өөрчилсөн
             sidebarFeatured.push(n); 
         } else {
             // бусад мэдээг энгийн grid-д оруулна
@@ -462,14 +468,14 @@ function createNewsCard(n, cardType) {
                 ${cardType !== 'featured_main' ? `<span>${new Date(n.created_at).toLocaleDateString('mn-MN')}</span>` : ''}
             </div>
             ${cardType !== 'featured_main' && cardType !== 'featured_sidebar_small' ? `<div class="card-author"><img src="${author.image}" alt="${author.name}"><span>${author.name}</span></div>` : ''}
-             
+            
             ${cardType === 'featured_main' ? `<p style="color:#eee; margin-top:10px; font-size:14px;">${n.content ? n.content.substring(0, 150) + '...' : ''}</p>` : ''} 
         </div>
     `;
     
     div.href = `news.html?slug=${n.slug}`; 
 
-    // featured_sidebar_small-д зөвхөн текстийг үлдээхээр CSS-д тохируулсан тул энд зургийг нь оруулах нь зөв
+    // featured_sidebar_small-д зөвхөн текстийг үлдээхээр байсан, одоо зургийг харуулах болсон
     div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
     
     return div;

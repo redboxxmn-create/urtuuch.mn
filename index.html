@@ -337,6 +337,11 @@
         <span id="newsModalClose">&times;</span>
         <h2 id="modalTitle"></h2>
         <div id="modalMeta" style="color:#666; font-size:12px; margin-bottom:10px;"></div>
+        
+        <div id="modalShare" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+            <span style="font-weight: bold; font-size: 14px; color: #555;">Хуваалцах:</span>
+        </div>
+        
         <img id="modalImage" src="">
         <div id="modalContent" style="line-height: 1.6;"></div> 
     </div>
@@ -347,7 +352,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
-// 💡 ЗАСВАР: Таны өгсөн түлхүүрийг ашиглав. Хэрэв мэдээ гарч ирэхгүй бол Supabase RLS Policy-г шалгана уу.
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -396,23 +400,19 @@ function getYouTubeEmbedHtml(videoUrl) {
 }
 // ===================================================================================
 
-
 async function fetchAuthors() {
     const { data, error } = await supabase.from('authors').select('*').order('id');
-    // 💡 Алдааг консолд харуулах
     if(error) console.error("Authors fetch error:", error); 
     else authorsData = data;
 }
 
 async function fetchNews() {
-    // 💡 ЗАСВАР: .eq('active', true)-г RLS асуудлаас сэргийлж түр хасаж туршвал зүгээр. Одоогоор үлдээв.
     const { data, error } = await supabase.from('news')
         .select('*, card_type, video_link') 
         .eq('active', true) 
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
         
-    // 💡 Алдааг консолд харуулах
     if(error) console.error("News fetch error:", error); 
     else newsData = data;
 }
@@ -438,7 +438,8 @@ function createNewsCard(n, cardType) {
     
     const div = document.createElement('div'); 
     div.className = "card";
-    div.onclick = () => openNewsModal(n); 
+    // 💡 ЗАСВАР: openNewsModal-д pushHistory=true-г нэмэв
+    div.onclick = () => openNewsModal(n, true); 
 
     const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
 
@@ -470,10 +471,10 @@ function createNewsCard(n, cardType) {
 function displayNews() {
     const container = document.getElementById('newsContainer');
     container.innerHTML = '';
+    
     if (!newsData || newsData.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Одоогоор нийтлэгдсэн мэдээ алга байна.</p>';
         renderPagination(0);
-        // Видеог доор гаргахгүй
         document.getElementById('videoContainer').style.display = 'none'; 
         return;
     }
@@ -569,7 +570,6 @@ function displayVideoCard() {
     const iframeElement = videoContainer.querySelector('iframe');
     const titleElement = document.getElementById('videoTitle');
     
-    // Эхний "Медиа" категорийн video_link-тэй мэдээг хайж олно.
     const videoNews = newsData.find(n => n.category === 'Медиа' && n.video_link);
     
     if (videoNews && videoNews.video_link) {
@@ -591,14 +591,12 @@ function displayVideoCard() {
             return;
         }
 
-        // Embed линк
         const embedLink = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
 
-        // Видео картны title болон iframe-ийн src-г шинэчлэх
         titleElement.innerText = videoNews.title || "Онцлох Видео";
         iframeElement.src = embedLink;
         
-        videoContainer.style.display = 'block'; // Видео олдвол харуулна
+        videoContainer.style.display = 'block';
         
     } else {
         videoContainer.style.display = 'none';
@@ -607,15 +605,22 @@ function displayVideoCard() {
 
 
 // ===================================================================================
-// Мэдээг Модальд нээх болон Видеог оруулах
+// 💡 ШИНЭЧИЛСЭН: Мэдээг Модальд нээх ба URL-ийг шинэчлэх (Тусдаа URL-аар унших)
 // ===================================================================================
-function openNewsModal(newsItem) {
+function openNewsModal(newsItem, pushHistory = true) {
     const videoHtml = getYouTubeEmbedHtml(newsItem.video_link);
 
     const modal = document.getElementById('newsModal');
     const modalContentDiv = document.getElementById('modalContent');
     const author = authorsData.find(a=>a.id===newsItem.author_id) || {name:"Тодорхойгүй"};
+    
+    // 1. URL-ийг шинэчлэх (Тусдаа URL-аар уншигдах асуудлыг шийдэв)
+    if (pushHistory) {
+        const newUrl = `${window.location.pathname}?id=${newsItem.id}`;
+        history.pushState({ newsId: newsItem.id }, newsItem.title, newUrl);
+    }
 
+    // Модаль дахь мэдээллийг шинэчлэх
     document.getElementById('modalTitle').innerText = newsItem.title;
     document.getElementById('modalImage').src = newsItem.image || ''; 
     document.getElementById('modalMeta').innerHTML = `
@@ -626,7 +631,27 @@ function openNewsModal(newsItem) {
     
     // Видеог (хэрэв байгаа бол) текстийн өмнө нэмэх
     modalContentDiv.innerHTML = videoHtml + (newsItem.description || "");
+
+    // 2. Share товчлууруудыг үүсгэх
+    const shareContainer = document.getElementById('modalShare');
+    // 💡 Одоогийн шинэчлэгдсэн URL-ийг ашиглана
+    const newsUrl = window.location.href; 
+    const newsTitle = encodeURIComponent(newsItem.title);
     
+    // Share товчлуурын HTML-ийг үүсгэх
+    shareContainer.innerHTML = `
+        <span style="font-weight: bold; font-size: 14px; color: #555;">Хуваалцах:</span>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=${newsUrl}" target="_blank" style="text-decoration: none;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_Logo_%282019%29.svg" alt="Facebook Share" style="width: 24px; height: 24px;">
+        </a>
+        <a href="https://twitter.com/intent/tweet?url=${newsUrl}&text=${newsTitle}" target="_blank" style="text-decoration: none;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg" alt="Twitter Share" style="width: 24px; height: 24px;">
+        </a>
+        <a href="https://www.instagram.com/direct/inbox/" target="_blank" style="text-decoration: none;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram Share" style="width: 24px; height: 24px;">
+        </a>
+    `;
+
     modal.style.display = 'flex';
 }
 
@@ -643,7 +668,6 @@ function displayFilteredNews(filteredData) {
 
     if (!filteredData || filteredData.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
-        // Хайлт хийх үед доорх видеог нууна.
         document.getElementById('videoContainer').style.display = 'none';
         return;
     }
@@ -653,7 +677,6 @@ function displayFilteredNews(filteredData) {
         container.appendChild(div);
     });
     
-    // Хайлт дууссаны дараа анхны мэдээг харуулна
     if (document.getElementById('searchInput').value === '') {
         displayVideoCard(); 
     } else {
@@ -675,14 +698,58 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
 });
 
 
-// Modal close
-document.getElementById('newsModalClose').onclick = ()=>{ document.getElementById('newsModal').style.display='none'; };
-document.getElementById('newsModal').onclick = e=>{ if(e.target.id==='newsModal') document.getElementById('newsModal').style.display='none'; };
+// 3. Modal close update (URL-ийг үндсэн хуудас руу буцаана)
+document.getElementById('newsModalClose').onclick = ()=>{ 
+    document.getElementById('newsModal').style.display='none'; 
+    // URL-ийг буцаана
+    history.pushState({}, document.title, window.location.pathname); 
+};
+document.getElementById('newsModal').onclick = e=>{ 
+    if(e.target.id==='newsModal') {
+        document.getElementById('newsModal').style.display='none'; 
+        // URL-ийг буцаана
+        history.pushState({}, document.title, window.location.pathname); 
+    }
+};
+
+
+// ===================================================================================
+// 💡 ШИНЭ: URL-аас мэдээний ID-г шалгаж модалийг нээх функц (Тусдаа URL-аар уншигдахыг дэмжинэ)
+// ===================================================================================
+function checkUrlForNewsId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('id');
+    
+    if (newsId && newsData.length > 0) {
+        // ID-г string-ээс number рүү хөрвүүлж хайна
+        const item = newsData.find(n => n.id === parseInt(newsId));
+        if (item) {
+            // pushHistory=false: URL-д ID байгаа тул дахин шинэчлэхгүй
+            openNewsModal(item, false); 
+        } else {
+            // ID олохгүй бол URL-ийг цэвэрлэнэ
+            history.pushState({}, document.title, window.location.pathname);
+        }
+    }
+}
+
+// 4. Browser-ийн back/forward товчийг дэмжих
+window.addEventListener('popstate', (event) => {
+    // Хэрэв URL-д ID байхгүй бол модалийг хаана
+    if (!window.location.search.includes('id=')) {
+        document.getElementById('newsModal').style.display = 'none'; 
+    } else {
+        // ID байвал модалийг дахин нээнэ
+        checkUrlForNewsId();
+    }
+});
+
 
 async function init(){
     await fetchAuthors();
     await fetchNews();
     displayNews();
+    checkUrlForNewsId(); // 💡 Ачааллах үед URL-ийг шалгана
 }
 
 init();

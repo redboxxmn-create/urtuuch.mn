@@ -73,8 +73,10 @@
         .featured-block-container {
             grid-column: 1 / -1; /* Бүх 4 баганыг эзэлнэ */
             display: grid;
-            /* Гол мэдээг 3/4, хажуугийн мэдээг 1/4 харьцаатай хуваана */
-            grid-template-columns: 3fr 1fr; 
+            
+            /* 💡 ӨӨРЧЛӨЛТ: Гол мэдээг 2/3, хажуугийн мэдээг 1/3 харьцаатай хуваасан */
+            grid-template-columns: 2fr 1fr; 
+            
             gap: 15px;
             margin-bottom: 25px;
             padding: 10px;
@@ -108,13 +110,12 @@
             padding: 0;
             overflow: hidden;
             border-radius: 8px;
-            /* ӨӨРЧЛӨЛТ: Зургийн доорх контентыг зөв байрлуулахын тулд нэмсэн */
             position: relative; 
         }
         .featured-main-card img {
             width: 100%;
-            /* ӨӨРЧЛӨЛТ: Өндрийг 480px болгож, 4 жижиг картын нийт өндөртэй тааруулсан */
-            height: 480px; 
+            /* Өндөр 350px хэвээр үлдэнэ */
+            height: 350px; 
             object-fit: cover;
             filter: brightness(0.85);
             transition: filter 0.3s;
@@ -157,7 +158,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr; 
             gap: 10px;
-            /* ӨӨРЧЛӨЛТ: Жижиг картуудыг талбайгаа дүүргэж, том картын өндөртэй тэнцүүлэх */
             align-content: stretch; 
         }
         .featured-sidebar .card {
@@ -171,16 +171,14 @@
         .featured-sidebar .card img {
             display: block; 
             width: 100%;
-            /* ӨӨРЧЛӨЛТ: Жижиг картын зургийн өндрийг 60px болгож багасгасан */
-            height: 60px; 
+            height: 50px; 
             object-fit: cover;
         }
         .featured-sidebar .card .card-content {
             padding: 8px;
             width: 100%; 
             display: block; 
-            /* Жижиг карт болгоны контентын зайг тохируулж болно */
-            min-height: 50px; 
+            min-height: 40px; 
         }
         .featured-sidebar .card .card-title {
             font-size: 13px; 
@@ -221,10 +219,10 @@
         /* ---------------------------------------------------------------------- */
         @media(max-width:992px){
             .featured-block-container {
+                /* 💡 ӨӨРЧЛӨЛТ: 2fr 1fr хэвээр үлдэнэ (768px-ээс дээш) */
                 grid-template-columns: 2fr 1fr;
             }
             .featured-main-card img {
-                /* ӨӨРЧЛӨЛТ: Бага дэлгэц дээр өндрийг буцаан багасгах */
                 height: 350px; 
             }
             .featured-main-card .card-title {

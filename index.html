@@ -108,10 +108,13 @@
             padding: 0;
             overflow: hidden;
             border-radius: 8px;
+            /* ӨӨРЧЛӨЛТ: Зургийн доорх контентыг зөв байрлуулахын тулд нэмсэн */
+            position: relative; 
         }
         .featured-main-card img {
             width: 100%;
-            height: 400px; 
+            /* ӨӨРЧЛӨЛТ: Өндрийг 480px болгож, 4 жижиг картын нийт өндөртэй тааруулсан */
+            height: 480px; 
             object-fit: cover;
             filter: brightness(0.85);
             transition: filter 0.3s;
@@ -151,34 +154,36 @@
         /* 2. Баруун талын Жижиг Мэдээний Самбар (Featured Sidebar) */
         .featured-sidebar {
             grid-column: 2 / 3; 
-            /* ӨӨРЧЛӨЛТ 1: Flex-ээс Grid рүү шилжинэ, 2x2 торон үүсгэнэ */
             display: grid;
-            grid-template-columns: 1fr 1fr; /* 2 багана үүсгэнэ */
+            grid-template-columns: 1fr 1fr; 
             gap: 10px;
+            /* ӨӨРЧЛӨЛТ: Жижиг картуудыг талбайгаа дүүргэж, том картын өндөртэй тэнцүүлэх */
+            align-content: stretch; 
         }
         .featured-sidebar .card {
             box-shadow: none;
             border: 1px solid #ccc;
             border-radius: 8px;
-            /* Босоо Grid-д ажиллахад тохируулна */
             display: flex;
             flex-direction: column; 
             overflow: hidden; 
         }
         .featured-sidebar .card img {
-            /* Зургийг харуулна, жижиг хэмжээтэй */
-            display: block; /* ӨӨРЧЛӨЛТ: Зургийг нуухгүй, харуулна */
+            display: block; 
             width: 100%;
-            height: 80px; /* Жижиг картын зургийн өндөр */
+            /* ӨӨРЧЛӨЛТ: Жижиг картын зургийн өндрийг 60px болгож багасгасан */
+            height: 60px; 
             object-fit: cover;
         }
         .featured-sidebar .card .card-content {
             padding: 8px;
             width: 100%; 
-            display: block; /* Flex center-ийг устгана */
+            display: block; 
+            /* Жижиг карт болгоны контентын зайг тохируулж болно */
+            min-height: 50px; 
         }
         .featured-sidebar .card .card-title {
-            font-size: 13px; /* Бага зэрэг жижигрүүлсэн */
+            font-size: 13px; 
             margin-bottom: 5px;
             line-height: 1.2;
         }
@@ -216,17 +221,15 @@
         /* ---------------------------------------------------------------------- */
         @media(max-width:992px){
             .featured-block-container {
-                /* 992px-ээс дээш (багцлахгүй) хэсэгт 2/1 хэвээр үлдэнэ */
                 grid-template-columns: 2fr 1fr;
             }
             .featured-main-card img {
-                height: 300px;
+                /* ӨӨРЧЛӨЛТ: Бага дэлгэц дээр өндрийг буцаан багасгах */
+                height: 350px; 
             }
             .featured-main-card .card-title {
                 font-size: 22px;
             }
-            /* featured-sidebar 992px-ээс дээш ч 2x2 хэвээр харагдана */
-            /* Зөвхөн текстийг харуулах байсан өмнөх загварыг устгасан */
         }
 
         @media(max-width:768px){
@@ -250,12 +253,10 @@
             
             /* Жижиг картуудыг гар утсан дээр 1 баганаар харуулна, гэхдээ зургийг хажууд нь гаргана */
             .featured-sidebar {
-                /* ӨӨРЧЛӨЛТ: 1 баганатай болгоно */
                 grid-template-columns: 1fr; 
             }
 
             .featured-sidebar .card {
-                /* Зургийг хажууд нь гаргана */
                 flex-direction: row; 
             }
             .featured-sidebar .card img {
@@ -388,7 +389,7 @@ function displayNews() {
     const pageNews = newsData.slice(start,end);
 
     let mainFeatured = null; // Зүүн талын хамгийн ТОМ мэдээ
-    let sidebarFeatured = []; // Баруун талын 4 жижиг мэдээ (Хязгаарыг 4 болгож өөрчилсөн)
+    let sidebarFeatured = []; // Баруун талын 4 жижиг мэдээ
     const normal = []; // Энгийн картууд
     
     // Мэдээг бүлэглэх
@@ -398,7 +399,6 @@ function displayNews() {
             mainFeatured = n; 
         // Дараагийн 4 мэдээг (featured_large эсвэл sub_featured) баруун самбарт оруулна
         } else if (sidebarFeatured.length < 4 && (n.card_type === 'featured_large' || n.card_type === 'sub_featured')) {
-            // ӨӨРЧЛӨЛТ 2: 3-аас 4 болгож өөрчилсөн
             sidebarFeatured.push(n); 
         } else {
             // бусад мэдээг энгийн grid-д оруулна
@@ -458,7 +458,7 @@ function createNewsCard(n, cardType) {
     const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
 
     const categoryText = (isFeatured ? 'ОНЦЛОХ | ' : '') + n.category;
-    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #d9534f;' : '';
+    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #e74c3c;' : ''; // Онцлохын өнгө
 
     const contentHtml = `
         <div class="card-content">
@@ -475,7 +475,6 @@ function createNewsCard(n, cardType) {
     
     div.href = `news.html?slug=${n.slug}`; 
 
-    // featured_sidebar_small-д зөвхөн текстийг үлдээхээр байсан, одоо зургийг харуулах болсон
     div.innerHTML = `${n.image?`<img src="${n.image}" alt="${n.title}">`:''}${contentHtml}`;
     
     return div;

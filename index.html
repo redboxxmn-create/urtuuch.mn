@@ -312,6 +312,10 @@
     </nav>
 </header>
 
+<div id="weatherContainer" style="background:#497a9f; color:#fff; padding:10px 15px; border-radius:8px; margin: 10px 15px; text-align: center; font-weight: bold; font-size: 16px;">
+    <p id="weatherText">Цаг агаарын мэдээ татаж байна...</p>
+</div>
+
 <div class="grid" id="newsContainer"></div>
 
 <div class="authors-container" id="authorsContainer"></div>
@@ -361,6 +365,13 @@ let newsData = [];
 let currentPage = 1;
 const NEWS_PER_PAGE = 12; 
 const TOTAL_NEWS_LIMIT = 29; 
+
+// ===================================================================================
+// 💡 OpenWeatherMap API ТҮЛХҮҮР
+// ===================================================================================
+const apiKey = "b73211d51342848ae190f73b7ad3b667"; // Таны өгсөн түлхүүр
+const defaultCity = "Ulaanbaatar"; // Хэрэглэгч зөвшөөрөл өгөхгүй бол харуулах үндсэн хот
+
 
 // ===================================================================================
 // YouTube ID-г URL-аас салгаж, embed HTML үүсгэх туслах функц (Модальд зориулсан)
@@ -564,7 +575,7 @@ function renderPagination() {
 }
 
 
-// 💡 ЗАСВАР: Хамгийн доорх том видеог харуулах (Category-г шалгахгүй)
+// Хамгийн доорх том видеог харуулах
 function displayVideoCard() {
     const videoContainer = document.getElementById('videoContainer');
     const iframeElement = videoContainer.querySelector('iframe');
@@ -633,7 +644,7 @@ function openNewsModal(newsItem, pushHistory = true) {
     // Видеог (хэрэв байгаа бол) текстийн өмнө нэмэх
     modalContentDiv.innerHTML = videoHtml + (newsItem.description || "");
 
-    // 2. Share товчлууруудыг үүсгэх (💡 ЗАСВАР: Facebook icon-ыг шинэчлэв)
+    // 2. Share товчлууруудыг үүсгэх (Facebook icon PNG-ээр засварласан)
     const shareContainer = document.getElementById('modalShare');
     const newsUrl = window.location.href; 
     const newsTitle = encodeURIComponent(newsItem.title);
@@ -745,12 +756,105 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
+// ===================================================================================
+// 💡 ШИНЭЧИЛСЭН ЦАГ АГААРЫН ФУНКЦ: БАЙРШИЛ АШИГЛАНА
+// ===================================================================================
+
+function getCoordinates() {
+    const weatherTextElement = document.getElementById('weatherText');
+    
+    if (!navigator.geolocation) {
+        weatherTextElement.innerText = "Таны браузер байршлын мэдээллийг дэмжихгүй байна.";
+        return;
+    }
+
+    weatherTextElement.innerText = "Байршлыг тодорхойлж байна...";
+
+    // Хэрэглэгчээс байршлын зөвшөөрөл хүсэх
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            fetchWeatherByLocation(lat, lon); // Зөвшөөрөл авбал цаг агаарыг татна
+        },
+        (error) => {
+            // Зөвшөөрөл өгөхгүй бол эсвэл алдаа гарвал үндсэн хотын мэдээг татна.
+            if (error.code === error.PERMISSION_DENIED) {
+                 weatherTextElement.innerText = `Та байршлын зөвшөөрөл өгөөгүй тул, ${defaultCity}-ийн цаг агаарыг харууллаа.`;
+            } else {
+                 weatherTextElement.innerText = `Байршлын алдаа гарлаа: ${error.message}. ${defaultCity}-ийн цаг агаарыг харууллаа.`;
+            }
+            fetchWeatherByCity(defaultCity); // Үндсэн хот (fallback)
+        }
+    );
+}
+
+// 1. Байршлын Өргөрөг/Уртрагаар татах
+async function fetchWeatherByLocation(lat, lon) {
+    const weatherTextElement = document.getElementById('weatherText');
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=mn`;
+
+    await executeWeatherFetch(url, weatherTextElement);
+}
+
+// 2. Хотын нэрээр татах (Fallback хийхэд зориулсан)
+async function fetchWeatherByCity(city) {
+    const weatherTextElement = document.getElementById('weatherText');
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=mn`;
+
+    await executeWeatherFetch(url, weatherTextElement);
+}
+
+
+// API дуудлагыг гүйцэтгэх үндсэн функц
+async function executeWeatherFetch(url, element) {
+    // API түлхүүр зөв эсэхийг шалгах
+    if (apiKey === "YOUR_API_KEY") {
+        element.innerText = "Цаг агаарын API түлхүүрийг тохируулаагүй байна!";
+        return;
+    }
+    
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+             const errorData = await response.json();
+             throw new Error(errorData.message || 'API-аас мэдээлэл авахад алдаа гарлаа.');
+        }
+        
+        const data = await response.json();
+        const temp = Math.round(data.main.temp);
+        const description = data.weather[0].description;
+        const icon = data.weather[0].icon;
+        
+        const weatherHtml = `
+            ${data.name}: ${temp}°C, ${description} 
+            <img src="https://openweathermap.org/img/w/${icon}.png" alt="${description}" style="width: 25px; height: 25px; vertical-align: middle; margin-left: 5px;">
+        `;
+        
+        element.innerHTML = weatherHtml;
+
+    } catch (error) {
+        element.innerText = `Цаг агаар татахад алдаа гарлаа. (${error.message})`;
+        console.error("Цаг агаар татахад алдаа гарлаа:", error);
+    }
+}
+
+// ===================================================================================
 
 async function init(){
+    // Цаг агаарын мэдээг байршлаар татахыг эхлүүлнэ
+    getCoordinates(); 
+    // 1 цаг тутамд автоматаар шинэчлэх (3600000 миллисекунд)
+    setInterval(getCoordinates, 3600000); 
+    
+    // Үндсэн мэдээний таталтууд
     await fetchAuthors();
     await fetchNews();
     displayNews();
-    checkUrlForNewsId(); // Ачааллах үед URL-ийг шалгана
+    checkUrlForNewsId(); 
 }
 
 init();

@@ -41,7 +41,6 @@
             display:grid; 
             grid-template-columns: repeat(4, 1fr); 
             gap:15px; 
-            padding:15px;
         }
         
         .card{cursor:pointer; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); position:relative; transition: transform 0.3s, box-shadow 0.3s; background:#fff; text-decoration: none; color: inherit;}
@@ -212,6 +211,46 @@
             border-radius: 12px;
         }
         
+        /* ---------------------------------------------------------------------- */
+        /* АНГИЛЛЫН ТАБ СТИЛЬ (Category Tabs) - ШИНЭЭР НЭМСЭН */
+        /* ---------------------------------------------------------------------- */
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s, color 0.2s;
+            white-space: nowrap; /* Товчлуур хугарахаас сэргийлнэ */
+        }
+
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background: #3d85c6;
+            color: #fff;
+            border-color: #3d85c6;
+        }
+
+        /* Ангилал тус бүрийг харуулах/нуух */
+        .category-section {
+            display: none; /* Анх бүгдийг нууна */
+            padding: 0 15px; /* Grid-ийн padding-ийг энэ контейнерт өгнө */
+        }
+
+        .category-section.active {
+            display: grid; /* Идэвхтэйг нь харуулна */
+        }
+
         /* --------------------------------------------------- */
         /* БУСАД ТУСЛАХ ЗАГВАРУУД */
         /* --------------------------------------------------- */
@@ -254,7 +293,10 @@
         }
 
         @media(max-width:768px){
-            .grid{grid-template-columns:1fr; gap:10px; padding:10px;}
+            .grid{grid-template-columns:1fr; gap:10px; padding:0;} /* Grid padding-ийг category-section-д шилжүүлсэн */
+            .category-section.active {
+                 padding: 10px; /* Гар утсан дээр 10px padding өгнө */
+            }
             #newsModalContent { max-width: 95%; max-height: 90%; }
             .video-card-bottom iframe {
                 height: 250px;
@@ -316,10 +358,20 @@
     <p id="weatherText">Цаг агаарын мэдээ татаж байна...</p>
 </div>
 
-<div class="grid" id="newsContainer"></div>
+<div class="category-tabs" id="categoryTabs" style="padding: 10px 15px; margin: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+    <button class="tab-button active" onclick="showCategory('all')">Үндсэн (Бүх мэдээ)</button> 
+    </div>
+
+<div class="category-content-wrapper" id="categoryContentWrapper">
+    <div class="grid category-section active" id="allNewsSection" data-category="all">
+        </div>
+    
+    </div>
+
 
 <div class="authors-container" id="authorsContainer"></div>
-<div class="pagination" id="pagination"></div>
+
+<div class="pagination" id="pagination" style="display: flex;"></div> 
 
 <div class="video-card-bottom" id="videoContainer" style="display: none;"> 
     <h3 id="videoTitle">Онцлох Видео</h3>
@@ -367,10 +419,10 @@ const NEWS_PER_PAGE = 12;
 const TOTAL_NEWS_LIMIT = 29; 
 
 // ===================================================================================
-// 💡 OpenWeatherMap API ТҮЛХҮҮР
+// 💡 OpenWeatherMap API ТҮЛХҮҮР (30 мин хүлээсний дараа ажиллах ёстой)
 // ===================================================================================
-const apiKey = "b73211d51342848ae190f73b7ad3b667"; // Таны өгсөн түлхүүр
-const defaultCity = "Ulaanbaatar"; // Хэрэглэгч зөвшөөрөл өгөхгүй бол харуулах үндсэн хот
+const apiKey = "b73211d51342848ae190f73b7ad3b667"; 
+const defaultCity = "Ulaanbaatar"; 
 
 
 // ===================================================================================
@@ -449,7 +501,6 @@ function createNewsCard(n, cardType) {
     
     const div = document.createElement('div'); 
     div.className = "card";
-    // openNewsModal-д pushHistory=true-г нэмэв
     div.onclick = () => openNewsModal(n, true); 
 
     const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
@@ -475,12 +526,90 @@ function createNewsCard(n, cardType) {
     return div;
 }
 
+// ===================================================================================
+// 💡 ШИНЭЧЛЭЛТ: Ангиллын таб болон контентыг үүсгэх
+// ===================================================================================
+
+function generateCategoryTabs() {
+    const tabsContainer = document.getElementById('categoryTabs');
+    const contentWrapper = document.getElementById('categoryContentWrapper');
+    
+    // Мэдээний датагаас давхардахгүй ангиллуудыг цуглуулах
+    const categories = [...new Set(newsData.map(n => n.category).filter(c => c && c.trim() !== ''))];
+    
+    // Ангиллуудыг нэмэх
+    categories.forEach(cat => {
+        // HTML ID-д тохирох нэр үүсгэх
+        const cleanCatName = cat.replace(/[^a-zA-Z0-9]/g, '');
+        
+        // Таб товчлуур
+        const button = document.createElement('button');
+        button.className = 'tab-button';
+        button.innerText = cat;
+        // Функц дуудахдаа таслалгүйгээр cat нэрийг дамжуулна
+        button.setAttribute('onclick', `showCategory('${cat.replace(/'/g, "\\'")}')`);
+        tabsContainer.appendChild(button);
+        
+        // Тухайн ангиллын мэдээг харуулах контейнер
+        const section = document.createElement('div');
+        section.className = 'grid category-section';
+        section.id = `${cleanCatName}Section`; 
+        section.setAttribute('data-category', cat);
+        contentWrapper.appendChild(section);
+    });
+}
 
 /**
- * Мэдээг Featured Block болон Normal Grid-д хувааж харуулах функц
+ * Ангиллын товчлуур дарахад ажиллах функц
  */
-function displayNews() {
-    const container = document.getElementById('newsContainer');
+window.showCategory = function(categoryName) {
+    // Бүх таб товчлууруудаас 'active' классыг хасах
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    
+    // Бүх ангиллын хэсгүүдээс 'active' классыг хасах (нуух)
+    document.querySelectorAll('.category-section').forEach(section => section.classList.remove('active'));
+    
+    document.getElementById('videoContainer').style.display = 'none'; // Эхлэхдээ видеог нууна
+
+    // Идэвхтэй таб товчлуурыг олох
+    let activeTabButton = null;
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        // Товчлуурын текст эсвэл onclick-ийн утгаар хайна
+        if (btn.innerText.includes(categoryName) || btn.getAttribute('onclick').includes(`'${categoryName.replace(/'/g, "\\'")}'`)) {
+            activeTabButton = btn;
+        }
+    });
+
+    // Идэвхтэй таб товчлуурт 'active' классыг нэмэх
+    if (activeTabButton) {
+        activeTabButton.classList.add('active');
+    }
+
+    // 1. Үндсэн (Бүх мэдээ) хэсэг
+    if (categoryName === 'all') {
+        const allSection = document.getElementById('allNewsSection');
+        allSection.classList.add('active');
+        displayMainPage(); 
+        document.getElementById('pagination').style.display = 'flex'; // Pagination-ийг харуулна
+        displayVideoCard(); // Видеог харуулна
+    } else {
+        // 2. Ангилал тус бүрийн хэсэг
+        const cleanCatName = categoryName.replace(/[^a-zA-Z0-9]/g, '');
+        const categorySection = document.getElementById(`${cleanCatName}Section`);
+        
+        if (categorySection) {
+            categorySection.classList.add('active');
+            displayCategoryNews(categoryName, categorySection);
+        }
+        document.getElementById('pagination').style.display = 'none'; // Pagination хэрэггүй
+    }
+}
+
+// ===================================================================================
+// 💡 ШИНЭЧЛЭЛТ: Хуучин displayNews() нь одоо displayMainPage() болсон
+// ===================================================================================
+function displayMainPage() {
+    const container = document.getElementById('allNewsSection');
     container.innerHTML = '';
     
     if (!newsData || newsData.length === 0) {
@@ -545,6 +674,30 @@ function displayNews() {
     displayAuthors();
 }
 
+/**
+ * Ангиллын мэдээг харуулах функц (Featured block болон Pagination-гүй)
+ */
+function displayCategoryNews(categoryName, container) {
+    container.innerHTML = ''; // Контейнерыг цэвэрлэх
+
+    const filteredNews = newsData.filter(n => n.category === categoryName);
+    
+    if (filteredNews.length === 0) {
+        container.innerHTML = `<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">"${categoryName}" ангилалд мэдээ одоогоор алга байна.</p>`;
+        return;
+    }
+
+    // Ангиллын мэдээг энгийн картаар харуулах
+    filteredNews.forEach(n => {
+        const div = createNewsCard(n, 'normal');
+        if (n.card_type === 'sub_featured') {
+            div.classList.add('sub-featured-card');
+        }
+        container.appendChild(div);
+    });
+}
+
+
 function renderPagination() {
     const container = document.getElementById('pagination');
     const totalPages = Math.ceil(newsData.length/NEWS_PER_PAGE); 
@@ -554,7 +707,7 @@ function renderPagination() {
     if(currentPage>1){
         const prev=document.createElement('button');
         prev.innerText="Өмнөх";
-        prev.onclick=()=>{currentPage--; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
+        prev.onclick=()=>{currentPage--; showCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(prev);
     }
 
@@ -562,14 +715,14 @@ function renderPagination() {
         const btn=document.createElement('button');
         btn.innerText=i;
         if(i===currentPage) btn.style.background="#3d85c6";
-        btn.onclick=()=>{currentPage=i; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
+        btn.onclick=()=>{currentPage=i; showCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(btn);
     }
 
     if(currentPage<totalPages){
         const next=document.createElement('button');
         next.innerText="Дараах";
-        next.onclick=()=>{currentPage++; displayNews(); window.scrollTo({top: 0, behavior: 'smooth'});};
+        next.onclick=()=>{currentPage++; showCategory('all'); window.scrollTo({top: 0, behavior: 'smooth'});};
         container.appendChild(next);
     }
 }
@@ -617,7 +770,7 @@ function displayVideoCard() {
 
 
 // ===================================================================================
-// Мэдээг Модальд нээх ба URL-ийг шинэчлэх (Тусдаа URL-аар унших)
+// Мэдээг Модальд нээх ба URL-ийг шинэчлэх
 // ===================================================================================
 function openNewsModal(newsItem, pushHistory = true) {
     const videoHtml = getYouTubeEmbedHtml(newsItem.video_link);
@@ -665,6 +818,8 @@ function openNewsModal(newsItem, pushHistory = true) {
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram Share" style="width: 24px; height: 24px;">
         </a>
     `;
+    
+    shareContainer.style.display = 'flex'; // Share хэсгийг харуулна
 
     modal.style.display = 'flex';
 }
@@ -675,10 +830,10 @@ window.openNewsModal = openNewsModal;
 
 
 function displayFilteredNews(filteredData) {
-    const container = document.getElementById('newsContainer');
+    const container = document.getElementById('allNewsSection'); // Хайлт хийхэд 'all' хэсгийг ашиглана
     container.innerHTML = '';
     
-    document.getElementById('pagination').innerHTML = '';
+    document.getElementById('pagination').style.display = 'none';
 
     if (!filteredData || filteredData.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
@@ -691,23 +846,23 @@ function displayFilteredNews(filteredData) {
         container.appendChild(div);
     });
     
-    if (document.getElementById('searchInput').value === '') {
-        displayVideoCard(); 
-    } else {
-        document.getElementById('videoContainer').style.display = 'none';
-    }
+    document.getElementById('videoContainer').style.display = 'none';
 }
 
 document.getElementById('searchInput').addEventListener('input', ()=>{
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     
-    const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
-    
-    displayFilteredNews(filtered);
-
     if (keyword === '') {
         currentPage = 1;
-        displayNews();
+        showCategory('all'); // Хайлтгүй бол үндсэн хуудсаа харуулна
+    } else {
+        // Хайлт хийх үед бүх табыг идэвхгүй болгоно
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.category-section').forEach(section => section.classList.remove('active'));
+        document.getElementById('allNewsSection').classList.add('active'); // Хайлтын үр дүнг 'all' хэсэгт харуулна
+
+        const filtered = newsData.filter(n=>n.title.toLowerCase().includes(keyword));
+        displayFilteredNews(filtered);
     }
 });
 
@@ -747,17 +902,17 @@ function checkUrlForNewsId() {
 
 // Browser-ийн back/forward товчийг дэмжих
 window.addEventListener('popstate', (event) => {
-    // Хэрэв URL-д ID байхгүй бол модалийг хаана
-    if (!window.location.search.includes('id=')) {
-        document.getElementById('newsModal').style.display = 'none'; 
-    } else {
-        // ID байвал модалийг дахин нээнэ
+    if (window.location.search.includes('id=')) {
         checkUrlForNewsId();
+    } else {
+        document.getElementById('newsModal').style.display = 'none'; 
+        // Ангиллын хуудаснаас буцаж байвал үндсэн хуудсыг дахин ачаална
+        showCategory('all');
     }
 });
 
 // ===================================================================================
-// 💡 ШИНЭЧИЛСЭН ЦАГ АГААРЫН ФУНКЦ: БАЙРШИЛ АШИГЛАНА
+// ЦАГ АГААРЫН ФУНКЦ
 // ===================================================================================
 
 function getCoordinates() {
@@ -770,49 +925,38 @@ function getCoordinates() {
 
     weatherTextElement.innerText = "Байршлыг тодорхойлж байна...";
 
-    // Хэрэглэгчээс байршлын зөвшөөрөл хүсэх
     navigator.geolocation.getCurrentPosition(
         (position) => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            fetchWeatherByLocation(lat, lon); // Зөвшөөрөл авбал цаг агаарыг татна
+            fetchWeatherByLocation(lat, lon); 
         },
         (error) => {
-            // Зөвшөөрөл өгөхгүй бол эсвэл алдаа гарвал үндсэн хотын мэдээг татна.
             if (error.code === error.PERMISSION_DENIED) {
                  weatherTextElement.innerText = `Та байршлын зөвшөөрөл өгөөгүй тул, ${defaultCity}-ийн цаг агаарыг харууллаа.`;
             } else {
                  weatherTextElement.innerText = `Байршлын алдаа гарлаа: ${error.message}. ${defaultCity}-ийн цаг агаарыг харууллаа.`;
             }
-            fetchWeatherByCity(defaultCity); // Үндсэн хот (fallback)
+            fetchWeatherByCity(defaultCity); 
         }
     );
 }
 
-// 1. Байршлын Өргөрөг/Уртрагаар татах
 async function fetchWeatherByLocation(lat, lon) {
     const weatherTextElement = document.getElementById('weatherText');
-
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=mn`;
-
     await executeWeatherFetch(url, weatherTextElement);
 }
 
-// 2. Хотын нэрээр татах (Fallback хийхэд зориулсан)
 async function fetchWeatherByCity(city) {
     const weatherTextElement = document.getElementById('weatherText');
-
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=mn`;
-
     await executeWeatherFetch(url, weatherTextElement);
 }
 
-
-// API дуудлагыг гүйцэтгэх үндсэн функц
 async function executeWeatherFetch(url, element) {
-    // API түлхүүр зөв эсэхийг шалгах
-    if (apiKey === "YOUR_API_KEY") {
-        element.innerText = "Цаг агаарын API түлхүүрийг тохируулаагүй байна!";
+    if (apiKey === "YOUR_API_KEY" || apiKey.length !== 32) {
+        element.innerText = "Цаг агаарын API түлхүүрийг тохируулаагүй эсвэл буруу байна!";
         return;
     }
     
@@ -845,15 +989,18 @@ async function executeWeatherFetch(url, element) {
 // ===================================================================================
 
 async function init(){
-    // Цаг агаарын мэдээг байршлаар татахыг эхлүүлнэ
+    // Цаг агаарын мэдээг эхлүүлэх
     getCoordinates(); 
-    // 1 цаг тутамд автоматаар шинэчлэх (3600000 миллисекунд)
     setInterval(getCoordinates, 3600000); 
     
     // Үндсэн мэдээний таталтууд
     await fetchAuthors();
     await fetchNews();
-    displayNews();
+    
+    // 💡 Табуудыг үүсгээд, үндсэн хуудсыг харуулна
+    generateCategoryTabs();
+    showCategory('all'); 
+    
     checkUrlForNewsId(); 
 }
 

@@ -633,7 +633,7 @@ function openNewsModal(newsItem, pushHistory = true) {
     // Видеог (хэрэв байгаа бол) текстийн өмнө нэмэх
     modalContentDiv.innerHTML = videoHtml + (newsItem.description || "");
 
-    // 2. Share товчлууруудыг үүсгэх
+    // 2. Share товчлууруудыг үүсгэх (💡 ЗАСВАР: Facebook icon-ыг шинэчлэв)
     const shareContainer = document.getElementById('modalShare');
     const newsUrl = window.location.href; 
     const newsTitle = encodeURIComponent(newsItem.title);
@@ -641,12 +641,15 @@ function openNewsModal(newsItem, pushHistory = true) {
     // Share товчлуурын HTML-ийг үүсгэх
     shareContainer.innerHTML = `
         <span style="font-weight: bold; font-size: 14px; color: #555;">Хуваалцах:</span>
+        
         <a href="https://www.facebook.com/sharer/sharer.php?u=${newsUrl}" target="_blank" style="text-decoration: none;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_Logo_%282019%29.svg" alt="Facebook Share" style="width: 24px; height: 24px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook Share" style="width: 24px; height: 24px;">
         </a>
+        
         <a href="https://twitter.com/intent/tweet?url=${newsUrl}&text=${newsTitle}" target="_blank" style="text-decoration: none;">
             <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg" alt="Twitter Share" style="width: 24px; height: 24px;">
         </a>
+        
         <a href="https://www.instagram.com/direct/inbox/" target="_blank" style="text-decoration: none;">
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram Share" style="width: 24px; height: 24px;">
         </a>

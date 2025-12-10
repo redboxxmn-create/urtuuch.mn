@@ -274,7 +274,7 @@
         }
 
         /* ---------------------------------------------------------------------- */
-        /* SIDEBAR (Сүүлийн үеийн мэдээ) ЗАГВАР */
+        /* SIDEBAR (Сүүлийн үеийн мэдээ) ЗАГВАР (Зурагтай болгосон) */
         /* ---------------------------------------------------------------------- */
 
         /* #allNewsSection-ийг 2 баганатай болгож хуваах (Гол хуудас) */
@@ -308,7 +308,7 @@
             align-content: start; 
         }
 
-        /* SIDEBAR ЗАГВАР: Ergelt.mn-д ойртуулсан */
+        /* SIDEBAR ЗАГВАР: Зурагтай болгож, Ergelt.mn-д ойртуулсан */
         .sidebar-container {
             grid-column: 2 / 3;
             background: #fff; 
@@ -329,10 +329,15 @@
             font-weight: bold;
         }
 
+        /* ШИНЭ: Sidebar-ын мэдээний нэгж элемент */
         .latest-news-item {
             padding: 10px 0;
             border-bottom: 1px dashed #eee;
             transition: background 0.2s; 
+            display: flex; /* Зураг болон текстийг хажуу хажуу талд нь байрлуулах */
+            gap: 10px; /* Хоорондын зай */
+            align-items: flex-start; /* Дээд талаас нь эхлүүлэх */
+            cursor: pointer;
         }
         .latest-news-item:last-child {
              border-bottom: none;
@@ -341,11 +346,32 @@
             background: #fcfcfc;
         }
 
+        /* ШИНЭ: Sidebar-ын жижиг зургийн загвар */
+        .sidebar-img-wrapper {
+            flex-shrink: 0; /* Зураг багасгахгүй байх */
+            width: 70px; /* Жижиг зургийн өргөн */
+            height: 70px; /* Жижиг зургийн өндөр */
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .sidebar-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Зургийг тааруулж дүүргэх */
+            display: block;
+        }
+
+        /* ШИНЭ: Sidebar-ын текстийн загвар */
+        .sidebar-content-wrapper {
+            flex-grow: 1; /* Текстний хэсэг үлдсэн зайг эзлэх */
+        }
+
         .latest-news-item a {
             text-decoration: none;
             color: #333;
             font-size: 13px; 
-            font-weight: 500;
+            font-weight: bold; /* Гарчгийг тодоор */
             line-height: 1.4;
             display: block;
             transition: color 0.2s;
@@ -428,6 +454,11 @@
                 grid-column: 1 / -1;
                 margin: 10px 15px; 
                 order: 3; 
+            }
+            /* Sidebar-ын зургийг гар утсан дээр дахин тохируулах */
+            .sidebar-img-wrapper {
+                width: 80px; 
+                height: 60px; 
             }
 
             #newsModalContent { max-width: 95%; max-height: 90%; }
@@ -756,7 +787,7 @@ window.showCategory = function(categoryName) {
 }
 
 // ===================================================================================
-// SIDEBAR: Сүүлийн 5 мэдээг харуулах
+// SIDEBAR: Сүүлийн 5 мэдээг Зурагтайгаар харуулах (Шинэчилсэн)
 // ===================================================================================
 function displaySidebarNews() {
     const container = document.getElementById('sidebarContainer');
@@ -766,7 +797,7 @@ function displaySidebarNews() {
     const latestNews = newsData.slice(0, 5); 
     
     if (latestNews.length === 0) {
-        container.innerHTML = '';
+        container.innerHTML = '<h3>ШИНЭ МЭДЭЭ</h3><p style="font-size: 12px; color: #777;">Одоогоор шинэ мэдээ алга байна.</p>';
         return;
     }
 
@@ -774,13 +805,20 @@ function displaySidebarNews() {
     
     latestNews.forEach(n => {
         const date = new Date(n.created_at).toLocaleDateString('mn-MN');
-        // Модалийг нээх onclick-ийг ашиглана
+        // Зураг байхгүй бол default зураг ашиглана
+        const imageUrl = n.image || 'https://i.imgur.com/vH1Nq0n.png'; 
+        
         sidebarHtml += `
-            <div class="latest-news-item">
-                <a href="javascript:void(0)" onclick="openNewsModal(${n.id})">
-                    ${n.title}
-                </a>
-                <span>🗓️ ${date}</span>
+            <div class="latest-news-item" onclick="openNewsModal(${n.id})">
+                <div class="sidebar-img-wrapper">
+                    <img src="${imageUrl}" alt="${n.title}">
+                </div>
+                <div class="sidebar-content-wrapper">
+                    <a href="javascript:void(0)">
+                        ${n.title}
+                    </a>
+                    <span>🗓️ ${date}</span>
+                </div>
             </div>
         `;
     });
@@ -1047,15 +1085,18 @@ function displayFilteredNews(filteredData) {
     document.getElementById('pagination').style.display = 'none';
     document.getElementById('videoContainer').style.display = 'none';
 
+    // Хайлт хийх үед Sidebar-ыг харуулахгүй тул энэ хэсгийг нуух эсвэл хоосон болгоно.
+    document.getElementById('sidebarContainer').innerHTML = ''; 
+
     if (!mainContentArea) return;
     mainContentArea.innerHTML = ''; // Гол хэсгийг цэвэрлэнэ
-    document.getElementById('sidebarContainer').innerHTML = ''; // Sidebar-ыг хоосон болгоно
 
     if (!filteredData || filteredData.length === 0) {
         mainContentArea.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; margin-top: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
         return;
     }
 
+    // Хайлтын үр дүнгийн картууд бүтэн өргөнтэй гарч ирэхийн тулд grid-ийг 4 баганатай хэвээр үлдээнэ
     filteredData.forEach(n => {
         const div = createNewsCard(n, 'normal'); 
         mainContentArea.appendChild(div);
@@ -1065,9 +1106,16 @@ function displayFilteredNews(filteredData) {
 document.getElementById('searchInput').addEventListener('input', ()=>{
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     
+    // Хайлт хийх үед sidebar-гүй загварт шилжих
+    const allSection = document.getElementById('allNewsSection');
+    allSection.style.gridTemplateColumns = '1fr'; // Sidebar-гүй, бүтэн өргөн
+    allSection.querySelector('.main-content-area').style.gridTemplateColumns = 'repeat(4, 1fr)'; // Карт 4 баганатай хэвээр
+
     if (keyword === '') {
         currentPage = 1;
-        showCategory('all'); // Хайлтгүй бол үндсэн хуудсаа харуулна
+        // Хайлтгүй бол үндсэн хуудсаа харуулна (Sidebar-тай загвар)
+        allSection.style.gridTemplateColumns = '3fr 1fr'; 
+        showCategory('all'); 
     } else {
         // Хайлт хийх үед бүх табыг идэвхгүй болгоно
         document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -1119,6 +1167,8 @@ window.addEventListener('popstate', (event) => {
     } else {
         document.getElementById('newsModal').style.display = 'none'; 
         // Ангиллын хуудаснаас буцаж байвал үндсэн хуудсыг дахин ачаална
+        // Sidebar-тай загварт буцаана
+        document.getElementById('allNewsSection').style.gridTemplateColumns = '3fr 1fr'; 
         showCategory('all');
     }
 });

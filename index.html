@@ -438,7 +438,7 @@ function createNewsCard(n, cardType) {
     
     const div = document.createElement('div'); 
     div.className = "card";
-    // 💡 ЗАСВАР: openNewsModal-д pushHistory=true-г нэмэв
+    // openNewsModal-д pushHistory=true-г нэмэв
     div.onclick = () => openNewsModal(n, true); 
 
     const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
@@ -564,13 +564,14 @@ function renderPagination() {
 }
 
 
-// 💡 Хамгийн доорх том видеог харуулах
+// 💡 ЗАСВАР: Хамгийн доорх том видеог харуулах (Category-г шалгахгүй)
 function displayVideoCard() {
     const videoContainer = document.getElementById('videoContainer');
     const iframeElement = videoContainer.querySelector('iframe');
     const titleElement = document.getElementById('videoTitle');
     
-    const videoNews = newsData.find(n => n.category === 'Медиа' && n.video_link);
+    // video_link талбар бөглөгдсөн, хамгийн сүүлийн эхний мэдээг хайж олно.
+    const videoNews = newsData.find(n => n.video_link);
     
     if (videoNews && videoNews.video_link) {
         let videoId = null;
@@ -605,7 +606,7 @@ function displayVideoCard() {
 
 
 // ===================================================================================
-// 💡 ШИНЭЧИЛСЭН: Мэдээг Модальд нээх ба URL-ийг шинэчлэх (Тусдаа URL-аар унших)
+// Мэдээг Модальд нээх ба URL-ийг шинэчлэх (Тусдаа URL-аар унших)
 // ===================================================================================
 function openNewsModal(newsItem, pushHistory = true) {
     const videoHtml = getYouTubeEmbedHtml(newsItem.video_link);
@@ -614,7 +615,7 @@ function openNewsModal(newsItem, pushHistory = true) {
     const modalContentDiv = document.getElementById('modalContent');
     const author = authorsData.find(a=>a.id===newsItem.author_id) || {name:"Тодорхойгүй"};
     
-    // 1. URL-ийг шинэчлэх (Тусдаа URL-аар уншигдах асуудлыг шийдэв)
+    // 1. URL-ийг шинэчлэх
     if (pushHistory) {
         const newUrl = `${window.location.pathname}?id=${newsItem.id}`;
         history.pushState({ newsId: newsItem.id }, newsItem.title, newUrl);
@@ -634,7 +635,6 @@ function openNewsModal(newsItem, pushHistory = true) {
 
     // 2. Share товчлууруудыг үүсгэх
     const shareContainer = document.getElementById('modalShare');
-    // 💡 Одоогийн шинэчлэгдсэн URL-ийг ашиглана
     const newsUrl = window.location.href; 
     const newsTitle = encodeURIComponent(newsItem.title);
     
@@ -655,7 +655,7 @@ function openNewsModal(newsItem, pushHistory = true) {
     modal.style.display = 'flex';
 }
 
-// Global scope-д гаргах (HTML-ийн onclick ажиллахын тулд)
+// Global scope-д гаргах 
 window.openNewsModal = openNewsModal; 
 // ===================================================================================
 
@@ -698,7 +698,7 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
 });
 
 
-// 3. Modal close update (URL-ийг үндсэн хуудас руу буцаана)
+// Modal close update (URL-ийг үндсэн хуудас руу буцаана)
 document.getElementById('newsModalClose').onclick = ()=>{ 
     document.getElementById('newsModal').style.display='none'; 
     // URL-ийг буцаана
@@ -713,9 +713,7 @@ document.getElementById('newsModal').onclick = e=>{
 };
 
 
-// ===================================================================================
-// 💡 ШИНЭ: URL-аас мэдээний ID-г шалгаж модалийг нээх функц (Тусдаа URL-аар уншигдахыг дэмжинэ)
-// ===================================================================================
+// URL-аас мэдээний ID-г шалгаж модалийг нээх функц
 function checkUrlForNewsId() {
     const urlParams = new URLSearchParams(window.location.search);
     const newsId = urlParams.get('id');
@@ -733,7 +731,7 @@ function checkUrlForNewsId() {
     }
 }
 
-// 4. Browser-ийн back/forward товчийг дэмжих
+// Browser-ийн back/forward товчийг дэмжих
 window.addEventListener('popstate', (event) => {
     // Хэрэв URL-д ID байхгүй бол модалийг хаана
     if (!window.location.search.includes('id=')) {
@@ -749,7 +747,7 @@ async function init(){
     await fetchAuthors();
     await fetchNews();
     displayNews();
-    checkUrlForNewsId(); // 💡 Ачааллах үед URL-ийг шалгана
+    checkUrlForNewsId(); // Ачааллах үед URL-ийг шалгана
 }
 
 init();

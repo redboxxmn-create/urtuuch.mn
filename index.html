@@ -793,6 +793,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0/+esm';
 
 const SUPABASE_URL = "https://wpotnvekaoosdkvmhqgo.supabase.co";
+// 💡 SUPABASE_ANON_KEY-г таны өгсөн зөв утгаар сольсон.
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYWFvc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1546,6 +1547,7 @@ async function init(){
     setInterval(updateDateTime, 1000); 
 
     // Үндсэн мэдээний таталтууд
+    // 💡 ЭНЭ ХОЁР ФУНКЦ ОДОО ЗӨВ ТҮЛХҮҮРТЭЙГЭЭ АЖИЛЛАНА.
     await fetchAuthors();
     await fetchNews();
     

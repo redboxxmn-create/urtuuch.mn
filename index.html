@@ -534,6 +534,11 @@
             .card-meta {
                 display: flex; 
             }
+
+            /* Цаг агаар болон Валютыг босоо болгох */
+            #header-widgets {
+                flex-direction: column; 
+            }
         }
     </style>
 </head>
@@ -568,9 +573,16 @@
     </nav>
 </header>
 
-<div id="weatherContainer" style="background:#497a9f; color:#fff; padding:10px 15px; border-radius:8px; margin: 10px 15px; text-align: center; font-weight: bold; font-size: 16px;">
-    <p id="weatherText">Цаг агаарын мэдээ татаж байна...</p>
+<div id="header-widgets" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 15px;">
+    <div id="weatherContainer" style="background:#497a9f; color:#fff; padding:10px 15px; border-radius:8px; text-align: center; font-weight: bold; font-size: 16px; flex-grow: 1;">
+        <p id="weatherText">Цаг агаарын мэдээ татаж байна...</p>
+    </div>
+    
+    <div id="exchangeRateContainer" style="background:#5cb85c; color:#fff; padding:10px 15px; border-radius:8px; text-align: center; font-weight: bold; font-size: 16px; flex-grow: 1;">
+        <span id="exchangeRatesText">Валютын ханш татаж байна...</span>
+    </div>
 </div>
+
 
 <div class="category-tabs" id="categoryTabs" style="padding: 10px 15px; margin: 15px; background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
     <button class="tab-button active" onclick="showCategory('all')">Үндсэн (Бүх мэдээ)</button> 
@@ -639,9 +651,11 @@ const NEWS_PER_PAGE = 12;
 const TOTAL_NEWS_LIMIT = 29; 
 
 // ===================================================================================
-// 💡 OpenWeatherMap API ТҮЛХҮҮР
+// 💡 API ТҮЛХҮҮРҮҮД
 // ===================================================================================
-const apiKey = "b73211d51342848ae190f73b7ad3b667"; 
+const OPENWEATHER_API_KEY = "b73211d51342848ae190f73b7ad3b667"; 
+// 💡 ТАНЫ ӨГСӨН ТҮЛХҮҮР: ccfdb2fcac-0282c8907b-t73egx
+const FASTFOREX_API_KEY = "ccfdb2fcac-0282c8907b-t73egx"; 
 const defaultCity = "Ulaanbaatar"; 
 
 
@@ -1245,19 +1259,19 @@ function getCoordinates() {
 
 async function fetchWeatherByLocation(lat, lon) {
     const weatherTextElement = document.getElementById('weatherText');
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=mn`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=mn`;
     await executeWeatherFetch(url, weatherTextElement);
 }
 
 async function fetchWeatherByCity(city) {
     const weatherTextElement = document.getElementById('weatherText');
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=mn`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=mn`;
     await executeWeatherFetch(url, weatherTextElement);
 }
 
 async function executeWeatherFetch(url, element) {
     // API түлхүүрийг шалгах
-    if (apiKey === "YOUR_API_KEY" || apiKey.length !== 32) {
+    if (OPENWEATHER_API_KEY === "YOUR_API_KEY" || OPENWEATHER_API_KEY.length !== 32) {
         element.innerText = "Цаг агаарын API түлхүүрийг тохируулаагүй эсвэл буруу байна!";
         return;
     }
@@ -1269,7 +1283,7 @@ async function executeWeatherFetch(url, element) {
              const errorData = await response.json();
              // API түлхүүр идэвхгүй үед 'Invalid API key' гэсэн алдаа гарна
              if (errorData.message.includes('Invalid API key')) {
-                 throw new Error("API түлхүүр идэвхжээгүй эсвэл буруу байна. 30 минут хүлээгээд дахин оролдоно уу.");
+                 throw new Error("API түлхүүр идэвхжээгүй эсвэл буруу байна.");
              }
              throw new Error(errorData.message || 'API-аас мэдээлэл авахад алдаа гарлаа.');
         }
@@ -1293,12 +1307,93 @@ async function executeWeatherFetch(url, element) {
 }
 
 // ===================================================================================
+// ВАЛЮТЫН ХАНШИЙН ФУНКЦ (FastForex)
+// ===================================================================================
+
+async function fetchExchangeRates() {
+    const ratesTextElement = document.getElementById('exchangeRatesText');
+    // MNT-тэй харьцахыг хүссэн валютууд
+    const targetCurrencies = ["MNT", "EUR", "KRW", "RUB", "CNY"]; 
+    // USD-г суурь валют болгож татаж авна.
+    const url = `https://api.fastforex.io/fetch-multi?from=USD&to=${targetCurrencies.join('%2C')}&api_key=${FASTFOREX_API_KEY}`;
+
+    if (FASTFOREX_API_KEY.length < 10) { 
+        ratesTextElement.innerText = "Валютын API түлхүүрийг тохируулаагүй эсвэл буруу байна!";
+        return;
+    }
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('API-аас ханшийн мэдээлэл авахад алдаа гарлаа.');
+        }
+        
+        const data = await response.json();
+        
+        if (data.result !== 'success' || !data.results) {
+             throw new Error('Ханшийн мэдээлэл буруу форматтай байна.');
+        }
+
+        const rates = data.results;
+        
+        // 1. 1 USD-ийн MNT-тэй харьцах ханшийг авна
+        const mntRate = rates['MNT']; 
+        
+        if (!mntRate) {
+            ratesTextElement.innerText = "MNT-ийн ханш олдсонгүй.";
+            return;
+        }
+
+        const displayData = [];
+        
+        // USD (1 USD = MNT)
+        displayData.push(`USD: ${mntRate.toFixed(2)}`);
+        
+        // Бусад валютууд (1 Валют = X MNT)
+        targetCurrencies.forEach(currency => {
+            if (currency !== 'MNT' && currency !== 'USD') {
+                const foreignRateInUSD = rates[currency]; 
+                
+                if (foreignRateInUSD) {
+                    // 1 Валют = (MNT/USD) / (Валют/USD) = X MNT
+                    const mntValuePerUnit = mntRate / foreignRateInUSD; 
+                    
+                    let currencyName = currency;
+                    let finalValue = mntValuePerUnit;
+                    
+                    // KRW-г 100 воноор тооцоолох (100 KRW = X MNT)
+                    if (currency === 'KRW') {
+                        currencyName = 'KRW (100₮)';
+                        // FastForex-ийн хувьд USD/KRW байдаг тул, KRW/MNT * 100
+                        finalValue = mntValuePerUnit * 100; 
+                    }
+                    
+                    displayData.push(`${currencyName}: ${finalValue.toFixed(2)}`);
+                } else {
+                    displayData.push(`${currency}: -`);
+                }
+            }
+        });
+        
+        ratesTextElement.innerHTML = `💵 Валютын ханш (₮): ${displayData.join(' | ')}`;
+
+    } catch (error) {
+        ratesTextElement.innerText = `Валютын ханш татахад алдаа гарлаа. (${error.message})`;
+        console.error("Валютын ханш татахад алдаа гарлаа:", error);
+    }
+}
+
+// ===================================================================================
 
 async function init(){
     // Цаг агаарын мэдээг эхлүүлэх
     getCoordinates(); 
     setInterval(getCoordinates, 3600000); 
     
+    // ВАЛЮТЫН ХАНШИЙН АЧААЛАЛ
+    fetchExchangeRates();
+    setInterval(fetchExchangeRates, 3600000); // 1 цаг тутамд шинэчлэх
+
     // Үндсэн мэдээний таталтууд
     await fetchAuthors();
     await fetchNews();

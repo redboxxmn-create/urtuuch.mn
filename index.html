@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* ---------------------------------------------------------------------- */
-        /* ЕРӨНХИЙ СТИЛЬ - ӨНГӨНИЙ ШИНЭЧЛЭЛТ */
+        /* ЕРӨНХИЙ СТИЛЬ - COOL BLUE ӨНГӨНИЙ СХЕМ */
         /* ---------------------------------------------------------------------- */
         body{
             font-family:'Ubuntu',sans-serif; 
@@ -361,9 +361,54 @@
             margin-bottom: 15px;
             font-weight: bold;
         }
-        /* ... (sidebar-ийн бусад стилүүд хэвээр) ... */
-
         
+        .latest-news-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+            cursor: pointer;
+        }
+        .latest-news-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .sidebar-img-wrapper {
+            flex-shrink: 0;
+            width: 70px;
+            height: 70px;
+            margin-right: 10px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .sidebar-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .sidebar-content-wrapper {
+            flex-grow: 1;
+        }
+        .sidebar-content-wrapper a {
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            text-decoration: none;
+            line-height: 1.4;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .sidebar-content-wrapper a:hover {
+            /* 💡 ШИНЭ: Онцлох цэнхэр */
+            color: #3498db;
+        }
+        .sidebar-content-wrapper span {
+            font-size: 11px;
+            color: #777;
+        }
+
         /* ---------------------------------------------------------------------- */
         /* 💡 ЦАГ АГААР/ЦАГ/УРИАЛГЫН ШИНЭЧИЛСЭН БАГАНА (HEADER WIDGETS) */
         /* ---------------------------------------------------------------------- */
@@ -421,8 +466,18 @@
             font-size: 14px;
         }
         
-        /* ... (Ticker-ийн бусад стилүүд хэвээр) ... */
+        /* Ticker-ийн гүйлгэх анимац */
+        #tickerContent {
+            overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
+            animation: ticker-roll linear infinite;
+        }
 
+        @keyframes ticker-roll {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
 
         /* --------------------------------------------------- */
         /* БУСАД ТУСЛАХ ЗАГВАРУУД */
@@ -431,6 +486,112 @@
         /* ... (бусад хэсгүүд хэвээр) ... */
         .pagination button{padding:5px 10px; border-radius:5px; border:none; background:#3498db; color:#fff; cursor:pointer; transition:0.3s;}
         .pagination button:hover{background:#2C3E50;}
+        
+        /* Модаль */
+        #newsModal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            justify-content: center;
+            align-items: center;
+        }
+        #newsModalContent {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%; 
+            max-width: 800px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #newsModalClose {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+        #newsModalClose:hover,
+        #newsModalClose:focus {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #modalTitle {
+            /* 💡 ШИНЭ: Онцлох цэнхэр */
+            color: #3498db;
+            font-size: 26px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        #modalImage {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        /* ЗОХИОГЧДЫН ЗАГВАР */
+        .authors-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px 15px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+        .author-card {
+            text-align: center;
+            width: 120px;
+        }
+        .author-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+            border: 3px solid #ddd;
+        }
+        .author-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #3498db;
+        }
+        .author-title {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* ХОЛБОО БАРИХ */
+        .contact {
+            padding: 20px;
+            text-align: center;
+            background: #2C3E50;
+            color: #fff;
+            margin-top: 20px;
+        }
+        .contact h3 {
+            border-bottom: 1px solid #4A637C;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
         
         /* ---------------------------------------------------------------------- */
         /* ГАР УТАСНЫ ЗАГВАР (MEDIA QUERY) */
@@ -459,11 +620,71 @@
                 padding: 8px 10px;
             }
             
-            /* ... (featured block болон бусад media query хэвээр) ... */
+            /* Featured Block Mobile */
+            .featured-block-container {
+                grid-template-columns: 1fr;
+            }
+            .featured-main-card {
+                grid-column: span 1;
+                min-height: 250px;
+            }
+            .featured-sidebar {
+                grid-column: span 1;
+                grid-template-columns: 1fr; 
+            }
+            .featured-sidebar .card {
+                min-height: 120px;
+            }
+            .featured-main-card .card-title {
+                font-size: 18px;
+            }
+            
+            /* Sidebar Mobile (Гол контенттэй нийлнэ) */
+            #allNewsSection {
+                grid-template-columns: 1fr !important; 
+                padding: 10px;
+            }
+            .main-content-area {
+                grid-column: 1 / -1;
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            .sidebar-container {
+                grid-column: 1 / -1;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sub-featured-card {
+                grid-column: span 2;
+            }
+            
+            .video-card-bottom iframe {
+                height: 250px;
+            }
         }
         
-        @media(max-width:768px){
-            /* ... (mobile стилүүд хэвээр) ... */
+        @media(max-width:576px){
+            /* Хамгийн жижиг дэлгэц дээр картууд 1 баганатай */
+             .grid, .main-content-area {
+                grid-template-columns: 1fr;
+            }
+            .sub-featured-card {
+                grid-column: span 1;
+            }
+            nav ul li {
+                margin-right: 10px;
+                margin-bottom: 5px;
+            }
+            nav ul {
+                justify-content: center;
+            }
+            .card-title {
+                 font-size: 15px;
+            }
+            .card-meta span.category {
+                font-size: 10px;
+            }
         }
     </style>
 </head>
@@ -535,7 +756,7 @@
 
 <div class="authors-container" id="authorsContainer"></div>
 
-<div class="pagination" id="pagination" style="display: flex;"></div> 
+<div class="pagination" id="pagination" style="display: flex; justify-content: center; padding: 20px 0;"></div> 
 
 <div class="video-card-bottom" id="videoContainer" style="display: none;"> 
     <h3 id="videoTitle">Онцлох Видео</h3>
@@ -628,25 +849,40 @@ function getYouTubeEmbedHtml(videoUrl) {
 // ===================================================================================
 
 async function fetchAuthors() {
+    console.log("Fetching authors...");
     const { data, error } = await supabase.from('authors').select('*').order('id');
-    if(error) console.error("Authors fetch error:", error); 
-    else authorsData = data;
+    if(error) {
+        console.error("Authors fetch error:", error); 
+        // Алдаа гарсан ч үргэлжлүүлнэ
+    }
+    else {
+        authorsData = data || [];
+        console.log("Authors fetched:", authorsData.length);
+    }
 }
 
 async function fetchNews() {
+    console.log("Fetching news...");
     const { data, error } = await supabase.from('news')
         .select('*, card_type, video_link') 
         .eq('active', true) 
         .order('created_at',{ascending:false})
         .limit(TOTAL_NEWS_LIMIT); 
         
-    if(error) console.error("News fetch error:", error); 
-    else newsData = data;
+    if(error) {
+        console.error("News fetch error:", error);
+        // Мэдээ татагдаагүй тохиолдолд хоосон массив үүсгэнэ
+        newsData = [];
+    }
+    else {
+        newsData = data || [];
+        console.log("News fetched:", newsData.length);
+    }
 }
 
 function displayAuthors() {
     const container = document.getElementById('authorsContainer');
-    if (!authorsData || authorsData.length === 0) return; 
+    if (!container || !authorsData || authorsData.length === 0) return; 
 
     container.innerHTML = authorsData.map(a=>`
         <div class="author-card">
@@ -661,18 +897,26 @@ function displayAuthors() {
  * News Card үүсгэх туслах функц (onclick-ээр модаль нээнэ)
  */
 function createNewsCard(n, cardType) {
-    // Зураг дээр давхарлаж байгаа загварт зохиогчийг нуусан тул энэ хэсэг шаардлагагүй
-    // const author = authorsData.find(a=>a.id===n.author_id) || {name:"Тодорхойгүй",image:"https://i.imgur.com/KqJv6N6.png"};
+    // n.card_type нь null байж болно, cardType-ийг ашиглана
+    const currentCardType = n.card_type || cardType; 
     
     const div = document.createElement('div'); 
     div.className = "card";
     // Ticker-ийн мэдээг дарсан үед ID-гаар хайхын тулд ID-г дамжуулна
     div.onclick = () => openNewsModal(n.id); 
 
-    const isFeatured = n.featured && cardType !== 'featured_sidebar_small'; 
+    const isFeatured = n.featured && currentCardType !== 'featured_sidebar_small'; 
 
     const categoryText = (isFeatured ? 'ОНЦЛОХ | ' : '') + n.category;
-    const categoryStyle = (isFeatured || cardType === 'featured_main') ? 'background: #e74c3c;' : ''; 
+    const categoryStyle = (isFeatured || currentCardType === 'featured_main') ? 'background: #e74c3c;' : ''; 
+
+    // Card-ын хэмжээг card_type-аар тодорхойлно
+    if (currentCardType === 'sub_featured') {
+        div.classList.add('sub-featured-card');
+    }
+    if (currentCardType === 'featured_main') {
+        div.classList.add('featured-main-card');
+    }
 
     const contentHtml = `
         <div class="card-content">
@@ -681,7 +925,7 @@ function createNewsCard(n, cardType) {
                 <span class="category" style="${categoryStyle}">${categoryText}</span>
                 <span>${new Date(n.created_at).toLocaleDateString('mn-MN')}</span>
             </div>
-            ${cardType === 'featured_main' ? `<p style="color:#eee; margin-top:10px; font-size:14px;">${n.description ? n.description.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...' : ''}</p>` : ''} 
+            ${currentCardType === 'featured_main' ? `<p style="color:#eee; margin-top:10px; font-size:14px;">${n.description ? n.description.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...' : ''}</p>` : ''} 
         </div>
     `;
     
@@ -698,12 +942,23 @@ function generateCategoryTabs() {
     const tabsContainer = document.getElementById('categoryTabs');
     const contentWrapper = document.getElementById('categoryContentWrapper');
     
-    // Мэдээний датагаас давхардахгүй ангиллуудыг цуглуулах
+    // Эхний 'Үндсэн' таб аль хэдийн HTML-д байгаа тул зөвхөн бусад ангиллуудыг нэмнэ.
     const categories = [...new Set(newsData.map(n => n.category).filter(c => c && c.trim() !== ''))];
     
+    // Одоо байгаа 'Үндсэн' табаас бусад бүх табыг цэвэрлэх
+    const existingTabs = tabsContainer.querySelectorAll('.tab-button');
+    existingTabs.forEach((tab, index) => {
+        if (index > 0) tab.remove();
+    });
+
+    // Одоо байгаа 'allNewsSection'-ээс бусад бүх контент хэсгийг цэвэрлэх
+    const existingSections = contentWrapper.querySelectorAll('.category-section');
+    existingSections.forEach((section) => {
+        if (section.id !== 'allNewsSection') section.remove();
+    });
+
     // Ангиллуудыг нэмэх
     categories.forEach(cat => {
-        // HTML ID-д тохирох нэр үүсгэх
         const cleanCatName = cat.replace(/[^a-zA-Z0-9]/g, '');
         
         // Таб товчлуур
@@ -740,7 +995,7 @@ window.showCategory = function(categoryName) {
     let activeTabButton = null;
     document.querySelectorAll('.tab-button').forEach(btn => {
         // Товчлуурын текст эсвэл onclick-ийн утгаар хайна
-        if (btn.innerText.includes(categoryName) || btn.getAttribute('onclick').includes(`'${categoryName.replace(/'/g, "\\'")}'`)) {
+        if (btn.innerText.trim() === categoryName.trim() || btn.getAttribute('onclick').includes(`'${categoryName.replace(/'/g, "\\'")}'`)) {
             activeTabButton = btn;
         }
     });
@@ -754,9 +1009,10 @@ window.showCategory = function(categoryName) {
     if (categoryName === 'all') {
         const allSection = document.getElementById('allNewsSection');
         allSection.classList.add('active');
+        // Sidebar-тай загварт буцаана
+        allSection.style.gridTemplateColumns = '3fr 1fr'; 
         displayMainPage(); 
         document.getElementById('pagination').style.display = 'flex'; // Pagination-ийг харуулна
-        displayVideoCard(); // Видеог харуулна
     } else {
         // 2. Ангилал тус бүрийн хэсэг (Sidebarгүй, бүтэн өргөнтэй)
         const cleanCatName = categoryName.replace(/[^a-zA-Z0-9]/g, '');
@@ -766,6 +1022,8 @@ window.showCategory = function(categoryName) {
             categorySection.classList.add('active');
             displayCategoryNews(categoryName, categorySection);
         }
+        // Ангиллын хуудас grid бүтэн өргөнтэй байх тул sidebar-ын зай хэрэггүй
+        document.getElementById('allNewsSection').style.gridTemplateColumns = '1fr'; 
         document.getElementById('pagination').style.display = 'none'; // Pagination хэрэггүй
     }
 }
@@ -853,7 +1111,8 @@ function displayMainPage() {
         featuredBlock.className = 'featured-block-container';
 
         const mainCard = createNewsCard(mainFeatured, 'featured_main'); 
-        mainCard.classList.add('featured-main-card');
+        // Featured Main card-ын class-ийг createNewsCard дотор нэмж байгаа тул энэ давхардалтыг устгана
+        // mainCard.classList.add('featured-main-card'); 
 
         const sidebar = document.createElement('div');
         sidebar.className = 'featured-sidebar';
@@ -880,10 +1139,7 @@ function displayMainPage() {
     // 2. Энгийн Картууд (Normal)
     normal.forEach(n=>{
         const div = createNewsCard(n, 'normal');
-        
-        if (n.card_type === 'sub_featured') {
-            div.classList.add('sub-featured-card');
-        }
+        // card_type=sub_featured бол class-ийг createNewsCard дотор нэмсэн
         mainContentArea.appendChild(div);
     });
     
@@ -911,9 +1167,6 @@ function displayCategoryNews(categoryName, container) {
     // Ангиллын мэдээг энгийн картаар харуулах
     filteredNews.forEach(n => {
         const div = createNewsCard(n, 'normal');
-        if (n.card_type === 'sub_featured') {
-            div.classList.add('sub-featured-card');
-        }
         container.appendChild(div);
     });
 }
@@ -1086,7 +1339,7 @@ function displayFilteredNews(filteredData) {
 
     // Хайлтын үр дүнгийн картууд бүтэн өргөнтэй гарч ирэхийн тулд grid-ийг 4 баганатай хэвээр үлдээнэ
     filteredData.forEach(n => {
-        const div = createNewsCard(n, 'normal'); 
+        const div = createNewsCard(n, n.card_type || 'normal'); // card_type-ийг дамжуулна
         mainContentArea.appendChild(div);
     });
 }
@@ -1096,7 +1349,8 @@ document.getElementById('searchInput').addEventListener('input', ()=>{
     
     // Хайлт хийх үед sidebar-гүй загварт шилжих
     const allSection = document.getElementById('allNewsSection');
-    allSection.style.gridTemplateColumns = '1fr'; // Sidebar-гүй, бүтэн өргөн
+    // Хайлт хийх үед sidebar-ийн зай хэрэггүй
+    allSection.style.gridTemplateColumns = '1fr'; 
     allSection.querySelector('.main-content-area').style.gridTemplateColumns = 'repeat(4, 1fr)'; // Карт 4 баганатай хэвээр
 
     // Бүх табыг идэвхгүй болгоно
@@ -1172,7 +1426,7 @@ function getCoordinates() {
     const weatherTextElement = document.getElementById('weatherText');
     
     if (!navigator.geolocation) {
-        weatherTextElement.innerText = "Цаг агаар: Байршлын мэдээлэл дэмжихгүй байна.";
+        weatherTextElement.innerText = "Цаг агаар: Байршлын мэдээлэл дэмжихгүй.";
         return;
     }
 

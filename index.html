@@ -914,13 +914,13 @@ window.showCategory = function(categoryName) {
 }
 
 // ===================================================================================
-// SIDEBAR: Сүүлийн 5 мэдээг Зурагтайгаар харуулах
+// SIDEBAR: Сүүлийн 10 мэдээг Зурагтайгаар харуулах
 // ===================================================================================
 function displaySidebarNews() {
     const container = document.getElementById('sidebarContainer');
     if (!container) return;
     
-    // Сүүлийн 5 мэдээг сонгох
+    // Сүүлийн 10 мэдээг сонгох
     const latestNews = newsData.slice(0, 5); 
     
     if (latestNews.length === 0) {

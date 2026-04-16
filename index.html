@@ -12,7 +12,7 @@
     <meta property="og:image" content="https://wpotnvekaoosdkvmhqgo.supabase.co/storage/v1/object/public/news_images/1765287786830_37k2pwz.png">
 
     <link rel="icon" type="image/png" href="https://wpotnvekaoosdkvmhqgo.supabase.co/storage/v1/object/public/news_images/1765287786830_37k2pwz.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
@@ -32,9 +32,9 @@
             --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
             --border: #e2e8f0;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -55,13 +55,12 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Animated Gradient Header */
+        /* Header */
         header {
             background: var(--accent-gradient);
             position: sticky;
             top: 0;
             z-index: 100;
-            backdrop-filter: blur(10px);
         }
 
         .header-container {
@@ -76,7 +75,6 @@
             filter: brightness(0) invert(1);
         }
 
-        /* Modern Search */
         .search-wrapper {
             position: relative;
             margin: 16px 0 12px;
@@ -87,7 +85,8 @@
             left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: rgba(255,255,255,0.7);
+            z-index: 1;
         }
 
         .search-box input {
@@ -124,6 +123,10 @@
             gap: 4px;
         }
 
+        nav ul li {
+            position: relative;
+        }
+
         nav ul li a {
             color: white;
             text-decoration: none;
@@ -142,6 +145,8 @@
         nav ul li ul {
             display: none;
             position: absolute;
+            top: 100%;
+            left: 0;
             background: var(--bg-secondary);
             min-width: 200px;
             border-radius: 16px;
@@ -202,6 +207,7 @@
             font-weight: 600;
             font-size: 12px;
             margin-right: 16px;
+            white-space: nowrap;
         }
 
         .ticker-content {
@@ -251,22 +257,31 @@
             color: white;
         }
 
-        /* Main Content */
+        /* Main Container */
         .main-container {
             max-width: 1400px;
             margin: 32px auto;
             padding: 0 24px;
         }
 
-        /* Featured Block */
-        .featured-grid {
+        /* Category Sections */
+        .category-section {
+            display: none;
+        }
+
+        .category-section.active {
+            display: block;
+        }
+
+        /* Featured Block Container */
+        .featured-block-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 24px;
             margin-bottom: 48px;
         }
 
-        .hero-card {
+        .featured-main-card {
             position: relative;
             border-radius: 24px;
             overflow: hidden;
@@ -274,25 +289,26 @@
             transition: transform 0.3s, box-shadow 0.3s;
             background: var(--bg-secondary);
             box-shadow: var(--shadow-lg);
+            min-height: 420px;
         }
 
-        .hero-card:hover {
+        .featured-main-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-xl);
         }
 
-        .hero-card img {
+        .featured-main-card img {
             width: 100%;
             height: 420px;
             object-fit: cover;
             transition: transform 0.5s;
         }
 
-        .hero-card:hover img {
+        .featured-main-card:hover img {
             transform: scale(1.05);
         }
 
-        .hero-overlay {
+        .featured-main-card .card-content {
             position: absolute;
             bottom: 0;
             left: 0;
@@ -302,34 +318,19 @@
             color: white;
         }
 
-        .hero-category {
-            background: var(--accent);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-
-        .hero-title {
+        .featured-main-card .card-title {
             font-size: 28px;
             font-weight: 800;
             margin-bottom: 8px;
         }
 
-        .hero-meta {
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .sidebar-featured {
+        .featured-sidebar {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
 
-        .mini-card {
+        .featured-sidebar .card {
             background: var(--bg-secondary);
             border-radius: 20px;
             overflow: hidden;
@@ -340,23 +341,23 @@
             border: 1px solid var(--border);
         }
 
-        .mini-card:hover {
+        .featured-sidebar .card:hover {
             transform: translateX(4px);
             box-shadow: var(--shadow-md);
         }
 
-        .mini-card img {
+        .featured-sidebar .card img {
             width: 100px;
             height: 100px;
             object-fit: cover;
         }
 
-        .mini-card-content {
+        .featured-sidebar .card .card-content {
             padding: 12px;
             flex: 1;
         }
 
-        .mini-card-title {
+        .featured-sidebar .card .card-title {
             font-weight: 700;
             font-size: 14px;
             margin-bottom: 6px;
@@ -364,14 +365,14 @@
         }
 
         /* News Grid */
-        .news-grid {
+        .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 24px;
             margin-bottom: 48px;
         }
 
-        .news-card {
+        .card {
             background: var(--bg-secondary);
             border-radius: 20px;
             overflow: hidden;
@@ -381,67 +382,72 @@
             border: 1px solid var(--border);
         }
 
-        .news-card:hover {
+        .card:hover {
             transform: translateY(-8px);
             box-shadow: var(--shadow-xl);
         }
 
-        .news-card img {
+        .card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             transition: transform 0.3s;
         }
 
-        .news-card:hover img {
+        .card:hover img {
             transform: scale(1.05);
         }
 
-        .news-card-content {
+        .card .card-content {
             padding: 16px;
         }
 
-        .news-category {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--accent);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: inline-block;
-        }
-
-        .news-title {
+        .card .card-title {
             font-weight: 700;
             font-size: 16px;
             line-height: 1.4;
             margin-bottom: 8px;
         }
 
-        .news-meta {
+        .card-meta {
             font-size: 12px;
             color: var(--text-secondary);
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
-        /* Sidebar + Main Layout */
-        .two-column-layout {
-            display: grid;
+        .category-badge {
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .sub-featured-card {
+            grid-column: span 2;
+        }
+
+        /* Two Column Layout for All News */
+        #allNewsSection {
+            display: grid !important;
             grid-template-columns: 3fr 1fr;
             gap: 32px;
-            margin-bottom: 48px;
         }
 
-        .sidebar-widget {
+        .sidebar-container {
             background: var(--bg-secondary);
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--border);
             position: sticky;
             top: 100px;
+            align-self: start;
         }
 
-        .sidebar-title {
+        .sidebar-container h3 {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 20px;
@@ -450,7 +456,7 @@
             display: inline-block;
         }
 
-        .sidebar-news-item {
+        .latest-news-item {
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
@@ -460,33 +466,43 @@
             transition: background 0.2s;
         }
 
-        .sidebar-news-item:hover {
+        .latest-news-item:hover {
             background: var(--bg-primary);
         }
 
-        .sidebar-news-img {
+        .sidebar-img-wrapper {
             width: 70px;
             height: 70px;
             border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-img-wrapper img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
-        .sidebar-news-title {
+        .sidebar-content-wrapper a {
             font-weight: 600;
             font-size: 13px;
             line-height: 1.4;
+            text-decoration: none;
+            color: var(--text-primary);
         }
 
         /* Authors Section */
-        .authors-section {
+        .authors-container {
             background: var(--bg-secondary);
             border-radius: 24px;
             padding: 32px;
-            margin-bottom: 48px;
+            margin: 32px auto;
+            max-width: 1400px;
             border: 1px solid var(--border);
         }
 
-        .authors-title {
+        .authors-container h3 {
             font-size: 24px;
             font-weight: 700;
             text-align: center;
@@ -524,21 +540,27 @@
             font-size: 14px;
         }
 
+        .author-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
         /* Video Section */
-        .video-section {
+        .video-card-bottom {
             background: var(--bg-secondary);
             border-radius: 24px;
             overflow: hidden;
-            margin-bottom: 48px;
+            margin: 32px auto;
+            max-width: 1400px;
             border: 1px solid var(--border);
         }
 
-        .video-section h3 {
+        .video-card-bottom h3 {
             padding: 20px 24px 0;
             font-size: 20px;
         }
 
-        .video-section iframe {
+        .video-card-bottom iframe {
             width: 100%;
             height: 500px;
             border: none;
@@ -552,7 +574,7 @@
             margin: 32px 0;
         }
 
-        .page-btn {
+        .pagination button {
             padding: 8px 16px;
             border: 1px solid var(--border);
             background: var(--bg-secondary);
@@ -562,66 +584,32 @@
             color: var(--text-primary);
         }
 
-        .page-btn:hover, .page-btn.active {
+        .pagination button:hover, .pagination button.active {
             background: var(--accent-gradient);
             border-color: transparent;
             color: white;
         }
 
-        /* Footer */
-        footer {
+        /* Contact */
+        .contact {
             background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            padding: 48px 24px 24px;
-            margin-top: 48px;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 32px;
-        }
-
-        .footer-col h4 {
-            margin-bottom: 16px;
-            font-size: 16px;
-        }
-
-        .footer-col p, .footer-col a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .social-links {
-            display: flex;
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .social-links a {
-            font-size: 20px;
-            transition: color 0.2s;
-        }
-
-        .social-links a:hover {
-            color: var(--accent);
-        }
-
-        .copyright {
             text-align: center;
-            padding-top: 32px;
-            margin-top: 32px;
+            padding: 40px;
+            margin-top: 48px;
             border-top: 1px solid var(--border);
+        }
+
+        .contact h3 {
+            margin-bottom: 16px;
+        }
+
+        .contact p {
             color: var(--text-secondary);
-            font-size: 13px;
+            margin: 8px 0;
         }
 
         /* Modal */
-        .modal {
+        #newsModal {
             display: none;
             position: fixed;
             top: 0;
@@ -635,7 +623,7 @@
             backdrop-filter: blur(8px);
         }
 
-        .modal-content {
+        #newsModalContent {
             background: var(--bg-secondary);
             width: 90%;
             max-width: 800px;
@@ -646,7 +634,7 @@
             position: relative;
         }
 
-        .modal-close {
+        #newsModalClose {
             position: absolute;
             top: 20px;
             right: 24px;
@@ -655,45 +643,58 @@
             transition: transform 0.2s;
         }
 
-        .modal-close:hover {
+        #newsModalClose:hover {
             transform: scale(1.1);
+        }
+
+        #modalImage {
+            width: 100%;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .modal-video-container {
+            margin: 20px 0;
+        }
+
+        .modal-video-container iframe {
+            width: 100%;
+            height: 350px;
+            border-radius: 20px;
         }
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .news-grid {
+            .grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .featured-grid {
+            .featured-block-container {
                 grid-template-columns: 1fr;
             }
-            .footer-content {
-                grid-template-columns: repeat(2, 1fr);
+            #allNewsSection {
+                grid-template-columns: 1fr !important;
             }
         }
 
         @media (max-width: 768px) {
-            .news-grid {
+            .grid {
                 grid-template-columns: 1fr;
             }
-            .two-column-layout {
-                grid-template-columns: 1fr;
-            }
-            .hero-title {
+            .featured-main-card .card-title {
                 font-size: 20px;
             }
-            .hero-card img {
+            .featured-main-card img {
                 height: 300px;
-            }
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .social-links {
-                justify-content: center;
             }
             .widgets-row {
                 flex-direction: column;
+            }
+            .video-card-bottom iframe {
+                height: 250px;
+            }
+            .category-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
             }
         }
     </style>
@@ -708,7 +709,7 @@
         <div class="search-wrapper">
             <i class="fas fa-search"></i>
             <div class="search-box">
-                <input type="text" placeholder="Мэдээ, сэдэв, зохиолч хайх..." id="searchInput">
+                <input type="text" placeholder="Мэдээ, сэдэв хайх..." id="searchInput">
             </div>
         </div>
         <nav>
@@ -739,76 +740,46 @@
     </div>
 </div>
 
-<div class="category-tabs" id="categoryTabs"></div>
+<div class="category-tabs" id="categoryTabs">
+    <button class="tab-button active" onclick="showCategory('all')">🌍 Бүх мэдээ</button>
+</div>
 
-<div class="main-container" id="mainContainer">
-    <div id="allNewsSection">
-        <div class="two-column-layout">
-            <div class="main-content-area">
-                <div class="featured-grid" id="featuredGrid"></div>
-                <div class="news-grid" id="newsGrid"></div>
-            </div>
-            <div class="sidebar-widget" id="sidebarContainer"></div>
+<div class="main-container" id="categoryContentWrapper">
+    <div class="category-section active" id="allNewsSection">
+        <div class="main-content-area">
+            <div class="featured-block-container" id="featuredBlock"></div>
+            <div class="grid" id="newsGrid"></div>
         </div>
+        <div class="sidebar-container" id="sidebarContainer"></div>
     </div>
 </div>
 
-<div class="authors-section" id="authorsSection">
-    <h2 class="authors-title">📰 Манай зохиолчид</h2>
-    <div class="authors-grid" id="authorsContainer"></div>
+<div class="authors-container" id="authorsContainer">
+    <h3>📰 Манай зохиолчид</h3>
+    <div class="authors-grid" id="authorsGrid"></div>
 </div>
 
-<div class="video-section" id="videoContainer" style="display: none;">
-    <h3>🎬 Онцлох видео</h3>
+<div class="video-card-bottom" id="videoContainer" style="display: none;">
+    <h3>🎥 Онцлох видео</h3>
     <iframe id="videoIframe" allowfullscreen></iframe>
 </div>
 
 <div class="pagination" id="pagination"></div>
 
-<footer>
-    <div class="footer-content">
-        <div class="footer-col">
-            <h4>urtuuch.mn</h4>
-            <p>Шинэ соргог мэдээллийг цаг алдалгүй хүргэж байна.</p>
-            <div class="social-links">
-                <a href="#"><i class="fab fa-facebook"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-youtube"></i></a>
-            </div>
-        </div>
-        <div class="footer-col">
-            <h4>Холбоос</h4>
-            <p><a href="#">Бидний тухай</a></p>
-            <p><a href="#">Зар сурталчилгаа</a></p>
-            <p><a href="#">Холбоо барих</a></p>
-            <p><a href="#">Нууцлалын бодлого</a></p>
-        </div>
-        <div class="footer-col">
-            <h4>Холбоо барих</h4>
-            <p><i class="fas fa-phone"></i> 94344777</p>
-            <p><i class="fab fa-facebook"></i> urtuuch.mn</p>
-            <p><i class="fas fa-map-marker-alt"></i> Арвайхээр хот</p>
-        </div>
-        <div class="footer-col">
-            <h4>Цагийн хуваарь</h4>
-            <p>Даваа - Баасан: 09:00 - 18:00</p>
-            <p>Бямба: 10:00 - 16:00</p>
-            <p>Ням: Амарна</p>
-        </div>
-    </div>
-    <div class="copyright">
-        &copy; 2024 urtuuch.mn. Бүх эрх хуулиар хамгаалагдсан.
-    </div>
-</footer>
+<div class="contact">
+    <h3>Холбоо барих</h3>
+    <p><i class="fas fa-phone"></i> Утас: 94344777</p>
+    <p><i class="fab fa-facebook"></i> Face: urtuuch.mn</p>
+    <p><i class="fas fa-map-marker-alt"></i> Хаяг: Арвайхээр хот</p>
+</div>
 
-<div class="modal" id="newsModal">
-    <div class="modal-content">
-        <span class="modal-close" id="newsModalClose">&times;</span>
-        <h2 id="modalTitle" style="margin-bottom: 12px;"></h2>
-        <div id="modalMeta" style="color: var(--text-secondary); margin-bottom: 16px;"></div>
-        <div id="modalShare" style="display: flex; gap: 16px; margin-bottom: 20px;"></div>
-        <img id="modalImage" style="width: 100%; border-radius: 20px; margin-bottom: 20px;">
+<div id="newsModal">
+    <div id="newsModalContent">
+        <span id="newsModalClose">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <div id="modalMeta" style="color: var(--text-secondary); font-size: 13px; margin-bottom: 15px;"></div>
+        <div id="modalShare" style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;"></div>
+        <img id="modalImage" src="">
         <div id="modalContent" style="line-height: 1.7;"></div>
     </div>
 </div>
@@ -837,107 +808,145 @@
         if (!error) authorsData = data;
     }
 
-    function createNewsCard(news) {
-        const card = document.createElement('div');
-        card.className = 'news-card';
-        card.onclick = () => openModal(news.id);
-        card.innerHTML = `
-            <img src="${news.image || 'https://placehold.co/400x250?text=urtuuch.mn'}" loading="lazy">
-            <div class="news-card-content">
-                <span class="news-category">${news.category || 'Мэдээ'}</span>
-                <h3 class="news-title">${news.title}</h3>
-                <div class="news-meta">
+    function createNewsCard(news, type = 'normal') {
+        const div = document.createElement('div');
+        div.className = 'card';
+        if (type === 'sub_featured') div.classList.add('sub-featured-card');
+        div.onclick = () => openModal(news.id);
+        
+        const imgHtml = news.image ? `<img src="${news.image}" alt="${news.title}" loading="lazy">` : '<img src="https://placehold.co/400x250?text=urtuuch.mn" loading="lazy">';
+        
+        div.innerHTML = `
+            ${imgHtml}
+            <div class="card-content">
+                <h3 class="card-title">${news.title}</h3>
+                <div class="card-meta">
+                    <span class="category-badge">${news.category || 'Мэдээ'}</span>
                     <span><i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')}</span>
                 </div>
             </div>
         `;
-        return card;
+        return div;
     }
 
-    function renderFeatured() {
-        const featured = newsData.find(n => n.card_type === 'featured_large');
-        const featuredGrid = document.getElementById('featuredGrid');
-        if (!featured) return;
-        
-        const heroHtml = `
-            <div class="hero-card" onclick="openModal(${featured.id})">
-                <img src="${featured.image}" alt="${featured.title}">
-                <div class="hero-overlay">
-                    <span class="hero-category">${featured.category}</span>
-                    <h1 class="hero-title">${featured.title}</h1>
-                    <div class="hero-meta">${new Date(featured.created_at).toLocaleDateString('mn-MN')}</div>
+    function createFeaturedSidebarCard(news) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.onclick = () => openModal(news.id);
+        div.innerHTML = `
+            <img src="${news.image || 'https://placehold.co/100x100'}" alt="${news.title}">
+            <div class="card-content">
+                <h3 class="card-title">${news.title.substring(0, 80)}</h3>
+                <div class="card-meta">
+                    <span>${new Date(news.created_at).toLocaleDateString('mn-MN')}</span>
                 </div>
             </div>
         `;
+        return div;
+    }
+
+    function renderMainPage() {
+        const featuredBlock = document.getElementById('featuredBlock');
+        const newsGrid = document.getElementById('newsGrid');
         
-        const sideNews = newsData.filter(n => n.card_type === 'sub_featured' && n.id !== featured.id).slice(0, 3);
-        let sideHtml = '<div class="sidebar-featured">';
-        sideNews.forEach(n => {
-            sideHtml += `
-                <div class="mini-card" onclick="openModal(${n.id})">
-                    <img src="${n.image || 'https://placehold.co/100x100'}" alt="${n.title}">
-                    <div class="mini-card-content">
-                        <div class="mini-card-title">${n.title.substring(0, 60)}</div>
-                        <div style="font-size: 11px; color: var(--text-secondary);">${new Date(n.created_at).toLocaleDateString('mn-MN')}</div>
+        if (!featuredBlock || !newsGrid) return;
+        
+        featuredBlock.innerHTML = '';
+        newsGrid.innerHTML = '';
+        
+        const mainFeatured = newsData.find(n => n.card_type === 'featured_large');
+        const sidebarFeatured = newsData.filter(n => n.card_type === 'sub_featured' && n.id !== mainFeatured?.id).slice(0, 4);
+        const start = (currentPage - 1) * PER_PAGE;
+        const normalNews = newsData.filter(n => n.card_type !== 'featured_large' && n.card_type !== 'sub_featured').slice(start, start + PER_PAGE);
+        
+        // Featured Block
+        if (mainFeatured) {
+            const mainCard = document.createElement('div');
+            mainCard.className = 'featured-main-card';
+            mainCard.onclick = () => openModal(mainFeatured.id);
+            mainCard.innerHTML = `
+                <img src="${mainFeatured.image}" alt="${mainFeatured.title}">
+                <div class="card-content">
+                    <span class="category-badge" style="background: #e74c3c;">ОНЦЛОХ | ${mainFeatured.category}</span>
+                    <h2 class="card-title">${mainFeatured.title}</h2>
+                    <div class="card-meta" style="color: rgba(255,255,255,0.8);">
+                        <span>${new Date(mainFeatured.created_at).toLocaleDateString('mn-MN')}</span>
                     </div>
                 </div>
             `;
-        });
-        sideHtml += '</div>';
+            featuredBlock.appendChild(mainCard);
+            
+            const sideDiv = document.createElement('div');
+            sideDiv.className = 'featured-sidebar';
+            sidebarFeatured.forEach(n => {
+                sideDiv.appendChild(createFeaturedSidebarCard(n));
+            });
+            featuredBlock.appendChild(sideDiv);
+        }
         
-        featuredGrid.innerHTML = heroHtml + sideHtml;
-    }
-
-    function renderNewsGrid() {
-        const start = (currentPage - 1) * PER_PAGE;
-        const paginated = newsData.slice(start, start + PER_PAGE);
-        const grid = document.getElementById('newsGrid');
-        grid.innerHTML = '';
-        paginated.forEach(news => {
-            if (news.card_type !== 'featured_large' && news.card_type !== 'sub_featured') {
-                grid.appendChild(createNewsCard(news));
-            }
+        // Normal News
+        normalNews.forEach(news => {
+            newsGrid.appendChild(createNewsCard(news));
         });
+        
+        renderSidebar();
+        renderPagination();
     }
 
     function renderSidebar() {
         const sidebar = document.getElementById('sidebarContainer');
-        const latest = newsData.slice(0, 5);
-        sidebar.innerHTML = `
-            <h3 class="sidebar-title"><i class="fas fa-fire"></i> Сүүлийн мэдээ</h3>
-            ${latest.map(n => `
-                <div class="sidebar-news-item" onclick="openModal(${n.id})">
-                    <img class="sidebar-news-img" src="${n.image || 'https://placehold.co/70x70'}" alt="${n.title}">
-                    <div>
-                        <div class="sidebar-news-title">${n.title.substring(0, 80)}</div>
-                        <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">${new Date(n.created_at).toLocaleDateString('mn-MN')}</div>
+        if (!sidebar) return;
+        
+        const latestNews = newsData.slice(0, 5);
+        sidebar.innerHTML = '<h3><i class="fas fa-fire"></i> Сүүлийн мэдээ</h3>';
+        
+        latestNews.forEach(n => {
+            sidebar.innerHTML += `
+                <div class="latest-news-item" onclick="openModal(${n.id})">
+                    <div class="sidebar-img-wrapper">
+                        <img src="${n.image || 'https://placehold.co/70x70'}" alt="${n.title}">
+                    </div>
+                    <div class="sidebar-content-wrapper">
+                        <a href="javascript:void(0)">${n.title.substring(0, 70)}</a>
+                        <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">
+                            ${new Date(n.created_at).toLocaleDateString('mn-MN')}
+                        </div>
                     </div>
                 </div>
-            `).join('')}
-        `;
+            `;
+        });
     }
 
     function renderAuthors() {
-        const container = document.getElementById('authorsContainer');
+        const container = document.getElementById('authorsGrid');
+        if (!container) return;
+        
         container.innerHTML = authorsData.map(a => `
             <div class="author-card">
                 <img src="${a.image || 'https://i.pravatar.cc/80'}" alt="${a.name}">
                 <div class="author-name">${a.name}</div>
-                <div style="font-size: 11px; color: var(--text-secondary);">${a.title}</div>
+                <div class="author-title">${a.title}</div>
             </div>
         `).join('');
     }
 
     function renderPagination() {
         const container = document.getElementById('pagination');
-        const total = Math.ceil(newsData.filter(n => n.card_type !== 'featured_large' && n.card_type !== 'sub_featured').length / PER_PAGE);
+        const normalNewsCount = newsData.filter(n => n.card_type !== 'featured_large' && n.card_type !== 'sub_featured').length;
+        const totalPages = Math.ceil(normalNewsCount / PER_PAGE);
         container.innerHTML = '';
-        for (let i = 1; i <= total; i++) {
+        
+        if (totalPages <= 1) return;
+        
+        for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement('button');
-            btn.className = 'page-btn';
             btn.textContent = i;
             if (i === currentPage) btn.classList.add('active');
-            btn.onclick = () => { currentPage = i; renderNewsGrid(); renderPagination(); window.scrollTo(0, 0); };
+            btn.onclick = () => {
+                currentPage = i;
+                renderMainPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
             container.appendChild(btn);
         }
     }
@@ -959,143 +968,212 @@
         container.style.display = 'none';
     }
 
-    function generateTabs() {
+    function generateCategoryTabs() {
         const tabsContainer = document.getElementById('categoryTabs');
         const categories = [...new Set(newsData.map(n => n.category).filter(Boolean))];
-        const allBtn = document.createElement('button');
-        allBtn.className = 'tab-button active';
-        allBtn.innerHTML = '<i class="fas fa-globe"></i> Бүх мэдээ';
-        allBtn.onclick = () => {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            allBtn.classList.add('active');
-            document.getElementById('allNewsSection').style.display = 'block';
-            renderFeatured();
-            renderNewsGrid();
-            renderSidebar();
-            renderVideo();
-            renderPagination();
-        };
-        tabsContainer.appendChild(allBtn);
         
         categories.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'tab-button';
             btn.textContent = cat;
-            btn.onclick = () => {
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('allNewsSection').style.display = 'block';
-                const filtered = newsData.filter(n => n.category === cat && n.card_type !== 'featured_large');
-                const grid = document.getElementById('newsGrid');
-                grid.innerHTML = '';
-                filtered.forEach(n => grid.appendChild(createNewsCard(n)));
-                document.getElementById('featuredGrid').innerHTML = '';
-                document.getElementById('videoContainer').style.display = 'none';
-                document.getElementById('pagination').style.display = 'none';
-            };
+            btn.onclick = () => showCategory(cat);
             tabsContainer.appendChild(btn);
         });
     }
 
-    window.openModal = async function(id) {
+    window.showCategory = function(categoryName) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.category-section').forEach(section => section.classList.remove('active'));
+        
+        let activeBtn = null;
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            if (btn.textContent === categoryName || (categoryName === 'all' && btn.textContent === '🌍 Бүх мэдээ')) {
+                activeBtn = btn;
+            }
+        });
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        if (categoryName === 'all') {
+            const allSection = document.getElementById('allNewsSection');
+            allSection.classList.add('active');
+            renderMainPage();
+            renderVideo();
+            document.getElementById('pagination').style.display = 'flex';
+        } else {
+            const filteredNews = newsData.filter(n => n.category === categoryName);
+            const tempContainer = document.createElement('div');
+            tempContainer.className = 'grid category-section active';
+            tempContainer.id = `category-${categoryName.replace(/\s/g, '')}`;
+            filteredNews.forEach(news => {
+                tempContainer.appendChild(createNewsCard(news));
+            });
+            
+            const wrapper = document.getElementById('categoryContentWrapper');
+            document.querySelectorAll('.grid.category-section:not(#allNewsSection)').forEach(el => el.remove());
+            wrapper.appendChild(tempContainer);
+            
+            document.getElementById('videoContainer').style.display = 'none';
+            document.getElementById('pagination').style.display = 'none';
+        }
+    };
+
+    function getYouTubeEmbedHtml(videoUrl) {
+        if (!videoUrl) return '';
+        try {
+            let videoId = null;
+            const url = new URL(videoUrl);
+            if (url.hostname.includes('youtube.com')) {
+                videoId = url.searchParams.get('v');
+            } else if (url.hostname === 'youtu.be') {
+                videoId = url.pathname.substring(1);
+            }
+            if (!videoId) return '';
+            return `
+                <div class="modal-video-container">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                </div>
+            `;
+        } catch(e) {
+            return '';
+        }
+    }
+
+    window.openModal = function(id) {
         const news = newsData.find(n => n.id === id);
         if (!news) return;
+        
         const author = authorsData.find(a => a.id === news.author_id) || { name: "Сэтгүүлч" };
+        const videoHtml = getYouTubeEmbedHtml(news.video_link);
+        
         document.getElementById('modalTitle').innerText = news.title;
         document.getElementById('modalImage').src = news.image || '';
-        document.getElementById('modalMeta').innerHTML = `<i class="fas fa-tag"></i> ${news.category} | <i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString()} | <i class="fas fa-user"></i> ${author.name}`;
+        document.getElementById('modalMeta').innerHTML = `
+            <i class="fas fa-tag"></i> ${news.category} | 
+            <i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')} | 
+            <i class="fas fa-user"></i> ${author.name}
+        `;
         
-        let videoHtml = '';
-        if (news.video_link) {
-            let vid = '';
-            if (news.video_link.includes('v=')) vid = new URL(news.video_link).searchParams.get('v');
-            else if (news.video_link.includes('youtu.be')) vid = news.video_link.split('/').pop();
-            if (vid) videoHtml = `<iframe width="100%" height="350" src="https://www.youtube.com/embed/${vid}" frameborder="0" allowfullscreen style="border-radius: 20px; margin-bottom: 20px;"></iframe>`;
-        }
         document.getElementById('modalContent').innerHTML = videoHtml + (news.description || 'Агуулга байхгүй');
         
         const shareContainer = document.getElementById('modalShare');
         const currentUrl = `${window.location.origin}${window.location.pathname}?id=${news.id}`;
         shareContainer.innerHTML = `
             <strong>Хуваалцах:</strong>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}" target="_blank"><i class="fab fa-facebook" style="font-size: 20px; color: #1877f2;"></i></a>
-            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}" target="_blank"><i class="fab fa-twitter" style="font-size: 20px; color: #1da1f2;"></i></a>
-            <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}" target="_blank"><i class="fab fa-linkedin" style="font-size: 20px; color: #0077b5;"></i></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}" target="_blank"><i class="fab fa-facebook" style="font-size: 22px; color: #1877f2;"></i></a>
+            <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}" target="_blank"><i class="fab fa-twitter" style="font-size: 22px; color: #1da1f2;"></i></a>
         `;
+        
         document.getElementById('newsModal').style.display = 'flex';
-        history.pushState({ id: news.id }, '', `?id=${news.id}`);
+        history.pushState({ id: news.id }, news.title, `?id=${news.id}`);
     };
 
     document.getElementById('newsModalClose').onclick = () => {
         document.getElementById('newsModal').style.display = 'none';
-        history.pushState({}, '', window.location.pathname);
+        history.pushState({}, document.title, window.location.pathname);
     };
-    window.onclick = (e) => { if (e.target.classList.contains('modal')) document.getElementById('newsModal').style.display = 'none'; };
+    
+    window.onclick = (e) => {
+        if (e.target === document.getElementById('newsModal')) {
+            document.getElementById('newsModal').style.display = 'none';
+            history.pushState({}, document.title, window.location.pathname);
+        }
+    };
+
+    function displayFilteredNews(filteredData) {
+        const newsGrid = document.getElementById('newsGrid');
+        const featuredBlock = document.getElementById('featuredBlock');
+        const sidebar = document.getElementById('sidebarContainer');
+        
+        featuredBlock.innerHTML = '';
+        newsGrid.innerHTML = '';
+        sidebar.innerHTML = '';
+        document.getElementById('videoContainer').style.display = 'none';
+        document.getElementById('pagination').style.display = 'none';
+        
+        if (!filteredData || filteredData.length === 0) {
+            newsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 50px;">Хайлтаар мэдээ олдсонгүй.</p>';
+            return;
+        }
+        
+        filteredData.forEach(news => {
+            newsGrid.appendChild(createNewsCard(news));
+        });
+    }
 
     async function getWeather() {
         const el = document.getElementById('weatherText');
         try {
             const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Ulaanbaatar&appid=${OPENWEATHER_API_KEY}&units=metric&lang=mn`);
             const data = await res.json();
-            if (data.main) el.innerHTML = `<i class="fas fa-temperature-high"></i> ${Math.round(data.main.temp)}°C · ${data.weather[0].description}`;
-        } catch(e) { el.innerHTML = '🌧️ Цаг агаар авахгүй байна'; }
+            if (data.main) {
+                el.innerHTML = `<i class="fas fa-temperature-high"></i> ${Math.round(data.main.temp)}°C · ${data.weather[0].description}`;
+            }
+        } catch(e) {
+            el.innerHTML = '🌧️ Цаг агаар авахгүй байна';
+        }
     }
 
-    function updateTime() {
+    function updateDateTime() {
         const now = new Date();
-        document.getElementById('dateTimeText').innerHTML = `<i class="far fa-clock"></i> ${now.toLocaleDateString('mn-MN')} · ${now.toLocaleTimeString('mn-MN')}`;
+        const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+        const dateString = now.toLocaleDateString('mn-MN', dateOptions);
+        const timeString = now.toLocaleTimeString('mn-MN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('dateTimeText').innerHTML = `<i class="far fa-clock"></i> ${dateString} · ${timeString}`;
     }
 
     function initTicker() {
         const ticker = document.getElementById('tickerContent');
-        const msg = "🔥 ӨРТӨӨЧ.МН · 24/7 ШИНЭ МЭДЭЭ · НЭЭЛТТЭЙ СЭТГЭЛГЭЭТЭЙ · ТАНЫ ДЭМЖИГЧ ✨ ➡️ ";
+        const msg = "ӨРТӨӨЧ.МН МЭДЭЭЛЛИЙН САЙТ ✨ САЙН САЙХАН ИРЭЭДҮЙД ТАНЫГ ӨРТӨӨЛНӨ 🚀 ➡️ ";
         ticker.innerHTML = `<span>${msg}</span><span>${msg}</span><span>${msg}</span>`;
     }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase();
-        if (!val) {
-            renderFeatured();
-            renderNewsGrid();
-            renderSidebar();
-            return;
+        const keyword = e.target.value.toLowerCase();
+        if (keyword === '') {
+            showCategory('all');
+        } else {
+            const filtered = newsData.filter(n => n.title.toLowerCase().includes(keyword));
+            displayFilteredNews(filtered);
         }
-        const filtered = newsData.filter(n => n.title.toLowerCase().includes(val));
-        const grid = document.getElementById('newsGrid');
-        grid.innerHTML = '';
-        filtered.forEach(n => grid.appendChild(createNewsCard(n)));
-        document.getElementById('featuredGrid').innerHTML = '';
-        document.getElementById('videoContainer').style.display = 'none';
-        document.getElementById('pagination').style.display = 'none';
     });
 
-    window.addEventListener('popstate', () => {
-        if (window.location.search.includes('id')) {
-            const id = new URLSearchParams(window.location.search).get('id');
-            if (id) window.openModal(parseInt(id));
-        } else document.getElementById('newsModal').style.display = 'none';
+    function checkUrlForNewsId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const newsId = urlParams.get('id');
+        if (newsId && newsData.length > 0) {
+            const item = newsData.find(n => n.id === parseInt(newsId));
+            if (item) {
+                setTimeout(() => openModal(item.id), 100);
+            } else {
+                history.pushState({}, document.title, window.location.pathname);
+            }
+        }
+    }
+
+    window.addEventListener('popstate', (event) => {
+        if (window.location.search.includes('id=')) {
+            checkUrlForNewsId();
+        } else {
+            document.getElementById('newsModal').style.display = 'none';
+            showCategory('all');
+        }
     });
 
     async function init() {
         await fetchAuthors();
         await fetchNews();
         renderAuthors();
-        generateTabs();
-        renderFeatured();
-        renderNewsGrid();
-        renderSidebar();
-        renderPagination();
+        generateCategoryTabs();
+        showCategory('all');
         renderVideo();
         getWeather();
         setInterval(getWeather, 1800000);
-        updateTime();
-        setInterval(updateTime, 1000);
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
         initTicker();
-        if (window.location.search.includes('id')) {
-            const id = new URLSearchParams(window.location.search).get('id');
-            if (id) setTimeout(() => window.openModal(parseInt(id)), 500);
-        }
+        checkUrlForNewsId();
     }
+    
     init();
 </script>
 </body>

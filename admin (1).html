@@ -3,795 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ Панел (Хуудаслалттай)</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
+    <title>Мэдээний сайт</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Ubuntu', sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-        header { 
-            background: #3d85c6; 
-            color: #fff; 
-            padding: 15px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 8px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { padding: 8px 15px; margin-right: 5px; border: none; border-radius: 8px; cursor: pointer; background: #6fa8dc; color: #fff; transition: background 0.3s; }
-        button:hover { background: #3d85c6; }
-        button:disabled { background: #ccc; cursor: not-allowed; } /* Хуудаслалтын товчийг идэвхгүй болгох CSS */
-        
-        #logoutButton {
-            background: #ff5252;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 8px;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        /* Мэдээний жагсаалт */
+        .news-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             cursor: pointer;
-            color: #fff;
-            transition: background 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        #logoutButton:hover {
-            background: #e04040;
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-        
-        .list-item { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        #editor { height: 150px; }
-        .group-title { font-weight: bold; margin-top: 20px; color: #3d85c6; border-bottom: 2px solid #3d85c6; padding-bottom: 5px; }
-        .search-input { margin-bottom: 10px; padding: 8px; width: 100%; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;}
-        .checkbox-group { display: flex; gap: 20px; margin: 10px 0; }
-        #imageUpload { padding: 4px; height: auto; }
+
+        .news-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .news-card-content {
+            padding: 20px;
+        }
+
+        .news-card-category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .news-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .news-card-meta {
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        /* Модал цонх */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 16px;
+            margin: 30px auto;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 32px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: auto;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .modal-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-meta i {
+            margin-right: 5px;
+        }
+
+        .modal-description {
+            line-height: 1.8;
+            color: #444;
+            font-size: 16px;
+        }
+
+        .share-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .share-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .share-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .share-facebook { background: #1877f2; color: white; }
+        .share-twitter { background: #1da1f2; color: white; }
+        .share-whatsapp { background: #25D366; color: white; }
+        .share-copy { background: #64748b; color: white; }
+
+        /* Footer */
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
 
         @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-            .card { grid-column: span 1 !important; }
+            .news-container {
+                grid-template-columns: 1fr;
+            }
+            .modal-body {
+                padding: 20px;
+            }
+            .modal-title {
+                font-size: 22px;
+            }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Админ Панел</h1>
-    <button id="logoutButton" onclick="handleLogout()" style="display: none;">Гарах</button>
-</header>
-
-<div id="loginFormContainer">
-    <div class="card" style="max-width: 400px; margin: 50px auto; text-align: center;">
-        <h2>Админ Нэвтрэх</h2>
-        <input id="loginEmail" type="email" placeholder="И-мэйл" required>
-        <input id="loginPassword" type="password" placeholder="Нууц үг" required>
-        <button onclick="handleLogin()">Нэвтрэх</button>
-        <p id="loginError" style="color: red; margin-top: 10px;"></p>
+    <div class="header">
+        <h1><i class="fas fa-newspaper"></i> Мэдээний төв</h1>
+        <p>Хамгийн сүүлийн үеийн мэдээ, мэдээлэл</p>
     </div>
-</div>
 
-<div class="container" id="adminContent" style="display: none;">
+    <div class="news-container" id="newsContainer"></div>
 
-    <div class="card">
-        <h2>Мэдээ нэмэх / засах</h2>
-        <input type="hidden" id="editIndex">
-        <input id="newsTitle" placeholder="Гарчиг">
-        <input id="newsSlugInput" placeholder="Slug (Автоматаар үүснэ)" style="margin-top: 0px;" readonly> 
+    <div class="footer">
+        <p>&copy; 2024 Мэдээний төв. Бүх эрх хуулиар хамгаалагдсан.</p>
+    </div>
 
-        <select id="newsCategory">
-            <option value="">Ангилал</option>
-            <option>Улс төр</option>
-            <option>Эдийн засаг</option>
-             <option>Нийгэм</option>
-            <option>Соёл урлаг</option>
-            <option>Медиа</option>
-             <option>Спорт</option>
-            <option>Дэлхий дахинд</option>
-            <option>Ярилцлага</option>
-        </select>
-        
-        <div style="margin: 10px 0;">
-            <label for="imageUpload">Зураг сонгох:</label>
-            <input type="file" id="imageUpload" accept="image/*" style="padding: 4px; height: auto;">
-            <button id="uploadButton" type="button" style="background: #2ecc71;">Зураг оруулах</button>
-            <div id="uploadStatus" style="font-size: 12px; margin-top: 5px;"></div>
-            <img id="previewImage" src="" style="max-width: 150px; height: auto; margin-top: 10px; border-radius: 8px; display: none;">
-            
-            <input type="hidden" id="newsImage" value=""> 
-            
-            <input type="text" id="newsImageURLManual" placeholder="Эсвэл Зураг URL-ийг гараар оруулна уу" style="margin-top: 10px;">
+    <!-- Модал цонх -->
+    <div id="newsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <img id="modalImage" class="modal-image" src="" alt="">
+            <div class="modal-body">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <div id="modalMeta" class="modal-meta"></div>
+                <div id="modalContent" class="modal-description"></div>
+                <div id="modalShare" class="share-section">
+                    <span class="share-label"><i class="fas fa-share-alt"></i> Хуваалцах:</span>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <input type="text" id="newsVideoLink" placeholder="YouTube Видео Линк (Бүтэн URL: https://www.youtube.com/watch?v=...)">
-
-
-        <select id="newsCardType">
-            <option value="normal">Энгийн мэдээ (Normal)</option>
-            <option value="sub_featured">Дэд онцлох (Sub-Featured)</option>
-            <option value="featured_large">Онцлох Том Карт (Featured Large)</option>
-        </select>
-        <div id="editor"></div>
-        <select id="newsAuthor"></select>
+    <script>
+        // ==================== ӨГӨГДӨЛ ====================
         
-        <div class="checkbox-group">
-            <label><input type="checkbox" id="newsFeatured"> Онцлох</label>
-            <label><input type="checkbox" id="newsActive"> Идэвхтэй / Нийтлэх</label> 
-        </div>
-        
-        <button onclick="saveNews()">Хадгалах</button>
-        <button onclick="clearNewsForm()">Цэвэрлэх</button>
-    </div>
+        // Зохиолчдын өгөгдөл
+        const authorsData = [
+            { id: 1, name: "Баттулга" },
+            { id: 2, name: "Сарнай" },
+            { id: 3, name: "Энхбат" },
+            { id: 4, name: "Номин" }
+        ];
 
-    <div class="card">
-        <h2>Нийтлэлч</h2>
-        <input type="hidden" id="editAuthorIndex">
-        <input id="authorName" placeholder="Нэр">
-        <input id="authorTitle" placeholder="Албан тушаал">
-        <input id="authorImage" placeholder="Зураг">
-        <button onclick="saveAuthor()">Хадгалах</button>
-        <button onclick="clearAuthorForm()">Цэвэрлэх</button>
-    </div>
+        // Мэдээний өгөгдөл
+        const newsData = [
+            {
+                id: 1,
+                title: "Шинэ технологийн дэвшил: Хиймэл оюун ухаан",
+                category: "Технологи",
+                image: "https://picsum.photos/id/1/800/450",
+                description: "Хиймэл оюун ухаан нь өдөр бүр шинэ боломжуудыг нээж байна. Энэхүү технологи нь эрүүл мэнд, боловсрол, тээвэр зэрэг олон салбарт хувьсгал хийж байна. Сүүлийн үеийн судалгаагаар хиймэл оюун ухааны зах зээл 2030 он гэхэд 1.8 их наяд долларт хүрэх төлөвтэй байна.",
+                video_link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                author_id: 1,
+                created_at: "2024-01-15T10:30:00"
+            },
+            {
+                id: 2,
+                title: "Уур амьсгалын өөрчлөлт: Дэлхий нийтийн сорилт",
+                category: "Байгаль орчин",
+                image: "https://picsum.photos/id/15/800/450",
+                description: "Дэлхийн дулаарал нь хүн төрөлхтний тулгарч буй хамгийн том сорилтын нэг болоод байна. Ногоон энергид шилжих, нүүрстөрөгчийн ялгаралтыг бууруулах зэрэг арга хэмжээнүүдийг дэлхий нийтийн хэмжээнд авч хэрэгжүүлж байна.",
+                video_link: "",
+                author_id: 2,
+                created_at: "2024-01-14T14:20:00"
+            },
+            {
+                id: 3,
+                title: "Спорт: Шигшээ багийн амжилт",
+                category: "Спорт",
+                image: "https://picsum.photos/id/29/800/450",
+                description: "Монголын шигшээ баг олон улсын тэмцээнд түрүүлж, улсынхаа нэр хүндийг өндөрт өргөв. Багийн гишүүд шаргуу бэлтгэлийн үр дүнд амжилттай оролцож, алтан медаль хүртлээ.",
+                video_link: "https://youtu.be/dQw4w9WgXcQ",
+                author_id: 3,
+                created_at: "2024-01-13T09:15:00"
+            },
+            {
+                id: 4,
+                title: "Эдийн засгийн өсөлт: Шинэ боломжууд",
+                category: "Эдийн засаг",
+                image: "https://picsum.photos/id/20/800/450",
+                description: "Улсын эдийн засаг өнгөрсөн улиралд 5.2 хувиар өссөн нь сүүлийн 5 жилийн хамгийн өндөр үзүүлэлт юм. Энэ нь гадаад хөрөнгө оруулалт нэмэгдэж, дотоодын үйлдвэрлэл идэвхжсэнтэй холбоотой.",
+                video_link: "",
+                author_id: 4,
+                created_at: "2024-01-12T11:45:00"
+            },
+            {
+                id: 5,
+                title: "Боловсролын шинэчлэл: Цахим сургалт",
+                category: "Боловсрол",
+                image: "https://picsum.photos/id/26/800/450",
+                description: "Боловсролын салбарт цахим сургалтын систем нэвтрүүлж, сурагчдын мэдлэг чадварыг дээшлүүлэхэд анхаарч байна. Шинэ систем нь хичээлийн агуулгыг илүү сонирхолтой, хүртээмжтэй болгож байна.",
+                video_link: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                author_id: 1,
+                created_at: "2024-01-11T08:00:00"
+            }
+        ];
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Системийн Хэрэглэгчид (Supabase Auth)</h2>
-        <button onclick="openAddUserModal()">+ Хэрэглэгч Нэмэх</button>
-        <div id="authUsersList"></div>
-    </div>
-    
-    <div class="card" style="grid-column: span 2;">
-        <input type="text" id="searchInput" class="search-input" placeholder="Мэдээ хайх...">
-    </div>
+        // ==================== HTML-ийг аюулгүй болгох функц ====================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Мэдээ</h2>
-        <div id="newsList"></div>
-    </div>
+        // ==================== YouTube embed HTML авах функц ====================
+        function getYouTubeEmbedHtml(videoLink) {
+            if (!videoLink) return '';
+            
+            let videoId = null;
+            
+            // YouTube холбоосноос ID гаргаж авах
+            if (videoLink.includes('youtube.com/watch')) {
+                const urlParams = new URLSearchParams(videoLink.split('?')[1]);
+                videoId = urlParams.get('v');
+            } else if (videoLink.includes('youtu.be/')) {
+                videoId = videoLink.split('youtu.be/')[1]?.split('?')[0];
+            } else if (videoLink.includes('embed/')) {
+                videoId = videoLink.split('embed/')[1]?.split('?')[0];
+            }
+            
+            if (videoId) {
+                return `<div style="margin-bottom: 20px; position: relative; padding-bottom: 56.25%; height: 0;">
+                            <iframe src="https://www.youtube.com/embed/${videoId}" 
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+                                    frameborder="0" 
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                            </iframe>
+                        </div>`;
+            }
+            
+            return '';
+        }
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Нийтлэлчид</h2>
-        <div id="authorList"></div>
-    </div>
-
-</div>
-
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> 
-
-<script>
-// ===================================================
-// GLOBAL CONFIG & VARIABLES
-// ===================================================
-
-// Хуудаслалтын хувьсагчууд 
-let currentPage = 1; 
-const newsPerPage = 30; // Нэг хуудсанд харуулах мэдээний тоо
-
-// DOM элементүүд
-const newsTitle = document.getElementById("newsTitle");
-const newsSlugInput = document.getElementById("newsSlugInput");
-const newsCategory = document.getElementById("newsCategory");
-const newsImage = document.getElementById("newsImage"); 
-const newsCardType = document.getElementById("newsCardType"); 
-const newsAuthor = document.getElementById("newsAuthor");
-const newsFeatured = document.getElementById("newsFeatured");
-const newsActive = document.getElementById("newsActive"); 
-const newsList = document.getElementById("newsList");
-const editIndex = document.getElementById("editIndex");
-
-const authorName = document.getElementById("authorName");
-const authorTitle = document.getElementById("authorTitle");
-const authorImage = document.getElementById("authorImage");
-const editAuthorIndex = document.getElementById("editAuthorIndex");
-const authorList = document.getElementById("authorList");
-
-const searchInput = document.getElementById("searchInput");
-
-// Нэвтрэх хэсгийн DOM элементүүд
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginError = document.getElementById("loginError");
-const loginFormContainer = document.getElementById("loginFormContainer");
-const adminContent = document.getElementById("adminContent");
-const logoutButton = document.getElementById("logoutButton");
-const authUsersList = document.getElementById("authUsersList");
-
-// Зураг Upload хийх DOM элементүүд
-const imageUploadInput = document.getElementById('imageUpload');
-const uploadButton = document.getElementById('uploadButton');
-const uploadStatus = document.getElementById('uploadStatus');
-const previewImage = document.getElementById('previewImage');
-const newsImageURLManual = document.getElementById('newsImageURLManual');
-
-const newsVideoLink = document.getElementById("newsVideoLink");
-
-
-// Supabase client 
-const supabaseUrl = "https://wpotnvekaoosdkvmhqgo.supabase.co"; 
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indwb3RudmVrYW9vc2Rrdm1ocWdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTU3NjQsImV4cCI6MjA4MDU5MTc2NH0.YIpy_IA9nNseYUJB3Y-adxgv9btgAt5IKP5FJpafNC0";
-
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey); 
-const BUCKET_NAME = 'news_images'; 
-
-// ===================================================
-// Quill Editor Setup
-// ===================================================
-const AlignStyle = Quill.import('attributors/style/align');
-AlignStyle.whitelist = ['right', 'center', 'justify']; 
-Quill.register(AlignStyle, true);
-
-const quill = new Quill("#editor", { 
-    theme: "snow",
-    modules: {
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'], 
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'align': [] }], 
-            ['link', 'image'],
-            ['clean']
-        ]
-    }
-});
-
-// ---------------------------------------------------
-// SLUG GENERATION FUNCTIONS
-// ---------------------------------------------------
-
-function cyrillicToLatin(text) {
-    const cyrToLat = {
-        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'ye', 'ё': 'yo', 'ж': 'j', 'з': 'z', 'и': 'i', 'й': 'i',
-        'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'ө': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-        'ү': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sh', 'ъ': '', 'ы': 'i', 'ь': '',
-        'э': 'e', 'ю': 'yu', 'я': 'ya', 'А': 'A', 'Б': 'B', 'V': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'Ye', 'Ё': 'Yo',
-        'Ж': 'J', 'З': 'Z', 'И': 'I', 'Й': 'I', 'К': 'K', 'Л': 'L', 'М': 'М', 'Н': 'Н', 'О': 'O', 'Ө': 'O',
-        'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ү': 'U', 'Ф': 'F', 'Х': 'H', 'Ц': 'Ts', 'Ч': 'Ch',
-        'Ш': 'Sh', 'Щ': 'Sh', 'Ъ': '', 'Ы': 'I', 'Ь': '', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya'
-    };
-
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        result += cyrToLat[char] || char;
-    }
-    return result;
-}
-
-function generateSlug(title) {
-    let slug = cyrillicToLatin(title);
-    slug = slug.toLowerCase();
-    slug = slug.replace(/\s+/g, '-');
-    slug = slug.replace(/[^\w-]+/g, '');
-    slug = slug.replace(/--+/g, '-');
-    slug = slug.replace(/^-+|-+$/g, '');
-    
-    return slug;
-}
-
-function generateUniqueSlug(title) {
-    if (editIndex.value === "") {
-        const slug = generateSlug(title);
-        const uniquePart = Math.random().toString(36).substring(2, 6); 
-        return `${slug}-${uniquePart}`; 
-    } else {
-        return newsSlugInput.value;
-    }
-}
-
-// DOM LISTENERS (Slug-ийг автоматаар бөглөх)
-newsTitle.addEventListener('input', () => {
-    if (editIndex.value === "") {
-        newsSlugInput.value = generateSlug(newsTitle.value);
-    }
-});
-
-
-// ---------------------------------------------------
-// ZUURAG UPLOAD LOGIC 
-// ---------------------------------------------------
-async function handleImageUpload() {
-    const file = imageUploadInput.files[0];
-    if (!file) {
-        uploadStatus.textContent = 'Зураг сонгоно уу.';
-        uploadStatus.style.color = 'red';
-        return;
-    }
-
-    uploadStatus.textContent = 'Зураг оруулж байна... (Хүлээгээрэй)';
-    uploadStatus.style.color = 'orange';
-    newsImage.value = ''; 
-    newsImageURLManual.value = ''; 
-    newsVideoLink.value = ''; 
-
-    const fileExtension = file.name.split('.').pop();
-    const uniqueFileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
-    const filePath = uniqueFileName; 
-
-    try {
-        const { error: uploadError } = await supabaseClient.storage
-            .from(BUCKET_NAME)
-            .upload(filePath, file, {
-                cacheControl: '3600',
-                upsert: false
+        // ==================== Мэдээний картуудыг харуулах ====================
+        function displayNewsCards() {
+            const container = document.getElementById('newsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            newsData.forEach(news => {
+                const author = authorsData.find(a => a.id === news.author_id) || { name: "Сэтгүүлч" };
+                const card = document.createElement('div');
+                card.className = 'news-card';
+                card.onclick = () => openModal(news.id);
+                
+                card.innerHTML = `
+                    <img src="${news.image}" alt="${escapeHtml(news.title)}" onerror="this.src='https://picsum.photos/id/1/800/450'">
+                    <div class="news-card-content">
+                        <span class="news-card-category">${escapeHtml(news.category)}</span>
+                        <h3 class="news-card-title">${escapeHtml(news.title)}</h3>
+                        <p class="news-card-meta">
+                            <span><i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')}</span>
+                            <span><i class="fas fa-user"></i> ${escapeHtml(author.name)}</span>
+                        </p>
+                    </div>
+                `;
+                
+                container.appendChild(card);
             });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicURLData } = supabaseClient.storage
-            .from(BUCKET_NAME)
-            .getPublicUrl(filePath);
-
-        const imageUrl = publicURLData.publicUrl;
-
-        newsImage.value = imageUrl; 
-        previewImage.src = imageUrl;
-        previewImage.style.display = 'block';
-
-        uploadStatus.textContent = 'Зураг амжилттай оруулав!';
-        uploadStatus.style.color = 'green';
-        
-    } catch (error) {
-        console.error("Зураг оруулах алдаа:", error);
-        uploadStatus.textContent = `Алдаа гарлаа: ${error.message}. Storage Policy-г шалгана уу (INSERT, authenticated/anon).`;
-        uploadStatus.style.color = 'red';
-    }
-}
-uploadButton.addEventListener('click', handleImageUpload);
-
-newsImageURLManual.addEventListener('input', () => {
-    newsImage.value = newsImageURLManual.value.trim();
-    if(newsImage.value) {
-        previewImage.src = newsImage.value;
-        previewImage.style.display = 'block'; 
-        uploadStatus.textContent = '(Гараар URL оруулсан)';
-        uploadStatus.style.color = 'blue';
-    } else {
-        previewImage.style.display = 'none'; 
-        uploadStatus.textContent = '';
-    }
-    imageUploadInput.value = ''; 
-});
-
-
-// ---------------------------------------------------
-// AUTH FUNCTIONS (Нэвтрэх / Гарах)
-// ---------------------------------------------------
-
-async function checkAuthAndRenderUI() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (user) {
-        loginFormContainer.style.display = 'none';
-        adminContent.style.display = 'grid';
-        logoutButton.style.display = 'block';
-        initializeAdminPanel(); 
-    } else {
-        loginFormContainer.style.display = 'block';
-        adminContent.style.display = 'none';
-        logoutButton.style.display = 'none';
-    }
-}
-
-async function handleLogin() {
-    loginError.textContent = '';
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value.trim();
-
-    if (!email || !password) {
-        loginError.textContent = "И-мэйл болон нууц үг заавал бөглөнө.";
-        return;
-    }
-
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        console.error("Login error:", error);
-        loginError.textContent = "Нэвтрэх нэр эсвэл нууц үг буруу байна. (" + error.message + ")";
-    } else {
-        loginEmail.value = '';
-        loginPassword.value = '';
-        await checkAuthAndRenderUI();
-    }
-}
-
-async function handleLogout() {
-    if (confirm("Системээс гарах уу?")) {
-        await supabaseClient.auth.signOut();
-        await checkAuthAndRenderUI();
-    }
-}
-
-async function displayAuthUsers() {
-    const list = await fetchAuthors(); 
-    authUsersList.innerHTML = `Системийн хэрэглэгчид (Нийтлэлчдийн тоо): ${list.length}`;
-}
-
-async function openAddUserModal() {
-    alert("Шинэ Auth хэрэглэгч нэмэх модаль нээгдэх болно.");
-}
-
-
-// ---------------------------------------------------
-// AUTHORS (Нийтлэлч) - БҮРЭН ФУНКЦУУД
-// ---------------------------------------------------
-
-async function fetchAuthors() {
-    const { data } = await supabaseClient.from("authors").select("*").order("id");
-    return data || [];
-}
-
-async function populateAuthorSelect() {
-    const list = await fetchAuthors();
-    newsAuthor.innerHTML = `<option value="">--- Нийтлэлч Сонгох ---</option>` + list
-        .map(a => `<option value="${a.id}">${a.name}</option>`)
-        .join("");
-}
-
-async function displayAuthors() { 
-    const list = await fetchAuthors();
-    authorList.innerHTML = "";
-    if (!list.length) { authorList.innerHTML = "Нийтлэлч байхгүй"; return; }
-    
-    list.forEach(a => {
-        authorList.innerHTML += `
-            <div class="list-item">
-                <span>${a.name} (${a.title})</span>
-                <span>
-                    <button onclick="editAuthor(${a.id})">Засах</button>
-                    <button onclick="removeAuthor(${a.id})">Устгах</button>
-                </span>
-            </div>`;
-    });
-}
-
-async function saveAuthor() { 
-    const nameValue = authorName.value.trim();
-    const titleValue = authorTitle.value.trim();
-    const imageValue = authorImage.value.trim();
-
-    if (!nameValue) return alert("Нийтлэлчийн нэрийг бөглөнө үү.");
-
-    const data = {
-        name: nameValue,
-        title: titleValue || null,
-        image: imageValue || null
-    };
-
-    let result;
-    if (editAuthorIndex.value === "") {
-        // Шинэ Нийтлэлч Нэмэх
-        result = await supabaseClient.from("authors").insert(data);
-    } else {
-        // Одоо байгааг Засах
-        result = await supabaseClient.from("authors").update(data).eq("id", editAuthorIndex.value);
-    }
-
-    if (result.error) {
-        console.error("Author save error:", result.error);
-        alert(`Нийтлэлч хадгалахад алдаа гарлаа: ${result.error.message}. (RLS Policy-г шалгана уу)`);
-    } else {
-        alert("Нийтлэлч амжилттай хадгалагдлаа.");
-    }
-    
-    clearAuthorForm();
-    populateAuthorSelect();
-    displayAuthors(); 
-}
-
-function clearAuthorForm() { 
-    editAuthorIndex.value = "";
-    authorName.value = "";
-    authorTitle.value = "";
-    authorImage.value = "";
-}
-
-async function editAuthor(id) { 
-    const { data } = await supabaseClient.from("authors").select("*").eq("id", id).single();
-    
-    editAuthorIndex.value = data.id;
-    authorName.value = data.name;
-    authorTitle.value = data.title;
-    authorImage.value = data.image;
-}
-
-async function removeAuthor(id) { 
-    if (confirm("Нийтлэлчийг устгах уу?")) {
-        const { error } = await supabaseClient.from("authors").delete().eq("id", id);
-        if (error) {
-            alert(`Устгах үед алдаа гарлаа: ${error.message}. Энэ нийтлэлчийг ашигласан мэдээ байгаа эсэхийг шалгана уу.`);
         }
-        populateAuthorSelect();
-        displayAuthors();
-    }
-}
 
-
-// ---------------------------------------------------
-// NEWS (Мэдээ) - ХУУДАСЛАЛТТАЙ
-// ---------------------------------------------------
-
-/**
- * Мэдээг Supabase-аас татаж авна. count: 'exact' ашиглан нийт тоог авна.
- */
-async function fetchNews(page = currentPage, limit = newsPerPage) {
-    const start = (page - 1) * limit;
-    const end = start + limit - 1; // Supabase range нь төгсгөлийн index-ийг оруулдаг
-
-    const { data, count, error } = await supabaseClient.from("news")
-        .select("*, video_link", { count: 'exact' }) 
-        .order("created_at", { ascending: false })
-        .range(start, end); // RANGE АШИГЛАЖ БАЙНА
-
-    if (error) {
-        console.error("Fetching news error:", error);
-        return { data: [], totalCount: 0 };
-    }
-    
-    return { data: data || [], totalCount: count || 0 };
-}
-
-
-function shareOnFacebook(slug) {
-    // ⚠️ Таны үндсэн домайн URL-ийг энд заавал зөв оруулах шаардлагатай!
-    const BASE_URL = 'https://urtuuch.mn/news/?slug='; 
-    const newsUrl = BASE_URL + slug;
-
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(newsUrl)}`;
-
-    window.open(facebookUrl, 'facebook-share-dialog', 'width=800,height=600');
-}
-
-/**
- * Мэдээг дэлгэцэнд харуулж, хуудаслалтын товчлуурыг үүсгэнэ.
- */
-async function displayNews(filter = "") {
-    
-    let newsData, totalCount;
-    
-    // Хэрэв хайлт хийгээгүй бол хуудаслалт ашиглана.
-    if (!filter) {
-        const result = await fetchNews(currentPage, newsPerPage);
-        newsData = result.data;
-        totalCount = result.totalCount;
-    } else {
-        // Хэрэв хайлт хийж байвал, бүх мэдээг татаж, JS-ээр шүүх (Хайлтад Pagination хийхгүй)
-        const allNews = await fetchNews(1, 99999); 
-        newsData = allNews.data; 
-    }
-
-    const authors = await fetchAuthors();
-    
-    newsList.innerHTML = "";
-
-    let filteredNews = newsData;
-
-    // Хайлтын шүүлтүүр
-    if (filter) {
-        filteredNews = newsData.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()) || 
-                                             n.slug?.toLowerCase().includes(filter.toLowerCase()));
-        totalCount = filteredNews.length; // Хайлтын үр дүнгийн тоо
-    }
-
-    if (!filteredNews.length) { newsList.innerHTML = "Мэдээ байхгүй"; return; }
-
-    const grouped = {};
-    filteredNews.forEach(n => {
-        const day = n.created_at ? n.created_at.split("T")[0] : "Огноо байхгүй";
-        if (!grouped[day]) grouped[day] = [];
-        grouped[day].push(n);
-    });
-
-    for (const d in grouped) {
-        newsList.innerHTML += `<div class="group-title">${d}</div>`;
-        grouped[d].forEach(n => {
-            const aut = authors.find(a => a.id == n.author_id)?.name || "Тодорхойгүй";
-            const activeStatus = n.active ? " (Идэвхтэй)" : " (Ноорог)"; 
+        // ==================== Модалыг хаах функц ====================
+        window.closeModal = function() {
+            const modal = document.getElementById('newsModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
             
-            const slugStatus = !n.slug || n.slug.length < 3 ? " ⚠️ SLUG АЛГА/БУРУУ" : "";
-            const cardTypeDisplay = n.card_type ? ` | ТӨРӨЛ: ${n.card_type.toUpperCase()}` : "";
-            const videoStatus = n.video_link ? " | 📹 ВИДЕО" : "";
+            // URL-ийг цэвэрлэх
+            if (window.location.search.includes('id=')) {
+                const cleanUrl = window.location.pathname;
+                history.pushState({ modalOpen: false }, '', cleanUrl);
+            }
+        };
 
+        // ==================== Модал нээх функц ====================
+        window.openModal = function(id) {
+            const news = newsData.find(n => n.id === id);
+            if (!news) return;
+            
+            const author = authorsData.find(a => a.id === news.author_id) || { name: "Сэтгүүлч" };
+            const videoHtml = getYouTubeEmbedHtml(news.video_link);
+            const currentUrl = `${window.location.origin}${window.location.pathname}?id=${news.id}`;
+            const newsTitle = encodeURIComponent(news.title);
+            
+            // Модалын үндсэн элементүүд
+            document.getElementById('modalTitle').innerText = news.title;
+            document.getElementById('modalImage').src = news.image || 'https://picsum.photos/id/1/800/450';
+            document.getElementById('modalMeta').innerHTML = `
+                <i class="fas fa-tag"></i> ${escapeHtml(news.category)} &nbsp;|&nbsp;
+                <i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')} &nbsp;|&nbsp;
+                <i class="fas fa-user"></i> ${escapeHtml(author.name)}
+            `;
+            
+            // Агуулгыг аюулгүй харагдуулах
+            const safeDescription = escapeHtml(news.description || 'Агуулга байхгүй');
+            document.getElementById('modalContent').innerHTML = videoHtml + '<p>' + safeDescription.replace(/\n/g, '<br>') + '</p>';
+            
+            // Хуваалцах хэсгийг цэвэрлэх
+            const shareContainer = document.getElementById('modalShare');
+            shareContainer.innerHTML = '<span class="share-label"><i class="fas fa-share-alt"></i> Хуваалцах:</span>';
+            
+            // Facebook товч
+            const facebookBtn = document.createElement('a');
+            facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}&quote=${newsTitle}`;
+            facebookBtn.target = '_blank';
+            facebookBtn.rel = 'noopener noreferrer';
+            facebookBtn.className = 'share-btn share-facebook';
+            facebookBtn.innerHTML = '<i class="fab fa-facebook"></i> Facebook';
+            shareContainer.appendChild(facebookBtn);
+            
+            // Twitter товч
+            const twitterBtn = document.createElement('a');
+            twitterBtn.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${newsTitle}`;
+            twitterBtn.target = '_blank';
+            twitterBtn.rel = 'noopener noreferrer';
+            twitterBtn.className = 'share-btn share-twitter';
+            twitterBtn.innerHTML = '<i class="fab fa-twitter"></i> Twitter';
+            shareContainer.appendChild(twitterBtn);
+            
+            // WhatsApp товч
+            const whatsappBtn = document.createElement('a');
+            whatsappBtn.href = `https://wa.me/?text=${newsTitle}%20-%20${encodeURIComponent(currentUrl)}`;
+            whatsappBtn.target = '_blank';
+            whatsappBtn.rel = 'noopener noreferrer';
+            whatsappBtn.className = 'share-btn share-whatsapp';
+            whatsappBtn.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+            shareContainer.appendChild(whatsappBtn);
+            
+            // Холбоос хуулах товч
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'share-btn share-copy';
+            copyBtn.innerHTML = '<i class="fas fa-link"></i> Холбоос хуулах';
+            
+            // Хуулах функц
+            copyBtn.onclick = async () => {
+                try {
+                    await navigator.clipboard.writeText(currentUrl);
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Хуулагдлаа!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-link"></i> Холбоос хуулах';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Хуулахад алдаа гарлаа:', err);
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = currentUrl;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Хуулагдлаа!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-link"></i> Холбоос хуулах';
+                    }, 2000);
+                }
+            };
+            
+            shareContainer.appendChild(copyBtn);
+            
+            // Модалыг харуулах
+            const modal = document.getElementById('newsModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // URL-ийг түүхэнд хадгалах
+            history.pushState({ id: news.id, modalOpen: true }, news.title, `?id=${news.id}`);
+        };
 
-            newsList.innerHTML += `
-            <div class="list-item">
-                <span>${n.title} | ${n.category} | ${aut} ${n.featured ? " | Онцлох" : ""}${cardTypeDisplay} ${videoStatus} ${activeStatus}${slugStatus}</span>
-                <span>
-                    <button onclick="shareOnFacebook('${n.slug}')" style="background: #4267B2;">🚀 Шэйрлэх</button>
-                    <button onclick="editNews(${n.id})">Засах</button>
-                    <button onclick="removeNews(${n.id})">Устгах</button>
-                </span>
-            </div>`;
+        // ==================== ESC товчоор хаах ====================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('newsModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            }
         });
-    }
-    
-    // ---------------------------------------------------
-    // 💡 PAGINATION BUTTONS (Хуудаслалтын Товчлуурууд)
-    // ---------------------------------------------------
-    if (!filter) { // Хайлт хийгээгүй үед л хуудаслалт харуулна
-        const totalPages = Math.ceil(totalCount / newsPerPage);
-        
-        let paginationHTML = `<div style="text-align:center; padding: 15px; margin-top: 20px;">
-                                <p>Нийт мэдээ: ${totalCount} | Хуудас: ${currentPage}/${totalPages}</p>`;
 
-        // Өмнөх хуудас
-        paginationHTML += `<button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Өмнөх</button>`;
-        
-        // Одоогийн хуудас
-        paginationHTML += `<span style="padding: 0 15px; font-weight: bold;"> ${currentPage} </span>`;
+        // ==================== Буцах товчны үйлдэл ====================
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.modalOpen && event.state.id) {
+                window.openModal(event.state.id);
+            } else {
+                const modal = document.getElementById('newsModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            }
+        });
 
-        // Дараагийн хуудас
-        paginationHTML += `<button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Дараагийн →</button>`;
-        
-        paginationHTML += `</div>`;
-        
-        newsList.innerHTML += paginationHTML;
-    }
-}
+        // ==================== Модалын гадна дарвал хаах ====================
+        document.getElementById('newsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
 
-
-function changePage(newPage) {
-    const totalPages = Math.ceil(newsList.querySelector('p').textContent.split('/')[1].split(' ')[0] / newsPerPage);
-    if (newPage > 0 && newPage <= totalPages) {
-        currentPage = newPage;
-        displayNews(searchInput.value); 
-        window.scrollTo(0, 0); 
-    } else if (newPage > 0 && currentPage < totalPages) {
-         // Энэ нь хамгийн сүүлийн хуудас байх магадлалтай.
-        currentPage = newPage;
-        displayNews(searchInput.value); 
-        window.scrollTo(0, 0); 
-    }
-}
-
-async function saveNews() {
-    const html = quill.root.innerHTML.trim();
-    const titleValue = newsTitle.value.trim();
-    const imageURL = newsImage.value.trim();
-    const videoLinkValue = newsVideoLink.value.trim(); 
-    
-    if (!titleValue) return alert("Гарчиг заавал бөглөнө");
-
-    const slugValue = editIndex.value === "" ? generateUniqueSlug(titleValue) : newsSlugInput.value;
-    
-    const data = {
-        title: titleValue,
-        slug: slugValue, 
-        category: newsCategory.value || null,
-        image: imageURL || null, 
-        video_link: videoLinkValue || null, 
-        description: html || null,
-        author_id: newsAuthor.value ? Number(newsAuthor.value) : null,
-        featured: newsFeatured.checked,
-        active: newsActive.checked,
-        card_type: newsCardType.value || 'normal'
-    };
-    
-    if (!data.author_id) return alert("Нийтлэлч сонгоно уу");
-
-    let result;
-    if (editIndex.value === "") {
-        // Шинэ мэдээ оруулах
-        result = await supabaseClient.from("news").insert(data);
-    } else {
-        // Мэдээ засах
-        const updateData = { ...data };
-        delete updateData.slug; 
-        
-        result = await supabaseClient.from("news").update(updateData).eq("id", editIndex.value);
-    }
-    
-    if (result.error) {
-        console.error("News save error:", result.error);
-        alert(`Мэдээ хадгалахад алдаа гарлаа: ${result.error.message}.`);
-    } else {
-        alert("Мэдээ амжилттай хадгалагдлаа.");
-    }
-
-    clearNewsForm();
-    // Хуудсыг дахин ачаалахдаа 1-р хуудас дээр буцаана (Шинэ мэдээ эхэнд гарна).
-    currentPage = 1; 
-    displayNews(searchInput.value);
-}
-
-async function editNews(id) {
-    const { data } = await supabaseClient.from("news").select("*").eq("id", id).single();
-    
-    editIndex.value = data.id;
-    newsTitle.value = data.title;
-    newsSlugInput.value = data.slug; 
-    newsCategory.value = data.category;
-    
-    const currentImage = data.image || "";
-    newsImage.value = currentImage; 
-    newsImageURLManual.value = currentImage; 
-
-    if (currentImage) {
-        previewImage.src = currentImage;
-        previewImage.style.display = 'block';
-    } else {
-        previewImage.style.display = 'none';
-    }
-    uploadStatus.textContent = ""; 
-    imageUploadInput.value = ""; 
-
-    newsVideoLink.value = data.video_link || ""; 
-
-    newsAuthor.value = data.author_id;
-    newsFeatured.checked = data.featured;
-    newsActive.checked = data.active; 
-    newsCardType.value = data.card_type || 'normal'; 
-    quill.root.innerHTML = data.description;
-    
-    window.scrollTo(0, 0); // Хуудсыг дээш гүйлгэх
-}
-
-function clearNewsForm() {
-    editIndex.value = "";
-    newsTitle.value = "";
-    newsSlugInput.value = ""; 
-    newsCategory.value = "";
-    
-    newsImage.value = "";
-    newsImageURLManual.value = ""; 
-    newsVideoLink.value = ""; 
-
-    previewImage.src = "";
-    previewImage.style.display = 'none';
-    uploadStatus.textContent = "";
-    imageUploadInput.value = "";
-
-    newsFeatured.checked = false;
-    newsActive.checked = false; 
-    newsCardType.value = 'normal'; 
-    quill.setText("");
-}
-
-async function removeNews(id) {
-    if (confirm("Устгах уу?")) {
-        const { error } = await supabaseClient.from("news").delete().eq("id", id);
-        if(error) {
-            alert(`Устгах үед алдаа гарлаа: ${error.message}`);
+        // ==================== Хуудас ачаалахад URL-ээс id унших ====================
+        function checkUrlForNews() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const newsId = urlParams.get('id');
+            if (newsId) {
+                const id = parseInt(newsId);
+                if (newsData.find(n => n.id === id)) {
+                    setTimeout(() => openModal(id), 100);
+                }
+            }
         }
-        // Устгасны дараа хуудсыг дахин ачаална.
-        displayNews(searchInput.value);
-    }
-}
 
-// Search listener
-searchInput.addEventListener("input", () => {
-    // Хайлт хийх үед pagination-ийг алга болгоно.
-    displayNews(searchInput.value);
-});
-
-// Global scope-д функцуудыг гаргах (HTML-ийн onclick үйлдлүүд ажиллахын тулд)
-window.saveNews = saveNews;
-window.clearNewsForm = clearNewsForm;
-window.editNews = editNews;
-window.removeNews = removeNews;
-window.shareOnFacebook = shareOnFacebook; 
-
-window.saveAuthor = saveAuthor; 
-window.clearAuthorForm = clearAuthorForm; 
-window.editAuthor = editAuthor; 
-window.removeAuthor = removeAuthor; 
-
-window.handleLogin = handleLogin;
-window.handleLogout = handleLogout;
-window.openAddUserModal = openAddUserModal;
-window.changePage = changePage; // Шинээр нэмэгдсэн
-
-
-// INIT
-function initializeAdminPanel() {
-    populateAuthorSelect();
-    displayAuthors(); 
-    currentPage = 1; // Үргэлж 1-р хуудаснаас эхлүүлнэ
-    displayNews();
-    displayAuthUsers();
-}
-
-// Хуудсыг эхлүүлэх: Эхлээд Auth-г шалгана
-checkAuthAndRenderUI();
-</script>
+        // ==================== Эхлүүлэх ====================
+        displayNewsCards();
+        checkUrlForNews();
+    </script>
 </body>
 </html>

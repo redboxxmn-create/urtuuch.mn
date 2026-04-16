@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мэдээний сайт</title>
+    <title>Мэдээний систем</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,82 +15,187 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: #f0f2f5;
         }
 
         /* Header */
-        .header {
+        .top-bar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo h2 {
+            font-size: 24px;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-name {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
-            text-align: center;
         }
 
-        .header h1 {
-            font-size: 28px;
-        }
-
-        /* Мэдээний жагсаалт */
-        .news-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-        }
-
-        .news-card {
+        /* Admin Menu */
+        .admin-menu {
             background: white;
             border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .menu-btn {
+            background: #f0f2f5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 14px;
+            transition: 0.3s;
         }
 
-        .news-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .news-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .news-card-content {
-            padding: 20px;
-        }
-
-        .news-card-category {
-            display: inline-block;
+        .menu-btn.active {
             background: #667eea;
             color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 10px;
         }
 
-        .news-card-title {
-            font-size: 18px;
-            font-weight: 600;
+        .menu-btn:hover {
+            background: #764ba2;
+            color: white;
+        }
+
+        /* Panel */
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h2 {
+            margin-bottom: 20px;
             color: #333;
-            margin-bottom: 10px;
-            line-height: 1.4;
         }
 
-        .news-card-meta {
-            font-size: 12px;
-            color: #888;
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
+        /* Table */
+        .news-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        /* Модал цонх */
+        .news-table th,
+        .news-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .news-table th {
+            background: #667eea;
+            color: white;
+        }
+
+        .news-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .edit-btn, .delete-btn, .view-btn {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 3px;
+        }
+
+        .view-btn { background: #2196F3; color: white; }
+        .edit-btn { background: #ff9800; color: white; }
+        .delete-btn { background: #f44336; color: white; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .submit-btn:hover {
+            background: #764ba2;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -138,7 +243,6 @@
             cursor: pointer;
             color: #666;
             z-index: 10;
-            transition: color 0.2s;
         }
 
         .modal-close:hover {
@@ -148,7 +252,7 @@
         .modal-image {
             width: 100%;
             height: auto;
-            max-height: 450px;
+            max-height: 400px;
             object-fit: cover;
             border-radius: 16px 16px 0 0;
         }
@@ -161,7 +265,6 @@
             font-size: 28px;
             color: #333;
             margin-bottom: 15px;
-            line-height: 1.3;
         }
 
         .modal-meta {
@@ -172,14 +275,9 @@
             border-bottom: 1px solid #eee;
         }
 
-        .modal-meta i {
-            margin-right: 5px;
-        }
-
         .modal-description {
             line-height: 1.8;
             color: #444;
-            font-size: 16px;
         }
 
         .share-section {
@@ -190,12 +288,6 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 10px;
-        }
-
-        .share-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
         }
 
         .share-btn {
@@ -210,7 +302,6 @@
             transition: all 0.2s;
             cursor: pointer;
             border: none;
-            font-family: inherit;
         }
 
         .share-btn:hover {
@@ -222,18 +313,11 @@
         .share-whatsapp { background: #25D366; color: white; }
         .share-copy { background: #64748b; color: white; }
 
-        /* Footer */
-        .footer {
-            background: #2d3748;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-        }
-
         @media (max-width: 768px) {
-            .news-container {
-                grid-template-columns: 1fr;
+            .top-bar {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
             }
             .modal-body {
                 padding: 20px;
@@ -241,20 +325,112 @@
             .modal-title {
                 font-size: 22px;
             }
+            .news-table {
+                font-size: 12px;
+            }
+            .news-table th,
+            .news-table td {
+                padding: 8px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1><i class="fas fa-newspaper"></i> Мэдээний төв</h1>
-        <p>Хамгийн сүүлийн үеийн мэдээ, мэдээлэл</p>
+    <div class="top-bar">
+        <div class="logo">
+            <h2><i class="fas fa-newspaper"></i> Мэдээний систем</h2>
+            <p>Админ панель</p>
+        </div>
+        <div class="admin-info">
+            <span class="admin-name"><i class="fas fa-user"></i> Админ хэрэглэгч</span>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Гарах</button>
+        </div>
     </div>
 
-    <div class="news-container" id="newsContainer"></div>
+    <div class="container">
+        <div class="admin-menu">
+            <button class="menu-btn active" data-panel="news-list-panel"><i class="fas fa-list"></i> Мэдээний жагсаалт</button>
+            <button class="menu-btn" data-panel="add-news-panel"><i class="fas fa-plus"></i> Мэдээ нэмэх</button>
+            <button class="menu-btn" data-panel="authors-panel"><i class="fas fa-users"></i> Зохиолчид</button>
+        </div>
 
-    <div class="footer">
-        <p>&copy; 2024 Мэдээний төв. Бүх эрх хуулиар хамгаалагдсан.</p>
+        <!-- Мэдээний жагсаалт Panel -->
+        <div id="news-list-panel" class="panel active">
+            <h2><i class="fas fa-list"></i> Мэдээний жагсаалт</h2>
+            <table class="news-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Гарчиг</th>
+                        <th>Ангилал</th>
+                        <th>Зохиолч</th>
+                        <th>Огноо</th>
+                        <th>Үйлдэл</th>
+                    </tr>
+                </thead>
+                <tbody id="newsTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Мэдээ нэмэх Panel -->
+        <div id="add-news-panel" class="panel">
+            <h2><i class="fas fa-plus"></i> Шинэ мэдээ нэмэх</h2>
+            <form id="addNewsForm">
+                <div class="form-group">
+                    <label>Гарчиг</label>
+                    <input type="text" id="newsTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Ангилал</label>
+                    <select id="newsCategory">
+                        <option value="Технологи">Технологи</option>
+                        <option value="Байгаль орчин">Байгаль орчин</option>
+                        <option value="Спорт">Спорт</option>
+                        <option value="Эдийн засаг">Эдийн засаг</option>
+                        <option value="Боловсрол">Боловсрол</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Зураг (URL)</label>
+                    <input type="text" id="newsImage" placeholder="https://picsum.photos/id/1/800/450">
+                </div>
+                <div class="form-group">
+                    <label>Тайлбар / Агуулга</label>
+                    <textarea id="newsDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>YouTube холбоос</label>
+                    <input type="text" id="newsVideo" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+                <div class="form-group">
+                    <label>Зохиолч</label>
+                    <select id="newsAuthor"></select>
+                </div>
+                <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Хадгалах</button>
+            </form>
+        </div>
+
+        <!-- Зохиолчид Panel -->
+        <div id="authors-panel" class="panel">
+            <h2><i class="fas fa-users"></i> Зохиолчид</h2>
+            <form id="addAuthorForm" style="margin-bottom: 30px;">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="authorName" placeholder="Зохиолчийн нэр" style="flex:1; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                    <button type="submit" class="submit-btn" style="padding: 10px 20px;">Нэмэх</button>
+                </div>
+            </form>
+            <table class="news-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Нэр</th>
+                        <th>Үйлдэл</th>
+                    </tr>
+                </thead>
+                <tbody id="authorsTableBody"></tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Модал цонх -->
@@ -267,7 +443,7 @@
                 <div id="modalMeta" class="modal-meta"></div>
                 <div id="modalContent" class="modal-description"></div>
                 <div id="modalShare" class="share-section">
-                    <span class="share-label"><i class="fas fa-share-alt"></i> Хуваалцах:</span>
+                    <span><i class="fas fa-share-alt"></i> Хуваалцах:</span>
                 </div>
             </div>
         </div>
@@ -275,70 +451,40 @@
 
     <script>
         // ==================== ӨГӨГДӨЛ ====================
-        
-        // Зохиолчдын өгөгдөл
-        const authorsData = [
+        let authorsData = [
             { id: 1, name: "Баттулга" },
             { id: 2, name: "Сарнай" },
             { id: 3, name: "Энхбат" },
             { id: 4, name: "Номин" }
         ];
 
-        // Мэдээний өгөгдөл
-        const newsData = [
+        let newsData = [
             {
                 id: 1,
                 title: "Шинэ технологийн дэвшил: Хиймэл оюун ухаан",
                 category: "Технологи",
                 image: "https://picsum.photos/id/1/800/450",
-                description: "Хиймэл оюун ухаан нь өдөр бүр шинэ боломжуудыг нээж байна. Энэхүү технологи нь эрүүл мэнд, боловсрол, тээвэр зэрэг олон салбарт хувьсгал хийж байна. Сүүлийн үеийн судалгаагаар хиймэл оюун ухааны зах зээл 2030 он гэхэд 1.8 их наяд долларт хүрэх төлөвтэй байна.",
+                description: "Хиймэл оюун ухаан нь өдөр бүр шинэ боломжуудыг нээж байна. Энэхүү технологи нь эрүүл мэнд, боловсрол, тээвэр зэрэг олон салбарт хувьсгал хийж байна.",
                 video_link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                 author_id: 1,
-                created_at: "2024-01-15T10:30:00"
+                created_at: new Date().toISOString()
             },
             {
                 id: 2,
                 title: "Уур амьсгалын өөрчлөлт: Дэлхий нийтийн сорилт",
                 category: "Байгаль орчин",
                 image: "https://picsum.photos/id/15/800/450",
-                description: "Дэлхийн дулаарал нь хүн төрөлхтний тулгарч буй хамгийн том сорилтын нэг болоод байна. Ногоон энергид шилжих, нүүрстөрөгчийн ялгаралтыг бууруулах зэрэг арга хэмжээнүүдийг дэлхий нийтийн хэмжээнд авч хэрэгжүүлж байна.",
+                description: "Дэлхийн дулаарал нь хүн төрөлхтний тулгарч буй хамгийн том сорилтын нэг болоод байна.",
                 video_link: "",
                 author_id: 2,
-                created_at: "2024-01-14T14:20:00"
-            },
-            {
-                id: 3,
-                title: "Спорт: Шигшээ багийн амжилт",
-                category: "Спорт",
-                image: "https://picsum.photos/id/29/800/450",
-                description: "Монголын шигшээ баг олон улсын тэмцээнд түрүүлж, улсынхаа нэр хүндийг өндөрт өргөв. Багийн гишүүд шаргуу бэлтгэлийн үр дүнд амжилттай оролцож, алтан медаль хүртлээ.",
-                video_link: "https://youtu.be/dQw4w9WgXcQ",
-                author_id: 3,
-                created_at: "2024-01-13T09:15:00"
-            },
-            {
-                id: 4,
-                title: "Эдийн засгийн өсөлт: Шинэ боломжууд",
-                category: "Эдийн засаг",
-                image: "https://picsum.photos/id/20/800/450",
-                description: "Улсын эдийн засаг өнгөрсөн улиралд 5.2 хувиар өссөн нь сүүлийн 5 жилийн хамгийн өндөр үзүүлэлт юм. Энэ нь гадаад хөрөнгө оруулалт нэмэгдэж, дотоодын үйлдвэрлэл идэвхжсэнтэй холбоотой.",
-                video_link: "",
-                author_id: 4,
-                created_at: "2024-01-12T11:45:00"
-            },
-            {
-                id: 5,
-                title: "Боловсролын шинэчлэл: Цахим сургалт",
-                category: "Боловсрол",
-                image: "https://picsum.photos/id/26/800/450",
-                description: "Боловсролын салбарт цахим сургалтын систем нэвтрүүлж, сурагчдын мэдлэг чадварыг дээшлүүлэхэд анхаарч байна. Шинэ систем нь хичээлийн агуулгыг илүү сонирхолтой, хүртээмжтэй болгож байна.",
-                video_link: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-                author_id: 1,
-                created_at: "2024-01-11T08:00:00"
+                created_at: new Date().toISOString()
             }
         ];
 
-        // ==================== HTML-ийг аюулгүй болгох функц ====================
+        let nextNewsId = 3;
+        let nextAuthorId = 5;
+
+        // ==================== ТУСЛАХ ФУНКЦУУД ====================
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -346,13 +492,9 @@
             return div.innerHTML;
         }
 
-        // ==================== YouTube embed HTML авах функц ====================
         function getYouTubeEmbedHtml(videoLink) {
             if (!videoLink) return '';
-            
             let videoId = null;
-            
-            // YouTube холбоосноос ID гаргаж авах
             if (videoLink.includes('youtube.com/watch')) {
                 const urlParams = new URLSearchParams(videoLink.split('?')[1]);
                 videoId = urlParams.get('v');
@@ -361,66 +503,160 @@
             } else if (videoLink.includes('embed/')) {
                 videoId = videoLink.split('embed/')[1]?.split('?')[0];
             }
-            
             if (videoId) {
                 return `<div style="margin-bottom: 20px; position: relative; padding-bottom: 56.25%; height: 0;">
                             <iframe src="https://www.youtube.com/embed/${videoId}" 
                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                    frameborder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen>
+                                    frameborder="0" allowfullscreen>
                             </iframe>
                         </div>`;
             }
-            
             return '';
         }
 
-        // ==================== Мэдээний картуудыг харуулах ====================
-        function displayNewsCards() {
-            const container = document.getElementById('newsContainer');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
+        // ==================== МЭДЭЭНИЙ ЖАГСААЛТЫГ ХАРУУЛАХ ====================
+        function displayNewsTable() {
+            const tbody = document.getElementById('newsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
             newsData.forEach(news => {
                 const author = authorsData.find(a => a.id === news.author_id) || { name: "Сэтгүүлч" };
-                const card = document.createElement('div');
-                card.className = 'news-card';
-                card.onclick = () => openModal(news.id);
-                
-                card.innerHTML = `
-                    <img src="${news.image}" alt="${escapeHtml(news.title)}" onerror="this.src='https://picsum.photos/id/1/800/450'">
-                    <div class="news-card-content">
-                        <span class="news-card-category">${escapeHtml(news.category)}</span>
-                        <h3 class="news-card-title">${escapeHtml(news.title)}</h3>
-                        <p class="news-card-meta">
-                            <span><i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')}</span>
-                            <span><i class="fas fa-user"></i> ${escapeHtml(author.name)}</span>
-                        </p>
-                    </div>
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${news.id}</td>
+                    <td>${escapeHtml(news.title.substring(0, 30))}${news.title.length > 30 ? '...' : ''}</td>
+                    <td>${escapeHtml(news.category)}</td>
+                    <td>${escapeHtml(author.name)}</td>
+                    <td>${new Date(news.created_at).toLocaleDateString('mn-MN')}</td>
+                    <td>
+                        <button class="view-btn" onclick="openModal(${news.id})"><i class="fas fa-eye"></i> Үзэх</button>
+                        <button class="edit-btn" onclick="editNews(${news.id})"><i class="fas fa-edit"></i> Засах</button>
+                        <button class="delete-btn" onclick="deleteNews(${news.id})"><i class="fas fa-trash"></i> Устгах</button>
+                    </td>
                 `;
-                
-                container.appendChild(card);
             });
         }
 
-        // ==================== Модалыг хаах функц ====================
+        // ==================== ЗОХИОЛЧДЫН ЖАГСААЛТЫГ ХАРУУЛАХ ====================
+        function displayAuthorsTable() {
+            const tbody = document.getElementById('authorsTableBody');
+            const authorSelect = document.getElementById('newsAuthor');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (authorSelect) {
+                authorSelect.innerHTML = '';
+            }
+            authorsData.forEach(author => {
+                if (tbody) {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${author.id}</td>
+                        <td>${escapeHtml(author.name)}</td>
+                        <td><button class="delete-btn" onclick="deleteAuthor(${author.id})"><i class="fas fa-trash"></i> Устгах</button></td>
+                    `;
+                }
+                if (authorSelect) {
+                    const option = document.createElement('option');
+                    option.value = author.id;
+                    option.textContent = author.name;
+                    authorSelect.appendChild(option);
+                }
+            });
+        }
+
+        // ==================== МЭДЭЭ НЭМЭХ ====================
+        document.getElementById('addNewsForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newNews = {
+                id: nextNewsId++,
+                title: document.getElementById('newsTitle').value,
+                category: document.getElementById('newsCategory').value,
+                image: document.getElementById('newsImage').value || 'https://picsum.photos/id/1/800/450',
+                description: document.getElementById('newsDescription').value,
+                video_link: document.getElementById('newsVideo').value,
+                author_id: parseInt(document.getElementById('newsAuthor').value),
+                created_at: new Date().toISOString()
+            };
+            newsData.push(newNews);
+            displayNewsTable();
+            this.reset();
+            alert('Мэдээ амжилттай нэмэгдлээ!');
+            document.querySelector('[data-panel="news-list-panel"]').click();
+        });
+
+        // ==================== МЭДЭЭ ЗАСАХ ====================
+        window.editNews = function(id) {
+            const news = newsData.find(n => n.id === id);
+            if (!news) return;
+            document.getElementById('newsTitle').value = news.title;
+            document.getElementById('newsCategory').value = news.category;
+            document.getElementById('newsImage').value = news.image;
+            document.getElementById('newsDescription').value = news.description;
+            document.getElementById('newsVideo').value = news.video_link;
+            document.getElementById('newsAuthor').value = news.author_id;
+            
+            // Засах үед хуучин мэдээг устгаад шинээр нэмэх
+            deleteNews(id, true);
+            document.querySelector('[data-panel="add-news-panel"]').click();
+            alert('Мэдээний мэдээллийг засаарай');
+        };
+
+        // ==================== МЭДЭЭ УСТГАХ ====================
+        window.deleteNews = function(id, isEdit = false) {
+            if (!isEdit && !confirm('Та энэ мэдээг устгахдаа итгэлтэй байна уу?')) return;
+            newsData = newsData.filter(n => n.id !== id);
+            displayNewsTable();
+            if (!isEdit) alert('Мэдээ устгагдлаа!');
+        };
+
+        // ==================== ЗОХИОЛЧ НЭМЭХ ====================
+        document.getElementById('addAuthorForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('authorName').value;
+            if (!name) return;
+            authorsData.push({
+                id: nextAuthorId++,
+                name: name
+            });
+            displayAuthorsTable();
+            document.getElementById('authorName').value = '';
+            alert('Зохиолч амжилттай нэмэгдлээ!');
+        });
+
+        // ==================== ЗОХИОЛЧ УСТГАХ ====================
+        window.deleteAuthor = function(id) {
+            if (confirm('Та энэ зохиолчийг устгахдаа итгэлтэй байна уу?')) {
+                authorsData = authorsData.filter(a => a.id !== id);
+                displayAuthorsTable();
+                alert('Зохиолч устгагдлаа!');
+            }
+        };
+
+        // ==================== МЕНЮ SWITCH ====================
+        document.querySelectorAll('.menu-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+                const panelId = this.getAttribute('data-panel');
+                document.getElementById(panelId).classList.add('active');
+            });
+        });
+
+        // ==================== МОДАЛ ХААХ ====================
         window.closeModal = function() {
             const modal = document.getElementById('newsModal');
             if (modal) {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
-            
-            // URL-ийг цэвэрлэх
             if (window.location.search.includes('id=')) {
                 const cleanUrl = window.location.pathname;
                 history.pushState({ modalOpen: false }, '', cleanUrl);
             }
         };
 
-        // ==================== Модал нээх функц ====================
+        // ==================== МОДАЛ НЭЭХ (ТАНЫ АНХНЫ ФУНКЦ + САЙЖРУУЛАЛТ) ====================
         window.openModal = function(id) {
             const news = newsData.find(n => n.id === id);
             if (!news) return;
@@ -430,56 +666,51 @@
             const currentUrl = `${window.location.origin}${window.location.pathname}?id=${news.id}`;
             const newsTitle = encodeURIComponent(news.title);
             
-            // Модалын үндсэн элементүүд
             document.getElementById('modalTitle').innerText = news.title;
-            document.getElementById('modalImage').src = news.image || 'https://picsum.photos/id/1/800/450';
+            document.getElementById('modalImage').src = news.image || '';
             document.getElementById('modalMeta').innerHTML = `
-                <i class="fas fa-tag"></i> ${escapeHtml(news.category)} &nbsp;|&nbsp;
-                <i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')} &nbsp;|&nbsp;
+                <i class="fas fa-tag"></i> ${escapeHtml(news.category)} | 
+                <i class="far fa-calendar"></i> ${new Date(news.created_at).toLocaleDateString('mn-MN')} | 
                 <i class="fas fa-user"></i> ${escapeHtml(author.name)}
             `;
             
-            // Агуулгыг аюулгүй харагдуулах
             const safeDescription = escapeHtml(news.description || 'Агуулга байхгүй');
             document.getElementById('modalContent').innerHTML = videoHtml + '<p>' + safeDescription.replace(/\n/g, '<br>') + '</p>';
             
-            // Хуваалцах хэсгийг цэвэрлэх
             const shareContainer = document.getElementById('modalShare');
-            shareContainer.innerHTML = '<span class="share-label"><i class="fas fa-share-alt"></i> Хуваалцах:</span>';
+            shareContainer.innerHTML = '<span><i class="fas fa-share-alt"></i> Хуваалцах:</span>';
             
-            // Facebook товч
-            const facebookBtn = document.createElement('a');
-            facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}&quote=${newsTitle}`;
-            facebookBtn.target = '_blank';
-            facebookBtn.rel = 'noopener noreferrer';
-            facebookBtn.className = 'share-btn share-facebook';
-            facebookBtn.innerHTML = '<i class="fab fa-facebook"></i> Facebook';
-            shareContainer.appendChild(facebookBtn);
+            // Facebook
+            const fbBtn = document.createElement('a');
+            fbBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}&quote=${newsTitle}`;
+            fbBtn.target = '_blank';
+            fbBtn.rel = 'noopener noreferrer';
+            fbBtn.className = 'share-btn share-facebook';
+            fbBtn.innerHTML = '<i class="fab fa-facebook"></i> Facebook';
+            shareContainer.appendChild(fbBtn);
             
-            // Twitter товч
-            const twitterBtn = document.createElement('a');
-            twitterBtn.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${newsTitle}`;
-            twitterBtn.target = '_blank';
-            twitterBtn.rel = 'noopener noreferrer';
-            twitterBtn.className = 'share-btn share-twitter';
-            twitterBtn.innerHTML = '<i class="fab fa-twitter"></i> Twitter';
-            shareContainer.appendChild(twitterBtn);
+            // Twitter
+            const twBtn = document.createElement('a');
+            twBtn.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${newsTitle}`;
+            twBtn.target = '_blank';
+            twBtn.rel = 'noopener noreferrer';
+            twBtn.className = 'share-btn share-twitter';
+            twBtn.innerHTML = '<i class="fab fa-twitter"></i> Twitter';
+            shareContainer.appendChild(twBtn);
             
-            // WhatsApp товч
-            const whatsappBtn = document.createElement('a');
-            whatsappBtn.href = `https://wa.me/?text=${newsTitle}%20-%20${encodeURIComponent(currentUrl)}`;
-            whatsappBtn.target = '_blank';
-            whatsappBtn.rel = 'noopener noreferrer';
-            whatsappBtn.className = 'share-btn share-whatsapp';
-            whatsappBtn.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
-            shareContainer.appendChild(whatsappBtn);
+            // WhatsApp
+            const waBtn = document.createElement('a');
+            waBtn.href = `https://wa.me/?text=${newsTitle}%20-%20${encodeURIComponent(currentUrl)}`;
+            waBtn.target = '_blank';
+            waBtn.rel = 'noopener noreferrer';
+            waBtn.className = 'share-btn share-whatsapp';
+            waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp';
+            shareContainer.appendChild(waBtn);
             
-            // Холбоос хуулах товч
+            // Copy link
             const copyBtn = document.createElement('button');
             copyBtn.className = 'share-btn share-copy';
             copyBtn.innerHTML = '<i class="fas fa-link"></i> Холбоос хуулах';
-            
-            // Хуулах функц
             copyBtn.onclick = async () => {
                 try {
                     await navigator.clipboard.writeText(currentUrl);
@@ -488,8 +719,6 @@
                         copyBtn.innerHTML = '<i class="fas fa-link"></i> Холбоос хуулах';
                     }, 2000);
                 } catch (err) {
-                    console.error('Хуулахад алдаа гарлаа:', err);
-                    // Fallback for older browsers
                     const textarea = document.createElement('textarea');
                     textarea.value = currentUrl;
                     document.body.appendChild(textarea);
@@ -502,19 +731,15 @@
                     }, 2000);
                 }
             };
-            
             shareContainer.appendChild(copyBtn);
             
-            // Модалыг харуулах
             const modal = document.getElementById('newsModal');
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            
-            // URL-ийг түүхэнд хадгалах
             history.pushState({ id: news.id, modalOpen: true }, news.title, `?id=${news.id}`);
         };
 
-        // ==================== ESC товчоор хаах ====================
+        // ==================== ESC ТОВЧ ====================
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const modal = document.getElementById('newsModal');
@@ -524,7 +749,7 @@
             }
         });
 
-        // ==================== Буцах товчны үйлдэл ====================
+        // ==================== БУЦАХ ТОВЧ ====================
         window.addEventListener('popstate', function(event) {
             if (event.state && event.state.modalOpen && event.state.id) {
                 window.openModal(event.state.id);
@@ -536,14 +761,22 @@
             }
         });
 
-        // ==================== Модалын гадна дарвал хаах ====================
+        // ==================== МОДАЛЫН ГАДАА ДАРВАЛ ХААХ ====================
         document.getElementById('newsModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
-        // ==================== Хуудас ачаалахад URL-ээс id унших ====================
+        // ==================== ГАРАХ ====================
+        window.logout = function() {
+            if (confirm('Та системээс гарахдаа итгэлтэй байна уу?')) {
+                alert('Амжилттай гарлаа!');
+                // location.reload();
+            }
+        };
+
+        // ==================== URL-ЭЭС МЭДЭЭ УНШИХ ====================
         function checkUrlForNews() {
             const urlParams = new URLSearchParams(window.location.search);
             const newsId = urlParams.get('id');
@@ -555,8 +788,9 @@
             }
         }
 
-        // ==================== Эхлүүлэх ====================
-        displayNewsCards();
+        // ==================== ЭХЛҮҮЛЭХ ====================
+        displayNewsTable();
+        displayAuthorsTable();
         checkUrlForNews();
     </script>
 </body>

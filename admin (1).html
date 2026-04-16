@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мэдээний систем</title>
+    <title>Мэдээний систем - Админ панель</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -595,7 +595,6 @@
             document.getElementById('newsVideo').value = news.video_link;
             document.getElementById('newsAuthor').value = news.author_id;
             
-            // Засах үед хуучин мэдээг устгаад шинээр нэмэх
             deleteNews(id, true);
             document.querySelector('[data-panel="add-news-panel"]').click();
             alert('Мэдээний мэдээллийг засаарай');
@@ -656,7 +655,7 @@
             }
         };
 
-        // ==================== МОДАЛ НЭЭХ (ТАНЫ АНХНЫ ФУНКЦ + САЙЖРУУЛАЛТ) ====================
+        // ==================== МОДАЛ НЭЭХ ====================
         window.openModal = function(id) {
             const news = newsData.find(n => n.id === id);
             if (!news) return;
@@ -772,7 +771,6 @@
         window.logout = function() {
             if (confirm('Та системээс гарахдаа итгэлтэй байна уу?')) {
                 alert('Амжилттай гарлаа!');
-                // location.reload();
             }
         };
 
